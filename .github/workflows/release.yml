@@ -56,8 +56,14 @@ jobs:
       - name: Patch Cafe Bazaar billing
         env:
           BAZAAR_RSA_KEY: ${{ secrets.BAZAAR_RSA_KEY }}
+          VERSION_CODE: ${{ github.run_number }}
         run: |
+          export VERSION_NAME="${GITHUB_REF#refs/tags/v}"
           python3 scripts/patch-android-billing.py
+
+      - name: Decode signing keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/release-key.jks"
 
       - name: Sync Capacitor
         run: |
@@ -71,6 +77,11 @@ jobs:
           echo "✅ Gradle wrapper updated"
 
       - name: Build Release APK
+        env:
+          KEYSTORE_PATH: ${{ runner.temp }}/release-key.jks
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           cd android
           ./gradlew assembleRelease --no-daemon --stacktrace

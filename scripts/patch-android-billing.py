@@ -31,6 +31,38 @@ if "kotlin-android" not in s:
 if "Poolakey" not in s:
     s = s.replace("dependencies {",
                   "dependencies {\n    implementation 'com.github.cafebazaar.Poolakey:poolakey:2.2.0'", 1)
+# versionCode / versionName (کافه بازار هر آپلود جدید را با versionCode بزرگ‌تر می‌خواهد)
+vc = os.environ.get("VERSION_CODE", "").strip()
+vn = os.environ.get("VERSION_NAME", "").strip()
+if vc.isdigit():
+    s = re.sub(r"versionCode\s+\d+", "versionCode " + vc, s)
+if vn:
+    s = re.sub(r'versionName\s+"[^"]*"', 'versionName "' + vn + '"', s)
+
+# امضای release با keystore (مقادیر از متغیر محیطی موقع بیلد خوانده می‌شود، نه ذخیره در فایل)
+if "signingConfigs" not in s:
+    s += """
+
+android {
+    signingConfigs {
+        release {
+            if (System.getenv("KEYSTORE_PATH")) {
+                storeFile file(System.getenv("KEYSTORE_PATH"))
+                storePassword System.getenv("KEYSTORE_PASSWORD")
+                keyAlias System.getenv("KEY_ALIAS")
+                keyPassword System.getenv("KEY_PASSWORD")
+            }
+        }
+    }
+    buildTypes {
+        release {
+            if (System.getenv("KEYSTORE_PATH")) {
+                signingConfig signingConfigs.release
+            }
+        }
+    }
+}
+"""
 p.write_text(s)
 
 # 3) plugin + MainActivity registration
