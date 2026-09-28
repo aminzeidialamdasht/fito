@@ -55,6 +55,12 @@ jobs:
           npx cap add android
           echo "✅ Android platform added"
 
+      - name: Patch Cafe Bazaar billing
+        env:
+          BAZAAR_RSA_KEY: ${{ secrets.BAZAAR_RSA_KEY }}
+        run: |
+          python3 scripts/patch-android-billing.py
+
       - name: Sync Capacitor
         run: |
           npx cap sync android

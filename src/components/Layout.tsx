@@ -2,11 +2,14 @@ import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, User, Brain, Dumbbell, Calendar,
-  Import, Trophy, Menu, X, Sun, Moon, Apple, Pill
+  Import, Trophy, Menu, X, Sun, Moon, Apple, Pill, Lock
 } from 'lucide-react';
 import { useState } from 'react';
 import { toPersianNumber, getPersianDate } from '../utils/jalali';
 import { useTheme } from '../context/ThemeContext';
+import { useSubscription } from '../subscription/SubscriptionContext';
+
+const premiumPaths = ['/prompt', '/import'];
 
 const navItems = [
   { path: '/', label: 'داشبورد', icon: LayoutDashboard },
@@ -34,6 +37,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === 'dark';
+  const { isPremium } = useSubscription();
 
   return (
     <div className={'min-h-screen flex flex-col theme-transition ' + (
@@ -117,6 +121,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               >
                 <Icon size={18} />
                 <span>{item.label}</span>
+                {!isPremium && premiumPaths.includes(item.path) && <Lock size={12} className="mr-auto opacity-60" />}
               </button>
             );
           })}
@@ -156,6 +161,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   >
                     <Icon size={20} />
                     <span>{item.label}</span>
+                {!isPremium && premiumPaths.includes(item.path) && <Lock size={12} className="mr-auto opacity-60" />}
                   </button>
                 );
               })}
