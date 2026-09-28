@@ -6,7 +6,7 @@ on:
       - 'v*'
 
 env:
-  APP_NAME: AI-Fitness-Coach
+  APP_NAME: Coachino
 
 jobs:
   release:
@@ -70,6 +70,16 @@ jobs:
           npx cap sync android
           echo "✅ Capacitor synced"
 
+      - name: Apply Coachino launcher icons
+        run: |
+          RES=android/app/src/main/res
+          mkdir -p "$RES/drawable" "$RES/mipmap-anydpi-v26" "$RES/values"
+          rm -f "$RES/values/ic_launcher_background.xml"
+          for D in mdpi hdpi xhdpi xxhdpi xxxhdpi; do mkdir -p "$RES/drawable-$D"; cp -f native-assets/android/drawable-$D/* "$RES/drawable-$D/"; done
+          cp -f native-assets/android/mipmap-anydpi-v26/* "$RES/mipmap-anydpi-v26/"
+          cp -f native-assets/android/values/ic_launcher_colors.xml "$RES/values/"
+          echo "✅ Coachino launcher icons applied"
+
       - name: Update Gradle Wrapper
         run: |
           cd android
@@ -97,16 +107,16 @@ jobs:
       - name: Rename APK
         run: |
           mkdir -p release
-          cp android/app/build/outputs/apk/release/app-release.apk "release/AI-Fitness-Coach-v${{ env.VERSION }}.apk"
+          cp android/app/build/outputs/apk/release/app-release.apk "release/کوچینو (Coachino)-v${{ env.VERSION }}.apk"
           echo "✅ APK renamed"
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           files: release/*.apk
-          name: "AI Fitness Coach v${{ env.VERSION }}"
+          name: "کوچینو (Coachino) v${{ env.VERSION }}"
           body: |
-            ## 🏋️ دستیار هوشمند بدنسازی نسخه ${{ env.VERSION }}
+            ## 🏋️ کوچینو (Coachino) نسخه ${{ env.VERSION }}
             
             ### ✨ ویژگی‌های اصلی:
             - 🤖 تولید برنامه تمرینی با هوش مصنوعی
@@ -127,10 +137,6 @@ jobs:
             - حجم: ~15 MB
             - معماری: Universal
             
-            ### 📝 تغییرات این نسخه:
-            - انتشار اولیه
-            - تمام ویژگی‌های اصلی
-            
             ---
             **ساخته شده با ❤️ برای جامعه بدنسازی ایران**
           draft: false
@@ -146,7 +152,4 @@ jobs:
           echo "### 📦 Release Information" >> $GITHUB_STEP_SUMMARY
           echo "- **Version:** ${{ env.VERSION }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Tag:** ${{ github.ref }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **APK:** AI-Fitness-Coach-v${{ env.VERSION }}.apk" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 📥 Download" >> $GITHUB_STEP_SUMMARY
-          echo "APK file is available in the release page." >> $GITHUB_STEP_SUMMARY
+          echo "- **APK:** کوچینو (Coachino)-v${{ env.VERSION }}.apk" >> $GITHUB_STEP_SUMMARY

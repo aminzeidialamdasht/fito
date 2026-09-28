@@ -55,7 +55,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <button
               onClick={() => setMenuOpen(!menuOpen)}
               className={'lg:hidden p-2 rounded-xl transition-all ' + (
-                isDark ? 'text-[#b8f542] hover:bg-[#b8f542]/10' : 'text-[#0d9488] hover:bg-[#14b8a6]/10'
+                isDark ? 'text-[#14b8a6] hover:bg-[#14b8a6]/10' : 'text-[#0d9488] hover:bg-[#14b8a6]/10'
               )}
             >
               {menuOpen ? <X size={22} /> : <Menu size={22} />}
@@ -63,7 +63,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <div className="flex items-center gap-3">
               <div className={'w-10 h-10 rounded-2xl flex items-center justify-center ' + (
                 isDark
-                  ? 'bg-[#b8f542] shadow-lg shadow-[#b8f542]/25'
+                  ? 'bg-[#14b8a6] shadow-lg shadow-[#14b8a6]/25'
                   : 'bg-gradient-to-br from-[#14b8a6] to-[#0d9488]'
               )}>
                 <Dumbbell size={20} className={isDark ? 'text-[#0a0a0a]' : 'text-white'} />
@@ -72,10 +72,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 <h1 className={'font-bold text-base sm:text-lg leading-tight ' + (
                   isDark ? 'text-white' : 'text-[#0d9488]'
                 )}>
-                  ای‌آی فیتنس
+                  کوچینو
                 </h1>
                 <p className={'text-[10px] sm:text-xs ' + (isDark ? 'text-gray-500' : 'text-[#0f766e]/70')}>
-                  {getPersianDate()}
+                  Coachino · {getPersianDate()}
                 </p>
               </div>
             </div>
@@ -86,7 +86,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               onClick={toggleTheme}
               className={'p-2 rounded-xl transition-all ' + (
                 isDark
-                  ? 'bg-white/5 border border-white/10 text-[#b8f542]'
+                  ? 'bg-white/5 border border-white/10 text-[#14b8a6]'
                   : 'bg-[#f0fdfa] border border-[#14b8a6]/30 text-[#0d9488]'
               )}
               title={isDark ? 'تم روشن' : 'تم تاریک'}
@@ -115,7 +115,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 onClick={() => navigate(item.path)}
                 className={'group flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-all ' + (
                   isActive
-                    ? (isDark ? 'bg-[#b8f542]/15 text-[#b8f542] font-bold' : 'bg-[#14b8a6]/15 text-[#0d9488] font-bold')
+                    ? (isDark ? 'bg-[#14b8a6]/15 text-[#14b8a6] font-bold' : 'bg-[#14b8a6]/15 text-[#0d9488] font-bold')
                     : (isDark ? 'text-gray-400 hover:text-white hover:bg-white/5' : 'text-[#0f766e]/70 hover:text-[#0d9488] hover:bg-[#f0fdfa]')
                 )}
               >
@@ -137,13 +137,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             >
               <div className={'flex items-center gap-3 mb-6 pb-5 border-b ' + (isDark ? 'border-white/10' : 'border-[#14b8a6]/20')}>
                 <div className={'w-12 h-12 rounded-2xl flex items-center justify-center ' + (
-                  isDark ? 'bg-[#b8f542]' : 'bg-[#14b8a6]'
+                  isDark ? 'bg-[#14b8a6]' : 'bg-[#14b8a6]'
                 )}>
                   <Dumbbell size={24} className={isDark ? 'text-[#0a0a0a]' : 'text-white'} />
                 </div>
                 <div>
-                  <span className={'font-bold text-lg block ' + (isDark ? 'text-white' : 'text-[#0d9488]')}>ای‌آی فیتنس</span>
-                  <span className={'text-xs ' + (isDark ? 'text-gray-500' : 'text-[#0f766e]/70')}>دستیار هوشمند بدنسازی</span>
+                  <span className={'font-bold text-lg block ' + (isDark ? 'text-white' : 'text-[#0d9488]')}>کوچینو</span>
+                  <span className={'text-xs ' + (isDark ? 'text-gray-500' : 'text-[#0f766e]/70')}>Coachino · دستیار هوشمند بدنسازی</span>
                 </div>
               </div>
               {navItems.map(item => {
@@ -155,7 +155,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     onClick={() => { navigate(item.path); setMenuOpen(false); }}
                     className={'flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm transition-all ' + (
                       isActive
-                        ? (isDark ? 'bg-[#b8f542]/15 text-[#b8f542] font-bold' : 'bg-[#14b8a6]/15 text-[#0d9488] font-bold')
+                        ? (isDark ? 'bg-[#14b8a6]/15 text-[#14b8a6] font-bold' : 'bg-[#14b8a6]/15 text-[#0d9488] font-bold')
                         : (isDark ? 'text-gray-300 hover:bg-white/5' : 'text-[#0f766e]/70 hover:bg-[#f0fdfa]')
                     )}
                   >
@@ -189,12 +189,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 onClick={() => navigate(item.path)}
                 className={'relative flex flex-col items-center gap-1 min-w-[56px] px-2 py-1 rounded-2xl transition-all ' + (
                   isActive
-                    ? (isDark ? 'text-[#b8f542]' : 'text-[#0d9488]')
+                    ? (isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]')
                     : (isDark ? 'text-gray-500' : 'text-[#0f766e]/50')
                 )}
               >
                 <div className={'w-10 h-10 rounded-2xl flex items-center justify-center transition-all ' + (
-                  isActive ? (isDark ? 'bg-[#b8f542]/15' : 'bg-[#14b8a6]/15') : ''
+                  isActive ? (isDark ? 'bg-[#14b8a6]/15' : 'bg-[#14b8a6]/15') : ''
                 )}>
                   <Icon size={22} strokeWidth={isActive ? 2.5 : 1.8} />
                 </div>

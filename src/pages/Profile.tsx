@@ -258,48 +258,48 @@ export default function Profile() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h2 className={'text-xl font-bold flex items-center gap-2 ' + (isDark ? 'text-white' : 'text-[#134e4a]')}>
-            <User size={22} className={isDark ? 'text-[#d4af37]' : 'text-[#0d9488]'} />
+            <User size={22} className={isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'} />
             مدیریت پروفایل شاگردان
           </h2>
           <div className="flex items-center gap-2">
             {exportMsg && <span className={'text-xs ' + (isDark ? 'text-[#22c55e]' : 'text-[#059669]')}>{exportMsg}</span>}
-            <button onClick={() => { setShowImport(!showImport); setImportError(''); setImportOk(false); }} className={'flex items-center gap-2 px-3 py-2 rounded-xl font-bold text-sm transition-all border ' + (isDark ? 'border-[#d4af37]/40 text-[#d4af37] hover:bg-[#d4af37]/10' : 'border-[#14b8a6]/40 text-[#0d9488] hover:bg-[#f0fdfa]')}>
+            <button onClick={() => { setShowImport(!showImport); setImportError(''); setImportOk(false); }} className={'flex items-center gap-2 px-3 py-2 rounded-xl font-bold text-sm transition-all border ' + (isDark ? 'border-[#14b8a6]/40 text-[#14b8a6] hover:bg-[#14b8a6]/10' : 'border-[#14b8a6]/40 text-[#0d9488] hover:bg-[#f0fdfa]')}>
               <Upload size={16} />
               ورود JSON
             </button>
-            <button onClick={handleNewProfile} className={'flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm transition-all shadow-lg ' + (isDark ? 'bg-gradient-to-l from-[#d4af37] to-[#f0d060] text-[#0d0d1a] shadow-[#d4af37]/20 hover:opacity-90' : 'bg-gradient-to-l from-[#14b8a6] to-[#0d9488] text-white shadow-[#14b8a6]/20 hover:opacity-90')}>
+            <button onClick={handleNewProfile} className={'flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm transition-all shadow-lg ' + (isDark ? 'bg-gradient-to-l from-[#14b8a6] to-[#2dd4bf] text-[#0d0d1a] shadow-[#14b8a6]/20 hover:opacity-90' : 'bg-gradient-to-l from-[#14b8a6] to-[#0d9488] text-white shadow-[#14b8a6]/20 hover:opacity-90')}>
               <Plus size={16} />
               پروفایل جدید
             </button>
           </div>
         </div>
         {showImport && (
-          <div className={'rounded-2xl p-5 border theme-transition ' + (isDark ? 'bg-[#1a1a2e] border-[#d4af37]/20' : 'bg-white border-[#14b8a6]/20')}>
-            <h3 className={'font-bold mb-2 text-sm ' + (isDark ? 'text-[#d4af37]' : 'text-[#0d9488]')}>ورود پروفایل از JSON</h3>
+          <div className={'rounded-2xl p-5 border theme-transition ' + (isDark ? 'bg-[#1a1a2e] border-[#14b8a6]/20' : 'bg-white border-[#14b8a6]/20')}>
+            <h3 className={'font-bold mb-2 text-sm ' + (isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]')}>ورود پروفایل از JSON</h3>
             <p className={'text-xs mb-3 ' + (isDark ? 'text-gray-400' : 'text-[#0f766e]/70')}>خروجی JSON پروفایل را اینجا بچسبانید. یک پروفایل جدید ساخته می‌شود.</p>
-            <textarea value={importJson} onChange={e => setImportJson(e.target.value)} rows={8} placeholder='{"name":"...","age":25,"gender":"male",...}' className={'w-full border rounded-xl px-4 py-3 text-xs font-mono focus:outline-none resize-none theme-transition ' + (isDark ? 'bg-[#0d0d1a] border-gray-700 text-white focus:border-[#d4af37]' : 'bg-[#f0fdfa] border-[#14b8a6]/30 text-[#134e4a] focus:border-[#14b8a6]')} dir="ltr" />
+            <textarea value={importJson} onChange={e => setImportJson(e.target.value)} rows={8} placeholder='{"name":"...","age":25,"gender":"male",...}' className={'w-full border rounded-xl px-4 py-3 text-xs font-mono focus:outline-none resize-none theme-transition ' + (isDark ? 'bg-[#0d0d1a] border-gray-700 text-white focus:border-[#14b8a6]' : 'bg-[#f0fdfa] border-[#14b8a6]/30 text-[#134e4a] focus:border-[#14b8a6]')} dir="ltr" />
             {importError && <p className="text-xs text-red-500 mt-2">{importError}</p>}
             {importOk && <p className={'text-xs mt-2 ' + (isDark ? 'text-[#22c55e]' : 'text-[#059669]')}>پروفایل با موفقیت وارد شد</p>}
             <div className="flex gap-2 mt-3">
-              <button onClick={handleImportProfile} className={'flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm transition-all ' + (isDark ? 'bg-gradient-to-l from-[#d4af37] to-[#f0d060] text-[#0d0d1a]' : 'bg-gradient-to-l from-[#14b8a6] to-[#0d9488] text-white')}><Upload size={14} />وارد کردن</button>
+              <button onClick={handleImportProfile} className={'flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm transition-all ' + (isDark ? 'bg-gradient-to-l from-[#14b8a6] to-[#2dd4bf] text-[#0d0d1a]' : 'bg-gradient-to-l from-[#14b8a6] to-[#0d9488] text-white')}><Upload size={14} />وارد کردن</button>
               <button onClick={() => { setShowImport(false); setImportJson(''); setImportError(''); }} className={'px-4 py-2 rounded-xl text-sm ' + (isDark ? 'text-gray-400 hover:text-white' : 'text-[#0f766e]/70 hover:text-[#0d9488]')}>انصراف</button>
             </div>
           </div>
         )}
         {profiles.length === 0 ? (
-          <div className={'rounded-2xl p-10 border text-center theme-transition ' + (isDark ? 'bg-[#1a1a2e] border-[#d4af37]/10' : 'bg-white border-[#14b8a6]/20')}>
-            <div className={'w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center ' + (isDark ? 'bg-[#d4af37]/10' : 'bg-[#14b8a6]/10')}><User size={40} className={isDark ? 'text-[#d4af37]' : 'text-[#0d9488]'} /></div>
+          <div className={'rounded-2xl p-10 border text-center theme-transition ' + (isDark ? 'bg-[#1a1a2e] border-[#14b8a6]/10' : 'bg-white border-[#14b8a6]/20')}>
+            <div className={'w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center ' + (isDark ? 'bg-[#14b8a6]/10' : 'bg-[#14b8a6]/10')}><User size={40} className={isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'} /></div>
             <h3 className={'text-lg font-bold mb-2 ' + (isDark ? 'text-white' : 'text-[#134e4a]')}>هنوز پروفایلی ایجاد نشده</h3>
             <p className={'text-sm mb-4 ' + (isDark ? 'text-gray-400' : 'text-[#0f766e]/70')}>برای شروع، اولین پروفایل شاگرد خود را ایجاد کنید</p>
-            <button onClick={handleNewProfile} className={'px-6 py-2.5 rounded-xl font-bold text-sm transition-all ' + (isDark ? 'bg-gradient-to-l from-[#d4af37] to-[#f0d060] text-[#0d0d1a] hover:opacity-90' : 'bg-gradient-to-l from-[#14b8a6] to-[#0d9488] text-white hover:opacity-90')}>ایجاد پروفایل جدید</button>
+            <button onClick={handleNewProfile} className={'px-6 py-2.5 rounded-xl font-bold text-sm transition-all ' + (isDark ? 'bg-gradient-to-l from-[#14b8a6] to-[#2dd4bf] text-[#0d0d1a] hover:opacity-90' : 'bg-gradient-to-l from-[#14b8a6] to-[#0d9488] text-white hover:opacity-90')}>ایجاد پروفایل جدید</button>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {profiles.map(profile => (
-              <div key={profile.id} className={'rounded-2xl p-5 border theme-transition ' + (profile.id === activeProfile?.id ? (isDark ? 'bg-gradient-to-l from-[#d4af37]/10 to-transparent border-[#d4af37]/50 shadow-lg shadow-[#d4af37]/10' : 'bg-gradient-to-l from-[#14b8a6]/10 to-white border-[#14b8a6]/50 shadow-lg shadow-[#14b8a6]/10') : (isDark ? 'bg-[#1a1a2e] border-gray-800 hover:border-gray-600' : 'bg-white border-[#14b8a6]/20 hover:border-[#14b8a6]/40'))}>
+              <div key={profile.id} className={'rounded-2xl p-5 border theme-transition ' + (profile.id === activeProfile?.id ? (isDark ? 'bg-gradient-to-l from-[#14b8a6]/10 to-transparent border-[#14b8a6]/50 shadow-lg shadow-[#14b8a6]/10' : 'bg-gradient-to-l from-[#14b8a6]/10 to-white border-[#14b8a6]/50 shadow-lg shadow-[#14b8a6]/10') : (isDark ? 'bg-[#1a1a2e] border-gray-800 hover:border-gray-600' : 'bg-white border-[#14b8a6]/20 hover:border-[#14b8a6]/40'))}>
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-3">
-                    <div className={'w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg ' + (profile.id === activeProfile?.id ? (isDark ? 'bg-gradient-to-br from-[#d4af37] to-[#f0d060] text-[#0d0d1a]' : 'bg-gradient-to-br from-[#14b8a6] to-[#0d9488] text-white') : (isDark ? 'bg-gray-800 text-gray-400' : 'bg-[#f0fdfa] text-[#0d9488]'))}>{profile.name.charAt(0)}</div>
+                    <div className={'w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg ' + (profile.id === activeProfile?.id ? (isDark ? 'bg-gradient-to-br from-[#14b8a6] to-[#2dd4bf] text-[#0d0d1a]' : 'bg-gradient-to-br from-[#14b8a6] to-[#0d9488] text-white') : (isDark ? 'bg-gray-800 text-gray-400' : 'bg-[#f0fdfa] text-[#0d9488]'))}>{profile.name.charAt(0)}</div>
                     <div>
                       <h3 className={'font-bold ' + (isDark ? 'text-white' : 'text-[#134e4a]')}>{profile.name}</h3>
                       <p className={'text-xs ' + (isDark ? 'text-gray-400' : 'text-[#0f766e]/70')}>{toPersianNumber(profile.age)} سال • {profile.gender === 'male' ? 'مرد' : 'زن'}</p>
@@ -334,11 +334,11 @@ export default function Profile() {
         <div className="flex items-center gap-3">
           <button onClick={() => setShowNewProfileForm(false)} className={'p-2 rounded-lg transition-all ' + (isDark ? 'hover:bg-white/5 text-gray-400' : 'hover:bg-[#f0fdfa] text-[#0f766e]/70')}><ChevronRight size={20} /></button>
           <h2 className={'text-xl font-bold flex items-center gap-2 ' + (isDark ? 'text-white' : 'text-[#134e4a]')}>
-            <User size={22} className={isDark ? 'text-[#d4af37]' : 'text-[#0d9488]'} />
+            <User size={22} className={isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'} />
             {editingProfileId ? 'ویرایش پروفایل' : 'پروفایل جدید'}
           </h2>
         </div>
-        <button onClick={handleSave} className={'flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm transition-all shadow-lg ' + (isDark ? 'bg-gradient-to-l from-[#d4af37] to-[#f0d060] text-[#0d0d1a] shadow-[#d4af37]/20 hover:opacity-90' : 'bg-gradient-to-l from-[#14b8a6] to-[#0d9488] text-white shadow-[#14b8a6]/20 hover:opacity-90')}>
+        <button onClick={handleSave} className={'flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm transition-all shadow-lg ' + (isDark ? 'bg-gradient-to-l from-[#14b8a6] to-[#2dd4bf] text-[#0d0d1a] shadow-[#14b8a6]/20 hover:opacity-90' : 'bg-gradient-to-l from-[#14b8a6] to-[#0d9488] text-white shadow-[#14b8a6]/20 hover:opacity-90')}>
           {saved ? <Check size={16} /> : <Save size={16} />}
           {saved ? 'ذخیره شد' : 'ذخیره'}
         </button>
@@ -346,12 +346,12 @@ export default function Profile() {
       <div className="flex items-center gap-1">
         {steps.map((s, i) => (
           <div key={i} className="flex-1 flex flex-col items-center">
-            <div className={'h-1.5 w-full rounded-full ' + (i <= step ? (isDark ? 'bg-[#d4af37]' : 'bg-[#14b8a6]') : (isDark ? 'bg-gray-700' : 'bg-[#f0fdfa]'))} />
-            <span className={'text-[10px] mt-1 ' + (i <= step ? (isDark ? 'text-[#d4af37]' : 'text-[#0d9488]') : (isDark ? 'text-gray-500' : 'text-[#0f766e]/50'))}>{s}</span>
+            <div className={'h-1.5 w-full rounded-full ' + (i <= step ? (isDark ? 'bg-[#14b8a6]' : 'bg-[#14b8a6]') : (isDark ? 'bg-gray-700' : 'bg-[#f0fdfa]'))} />
+            <span className={'text-[10px] mt-1 ' + (i <= step ? (isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]') : (isDark ? 'text-gray-500' : 'text-[#0f766e]/50'))}>{s}</span>
           </div>
         ))}
       </div>
-      <div className={'rounded-2xl p-5 border theme-transition ' + (isDark ? 'bg-[#1a1a2e] border-[#d4af37]/10' : 'bg-white border-[#14b8a6]/15')}>
+      <div className={'rounded-2xl p-5 border theme-transition ' + (isDark ? 'bg-[#1a1a2e] border-[#14b8a6]/10' : 'bg-white border-[#14b8a6]/15')}>
         {step === 0 && <StepBasic form={form} setForm={setForm} isDark={isDark} />}
         {step === 1 && <StepTraining form={form} setForm={setForm} toggleEquipment={toggleEquipment} isDark={isDark} />}
         {step === 2 && <StepNutrition form={form} setForm={setForm} toggleFood={toggleFood} isDark={isDark} />}
@@ -361,7 +361,7 @@ export default function Profile() {
       <div className="flex justify-between">
         <button onClick={() => setStep(Math.max(0, step - 1))} disabled={step === 0} className={'flex items-center gap-1 disabled:opacity-30 transition-all ' + (isDark ? 'text-gray-400 hover:text-white' : 'text-[#0f766e]/70 hover:text-[#0d9488]')}><ChevronRight size={18} />قبلی</button>
         <span className={isDark ? 'text-gray-500 text-sm' : 'text-[#0f766e]/50 text-sm'}>{toPersianNumber(step + 1)} از {toPersianNumber(5)}</span>
-        <button onClick={() => setStep(Math.min(4, step + 1))} disabled={step === 4} className={'flex items-center gap-1 disabled:opacity-30 transition-all ' + (isDark ? 'text-[#d4af37] hover:text-[#f0d060]' : 'text-[#0d9488] hover:text-[#14b8a6]')}>بعدی<ChevronLeft size={18} /></button>
+        <button onClick={() => setStep(Math.min(4, step + 1))} disabled={step === 4} className={'flex items-center gap-1 disabled:opacity-30 transition-all ' + (isDark ? 'text-[#14b8a6] hover:text-[#2dd4bf]' : 'text-[#0d9488] hover:text-[#14b8a6]')}>بعدی<ChevronLeft size={18} /></button>
       </div>
     </div>
   );

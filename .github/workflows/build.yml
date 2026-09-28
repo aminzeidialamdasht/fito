@@ -1,20 +1,19 @@
-name: Build APK
+name: Build Coachino APK
 
 on:
   push:
-    branches: [ main, master, develop ]
+    branches: [ main, master, develop, 'feature/**' ]
   pull_request:
     branches: [ main, master ]
   workflow_dispatch:
 
 env:
-  APP_NAME: AI-Fitness-Coach
+  APP_NAME: Coachino
 
 jobs:
   build:
-    name: Build Debug APK
+    name: Build Coachino Debug APK
     runs-on: ubuntu-latest
-    
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -37,23 +36,20 @@ jobs:
           echo "ANDROID_SDK_ROOT=$ANDROID_HOME" >> $GITHUB_ENV
           yes | sdkmanager --licenses > /dev/null 2>&1 || true
           sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0" 2>/dev/null || true
-          echo "✅ Android SDK configured"
 
       - name: Install Dependencies
-        run: |
-          npm ci
-          echo "✅ Dependencies installed"
+        run: npm ci
+
+      - name: TypeScript Check
+        run: npm run typecheck
 
       - name: Build Web Application
-        run: |
-          npm run build
-          echo "✅ Web app built"
+        run: npm run build
 
       - name: Add Android Platform
         run: |
           rm -rf android
           npx cap add android
-          echo "✅ Android platform added"
 
       - name: Patch Cafe Bazaar billing
         env:
@@ -62,45 +58,42 @@ jobs:
           python3 scripts/patch-android-billing.py
 
       - name: Sync Capacitor
+        run: npx cap sync android
+
+      - name: Apply Coachino launcher icons
         run: |
-          npx cap sync android
-          echo "✅ Capacitor synced"
+          # Capacitor regenerates android/; copy adaptive icons from native-assets
+          RES=android/app/src/main/res
+          mkdir -p "$RES/drawable" "$RES/mipmap-anydpi-v26" "$RES/values"
+          # Avoid Duplicate resources: Capacitor ships values/ic_launcher_background.xml
+          rm -f "$RES/values/ic_launcher_background.xml"
+          for D in mdpi hdpi xhdpi xxhdpi xxxhdpi; do mkdir -p "$RES/drawable-$D"; cp -f native-assets/android/drawable-$D/* "$RES/drawable-$D/"; done
+          cp -f native-assets/android/mipmap-anydpi-v26/* "$RES/mipmap-anydpi-v26/"
+          cp -f native-assets/android/values/ic_launcher_colors.xml "$RES/values/"
+          echo "✅ Coachino launcher icons applied"
 
       - name: Update Gradle Wrapper
         run: |
           cd android
           sed -i 's|gradle-[0-9.]*-bin.zip|gradle-8.13-bin.zip|g' gradle/wrapper/gradle-wrapper.properties
-          echo "✅ Gradle wrapper updated"
 
       - name: Build Debug APK
         run: |
           cd android
           ./gradlew assembleDebug --no-daemon --stacktrace
-          echo "✅ Debug APK built"
+          cp app/build/outputs/apk/debug/app-debug.apk "app/build/outputs/apk/debug/کوچینو (Coachino).apk"
 
-      - name: Upload Debug APK
+      - name: Upload Coachino APK
         uses: actions/upload-artifact@v4
         with:
-          name: AI-Fitness-Coach-Debug
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: کوچینو (Coachino)-Debug
+          path: android/app/build/outputs/apk/debug/کوچینو (Coachino).apk
           retention-days: 30
 
       - name: Build Summary
         if: always()
         run: |
-          echo "## 🎉 Debug Build Complete!" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 📦 Build Information" >> $GITHUB_STEP_SUMMARY
-          echo "- **Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **APK:** app-debug.apk" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 📥 Download" >> $GITHUB_STEP_SUMMARY
-          echo "APK file is available in the artifacts section." >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 🚀 Create Release" >> $GITHUB_STEP_SUMMARY
-          echo "To create a release, push a tag:" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
-          echo "git tag v1.0.0" >> $GITHUB_STEP_SUMMARY
-          echo "git push origin v1.0.0" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "## کوچینو (Coachino) — Debug Build" >> $GITHUB_STEP_SUMMARY
+          echo "- Branch: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Commit: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- APK: کوچینو (Coachino).apk" >> $GITHUB_STEP_SUMMARY

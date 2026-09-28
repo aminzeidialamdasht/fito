@@ -1,12 +1,12 @@
 import { useAppContext } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
-import { getPersianDate, toPersianNumber, getTodayJalali, getWeekdayName, getMonthName } from '../utils/jalali';
+import { getPersianDate, toPersianNumber, getTodayJalali, getWeekdayName, getMonthName, getProgramTimelineDetails } from '../utils/jalali';
 import { EXPERIENCE_LABELS, getGoalLabel } from '../types';
 import { 
   Dumbbell, TrendingUp, Calendar, Target, 
   Flame, Award, Activity, Clock, Sparkles,
   CheckCircle2, Timer, Zap, User, ChevronLeft,
-  Trophy, TrendingDown, Heart, Apple, Pill, Brain
+  Trophy, TrendingDown, Heart, Apple, Pill, Brain, AlertTriangle, Bell
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
@@ -23,6 +23,9 @@ export default function Dashboard() {
   const totalVolume = completedSessions.reduce((acc, s) => acc + s.totalVolume, 0);
   const currentStreak = calculateStreak(sessions);
   const activeProgram = programs.find(p => p.id === state.activeProgram);
+  const activeProgramTimeline = activeProgram
+    ? getProgramTimelineDetails(activeProgram.startDate, activeProgram.duration, activeProgram.createdAt)
+    : null;
 
   const today = new Date();
   const dayOfWeek = (today.getDay() + 1) % 7;
@@ -63,10 +66,10 @@ export default function Dashboard() {
     <div className="space-y-5">
       {profiles.length > 1 && (
         <div className={`rounded-2xl p-3 border theme-transition ${
-          isDark ? 'bg-[#1a1a2e]/50 border-[#d4af37]/10' : 'bg-white/70 border-[#14b8a6]/20'
+          isDark ? 'bg-[#1a1a2e]/50 border-[#14b8a6]/10' : 'bg-white/70 border-[#14b8a6]/20'
         }`}>
           <div className="flex items-center gap-2 overflow-x-auto">
-            <User size={16} className={isDark ? 'text-[#d4af37]' : 'text-[#0d9488]'} />
+            <User size={16} className={isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'} />
             <div className="flex gap-2">
               {profiles.map(p => (
                 <button
@@ -75,7 +78,7 @@ export default function Dashboard() {
                   className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all ${
                     p.id === profile?.id
                       ? isDark
-                        ? 'bg-gradient-to-l from-[#d4af37] to-[#f0d060] text-[#0d0d1a]'
+                        ? 'bg-gradient-to-l from-[#14b8a6] to-[#2dd4bf] text-[#0d0d1a]'
                         : 'bg-gradient-to-l from-[#14b8a6] to-[#0d9488] text-white'
                       : isDark
                         ? 'bg-[#0d0d1a] text-gray-400 hover:text-white'
@@ -90,13 +93,126 @@ export default function Dashboard() {
         </div>
       )}
 
+      {/* Active Program Alarm Banner (Triggered when 1 day or <= 1 day remaining) */}
+      {activeProgram && activeProgramTimeline && activeProgramTimeline.isAlarmRequired && (
+        <div className={`rounded-2xl p-5 border shadow-xl animate-pulse-subtle theme-transition ${
+          isDark
+            ? 'bg-gradient-to-l from-amber-500/20 via-[#1a1a2e] to-red-500/10 border-amber-500/50 text-amber-200'
+            : 'bg-gradient-to-l from-amber-100 via-white to-red-50 border-amber-400 text-amber-900'
+        }`}>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-500 flex items-center justify-center shrink-0">
+                <Bell size={26} className="animate-bounce" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="px-2 py-0.5 rounded-full text-xs font-black bg-amber-500 text-black">
+                    🚨 آلارم پایان برنامه
+                  </span>
+                  <span className="text-xs font-bold">
+                    ({activeProgramTimeline.daysRemaining > 0 ? `${toPersianNumber(activeProgramTimeline.daysRemaining)} روز باقی‌مانده` : 'امروز پایان برنامه'})
+                  </span>
+                </div>
+                <h3 className="text-lg font-bold">
+                  تنها {toPersianNumber(Math.max(0, activeProgramTimeline.daysRemaining))} روز تا پایان برنامه «{activeProgram.name}» باقی مانده است!
+                </h3>
+                <p className={`text-xs mt-1 ${isDark ? 'text-amber-200/80' : 'text-amber-800'}`}>
+                  برای حفظ تداوم رشد و پیشرفت ورزشی، همین حالا نسبت به تولید و دریافت برنامه جدید اقدام کنید.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => navigate('/prompt')}
+              className={`px-5 py-3 rounded-xl font-bold text-sm shrink-0 flex items-center justify-center gap-2 transition-all shadow-lg ${
+                isDark
+                  ? 'bg-gradient-to-l from-amber-400 to-amber-500 text-slate-950 hover:opacity-90'
+                  : 'bg-gradient-to-l from-amber-500 to-amber-600 text-white hover:opacity-90'
+              }`}
+            >
+              <Brain size={18} />
+              <span>تولید پرامپت جدید</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Program Timeline Overview Card */}
+      {activeProgram && activeProgramTimeline && (
+        <div className={`rounded-2xl p-5 border theme-transition ${
+          isDark ? 'bg-[#1a1a2e] border-[#14b8a6]/20' : 'bg-white border-[#14b8a6]/25 shadow-sm'
+        }`}>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+            <div className="flex items-center gap-3">
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isDark ? 'bg-[#14b8a6]/20 text-[#14b8a6]' : 'bg-[#14b8a6]/15 text-[#0d9488]'}`}>
+                <Clock size={20} />
+              </div>
+              <div>
+                <h3 className={`font-bold ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>
+                  زمان‌بندی برنامه «{activeProgram.name}»
+                </h3>
+                <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}`}>
+                  مدت کل: {activeProgram.duration} ({toPersianNumber(activeProgramTimeline.totalDays)} روز)
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => navigate('/import')}
+              className={`text-xs font-bold px-3 py-1.5 rounded-lg border transition-all ${
+                isDark
+                  ? 'border-gray-700 text-gray-300 hover:bg-gray-800'
+                  : 'border-teal-200 text-[#0d9488] hover:bg-[#f0fdfa]'
+              }`}
+            >
+              مدیریت برنامه‌ها ←
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs mb-3">
+            <div className={`rounded-xl p-2.5 ${isDark ? 'bg-[#0d0d1a]' : 'bg-[#f0fdfa]'}`}>
+              <span className={isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}>تاریخ شروع:</span>
+              <p className={`font-bold mt-0.5 ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>{activeProgramTimeline.startDateJalali}</p>
+            </div>
+            <div className={`rounded-xl p-2.5 ${isDark ? 'bg-[#0d0d1a]' : 'bg-[#f0fdfa]'}`}>
+              <span className={isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}>تاریخ پایان:</span>
+              <p className={`font-bold mt-0.5 ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>{activeProgramTimeline.endDateJalali}</p>
+            </div>
+            <div className={`rounded-xl p-2.5 ${isDark ? 'bg-[#0d0d1a]' : 'bg-[#f0fdfa]'}`}>
+              <span className={isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}>روزهای طی شده:</span>
+              <p className={`font-bold mt-0.5 ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>{toPersianNumber(activeProgramTimeline.daysPassed)} روز</p>
+            </div>
+            <div className={`rounded-xl p-2.5 ${isDark ? 'bg-[#0d0d1a]' : 'bg-[#f0fdfa]'}`}>
+              <span className={isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}>روزهای باقی‌مانده:</span>
+              <p className={`font-bold mt-0.5 ${activeProgramTimeline.isAlarmRequired ? 'text-amber-500 font-black' : isDark ? 'text-white' : 'text-[#134e4a]'}`}>
+                {activeProgramTimeline.daysRemaining >= 0 ? `${toPersianNumber(activeProgramTimeline.daysRemaining)} روز` : 'پایان یافته'}
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <div className="flex justify-between text-xs">
+              <span className={isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}>پیشرفت دوره برنامه</span>
+              <span className={`font-bold ${isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'}`}>{toPersianNumber(activeProgramTimeline.progressPercent)}٪</span>
+            </div>
+            <div className={`w-full h-2 rounded-full overflow-hidden ${isDark ? 'bg-gray-800' : 'bg-[#f0fdfa]'}`}>
+              <div
+                className={`h-full rounded-full transition-all duration-1000 ${
+                  activeProgramTimeline.isAlarmRequired ? 'bg-amber-500' : isDark ? 'bg-[#14b8a6]' : 'bg-[#0d9488]'
+                }`}
+                style={{ width: `${activeProgramTimeline.progressPercent}%` }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Quick Actions */}
       <div className="flex gap-2">
         <button
           onClick={() => navigate('/prompt')}
           className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all ${
             isDark
-              ? 'bg-gradient-to-l from-[#d4af37]/20 to-[#d4af37]/5 border border-[#d4af37]/30 text-[#d4af37] hover:bg-[#d4af37]/20'
+              ? 'bg-gradient-to-l from-[#14b8a6]/20 to-[#14b8a6]/5 border border-[#14b8a6]/30 text-[#14b8a6] hover:bg-[#14b8a6]/20'
               : 'bg-gradient-to-l from-[#14b8a6]/15 to-[#14b8a6]/5 border border-[#14b8a6]/30 text-[#0d9488] hover:bg-[#14b8a6]/15'
           }`}
         >
@@ -119,18 +235,18 @@ export default function Dashboard() {
       {todayWorkout && (
         <div className={`relative rounded-3xl p-6 overflow-hidden theme-transition ${
           isDark
-            ? 'bg-gradient-to-bl from-[#1a1a2e] via-[#16213e] to-[#1a1a2e] border border-[#d4af37]/20'
+            ? 'bg-gradient-to-bl from-[#1a1a2e] via-[#16213e] to-[#1a1a2e] border border-[#14b8a6]/20'
             : 'bg-gradient-to-bl from-[#f0fdfa] via-[#ccfbf1] to-[#ecfdf5] border border-[#14b8a6]/30'
         }`}>
           <div className={`absolute top-0 left-0 w-40 h-40 rounded-full blur-3xl ${
-            isDark ? 'bg-[#d4af37]/10' : 'bg-[#14b8a6]/20'
+            isDark ? 'bg-[#14b8a6]/10' : 'bg-[#14b8a6]/20'
           }`} />
           <div className="relative">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <div className={`w-2 h-2 rounded-full animate-pulse ${isDark ? 'bg-[#d4af37]' : 'bg-[#14b8a6]'}`} />
-                  <span className={`text-xs font-bold ${isDark ? 'text-[#d4af37]' : 'text-[#0d9488]'}`}>تمرین امروز</span>
+                  <div className={`w-2 h-2 rounded-full animate-pulse ${isDark ? 'bg-[#14b8a6]' : 'bg-[#14b8a6]'}`} />
+                  <span className={`text-xs font-bold ${isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'}`}>تمرین امروز</span>
                 </div>
                 <h2 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>{todayWorkout.day}</h2>
                 <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}`}>
@@ -139,7 +255,7 @@ export default function Dashboard() {
               </div>
               <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${
                 isDark
-                  ? 'bg-gradient-to-br from-[#d4af37] to-[#f0d060] shadow-lg shadow-[#d4af37]/30'
+                  ? 'bg-gradient-to-br from-[#14b8a6] to-[#2dd4bf] shadow-lg shadow-[#14b8a6]/30'
                   : 'bg-gradient-to-br from-[#14b8a6] to-[#0d9488] shadow-lg shadow-[#14b8a6]/30'
               }`}>
                 <Dumbbell size={32} className={isDark ? 'text-[#0d0d1a]' : 'text-white'} />
@@ -176,7 +292,7 @@ export default function Dashboard() {
               }}
               className={`w-full py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${
                 isDark
-                  ? 'bg-gradient-to-l from-[#d4af37] to-[#f0d060] text-[#0d0d1a] shadow-lg shadow-[#d4af37]/30 hover:opacity-90'
+                  ? 'bg-gradient-to-l from-[#14b8a6] to-[#2dd4bf] text-[#0d0d1a] shadow-lg shadow-[#14b8a6]/30 hover:opacity-90'
                   : 'bg-gradient-to-l from-[#14b8a6] to-[#0d9488] text-white shadow-lg shadow-[#14b8a6]/30 hover:opacity-90'
               }`}
             >
@@ -255,16 +371,16 @@ export default function Dashboard() {
         <StatCard icon={<Activity size={18} />} label="جلسات" value={toPersianNumber(totalSessions)} subtext="تکمیل شده" color={isDark ? 'text-[#4a90d9]' : 'text-[#0d9488]'} bgColor={isDark ? 'bg-[#4a90d9]/10' : 'bg-[#14b8a6]/10'} borderColor={isDark ? 'border-[#4a90d9]/20' : 'border-[#14b8a6]/20'} isDark={isDark} />
         <StatCard icon={<TrendingUp size={18} />} label="حجم کل" value={toPersianNumber(totalVolume.toLocaleString())} subtext="کیلوگرم" color={isDark ? 'text-[#22c55e]' : 'text-[#059669]'} bgColor={isDark ? 'bg-[#22c55e]/10' : 'bg-[#10b981]/10'} borderColor={isDark ? 'border-[#22c55e]/20' : 'border-[#10b981]/20'} isDark={isDark} />
         <StatCard icon={<Flame size={18} />} label="استریک" value={toPersianNumber(currentStreak)} subtext="روز متوالی" color={isDark ? 'text-[#f59e0b]' : 'text-[#d97706]'} bgColor={isDark ? 'bg-[#f59e0b]/10' : 'bg-[#f59e0b]/10'} borderColor={isDark ? 'border-[#f59e0b]/20' : 'border-[#f59e0b]/20'} isDark={isDark} />
-        <StatCard icon={<Target size={18} />} label="هدف هفتگی" value={`${toPersianNumber(weeklyCompleted)}/${toPersianNumber(weeklyGoal)}`} subtext="جلسه" color={isDark ? 'text-[#d4af37]' : 'text-[#0d9488]'} bgColor={isDark ? 'bg-[#d4af37]/10' : 'bg-[#14b8a6]/10'} borderColor={isDark ? 'border-[#d4af37]/20' : 'border-[#14b8a6]/20'} isDark={isDark} progress={weeklyProgress} />
+        <StatCard icon={<Target size={18} />} label="هدف هفتگی" value={`${toPersianNumber(weeklyCompleted)}/${toPersianNumber(weeklyGoal)}`} subtext="جلسه" color={isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'} bgColor={isDark ? 'bg-[#14b8a6]/10' : 'bg-[#14b8a6]/10'} borderColor={isDark ? 'border-[#14b8a6]/20' : 'border-[#14b8a6]/20'} isDark={isDark} progress={weeklyProgress} />
       </div>
 
-      <div className={`rounded-2xl p-5 border theme-transition ${isDark ? 'bg-[#1a1a2e] border-[#d4af37]/10' : 'bg-white border-[#14b8a6]/15'}`}>
+      <div className={`rounded-2xl p-5 border theme-transition ${isDark ? 'bg-[#1a1a2e] border-[#14b8a6]/10' : 'bg-white border-[#14b8a6]/15'}`}>
         <div className="flex items-center justify-between mb-3">
-          <h3 className={`font-bold flex items-center gap-2 ${isDark ? 'text-[#d4af37]' : 'text-[#0d9488]'}`}><Calendar size={16} />پیشرفت هفتگی</h3>
+          <h3 className={`font-bold flex items-center gap-2 ${isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'}`}><Calendar size={16} />پیشرفت هفتگی</h3>
           <span className={`text-xs font-bold ${isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}`}>{toPersianNumber(Math.round(weeklyProgress))}٪</span>
         </div>
         <div className={`w-full h-3 rounded-full overflow-hidden mb-3 ${isDark ? 'bg-gray-800' : 'bg-[#f0fdfa]'}`}>
-          <div className={`h-full rounded-full transition-all duration-1000 ${isDark ? 'bg-gradient-to-l from-[#d4af37] to-[#f0d060]' : 'bg-gradient-to-l from-[#14b8a6] to-[#0d9488]'}`} style={{ width: `${weeklyProgress}%` }} />
+          <div className={`h-full rounded-full transition-all duration-1000 ${isDark ? 'bg-gradient-to-l from-[#14b8a6] to-[#2dd4bf]' : 'bg-gradient-to-l from-[#14b8a6] to-[#0d9488]'}`} style={{ width: `${weeklyProgress}%` }} />
         </div>
         <div className="flex justify-between">
           {['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'].map((day, i) => {
@@ -273,8 +389,8 @@ export default function Dashboard() {
             return (
               <div key={i} className="flex flex-col items-center gap-1">
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
-                  hasSession ? (isDark ? 'bg-[#d4af37] text-[#0d0d1a]' : 'bg-[#14b8a6] text-white')
-                    : isToday ? (isDark ? 'bg-[#d4af37]/20 text-[#d4af37] border border-[#d4af37]/50' : 'bg-[#14b8a6]/20 text-[#0d9488] border border-[#14b8a6]/50')
+                  hasSession ? (isDark ? 'bg-[#14b8a6] text-[#0d0d1a]' : 'bg-[#14b8a6] text-white')
+                    : isToday ? (isDark ? 'bg-[#14b8a6]/20 text-[#14b8a6] border border-[#14b8a6]/50' : 'bg-[#14b8a6]/20 text-[#0d9488] border border-[#14b8a6]/50')
                     : (isDark ? 'bg-gray-800 text-gray-500' : 'bg-[#f0fdfa] text-[#0f766e]/50')
                 }`}>{hasSession ? <CheckCircle2 size={14} /> : day}</div>
               </div>
@@ -311,16 +427,16 @@ export default function Dashboard() {
             <div className={`rounded-xl p-3 ${isDark ? 'bg-[#0d0d1a]/50' : 'bg-white/70'}`}>
               <TrendingUp size={14} className={isDark ? 'text-gray-400' : 'text-[#0f766e]/70'} />
               <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}`}>حجم</p>
-              <p className={`font-bold text-sm ${isDark ? 'text-[#d4af37]' : 'text-[#0d9488]'}`}>{toPersianNumber(lastSession.totalVolume)} kg</p>
+              <p className={`font-bold text-sm ${isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'}`}>{toPersianNumber(lastSession.totalVolume)} kg</p>
             </div>
           </div>
         </div>
       )}
 
       {profile && (
-        <div className={`rounded-2xl p-5 border theme-transition ${isDark ? 'bg-[#1a1a2e] border-[#d4af37]/10' : 'bg-white border-[#14b8a6]/15'}`}>
+        <div className={`rounded-2xl p-5 border theme-transition ${isDark ? 'bg-[#1a1a2e] border-[#14b8a6]/10' : 'bg-white border-[#14b8a6]/15'}`}>
           <div className="flex items-center justify-between mb-4">
-            <h3 className={`font-bold flex items-center gap-2 ${isDark ? 'text-[#d4af37]' : 'text-[#0d9488]'}`}><User size={16} />{profile.name}</h3>
+            <h3 className={`font-bold flex items-center gap-2 ${isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'}`}><User size={16} />{profile.name}</h3>
             <button onClick={() => navigate('/profile')} className={`text-xs ${isDark ? 'text-gray-400 hover:text-white' : 'text-[#0f766e]/70 hover:text-[#0d9488]'}`}>ویرایش</button>
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -333,34 +449,34 @@ export default function Dashboard() {
       )}
 
       {weightData.length > 1 && (
-        <div className={`rounded-2xl p-5 border theme-transition ${isDark ? 'bg-[#1a1a2e] border-[#d4af37]/10' : 'bg-white border-[#14b8a6]/15'}`}>
-          <h3 className={`font-bold mb-4 flex items-center gap-2 ${isDark ? 'text-[#d4af37]' : 'text-[#0d9488]'}`}><TrendingUp size={16} />روند وزن</h3>
+        <div className={`rounded-2xl p-5 border theme-transition ${isDark ? 'bg-[#1a1a2e] border-[#14b8a6]/10' : 'bg-white border-[#14b8a6]/15'}`}>
+          <h3 className={`font-bold mb-4 flex items-center gap-2 ${isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'}`}><TrendingUp size={16} />روند وزن</h3>
           <ResponsiveContainer width="100%" height={180}>
             <AreaChart data={weightData}>
               <defs>
                 <linearGradient id="weightGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={isDark ? '#d4af37' : '#14b8a6'} stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor={isDark ? '#d4af37' : '#14b8a6'} stopOpacity={0}/>
+                  <stop offset="5%" stopColor={isDark ? '#14b8a6' : '#14b8a6'} stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor={isDark ? '#14b8a6' : '#14b8a6'} stopOpacity={0}/>
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#333' : '#e5e7eb'} />
               <XAxis dataKey="date" stroke={isDark ? '#888' : '#6b7280'} fontSize={10} />
               <YAxis stroke={isDark ? '#888' : '#6b7280'} fontSize={10} domain={['dataMin - 2', 'dataMax + 2']} />
-              <Tooltip contentStyle={{ background: isDark ? '#1a1a2e' : '#ffffff', border: `1px solid ${isDark ? '#d4af37' : '#14b8a6'}`, borderRadius: '8px', fontSize: '12px' }} />
-              <Area type="monotone" dataKey="weight" stroke={isDark ? '#d4af37' : '#14b8a6'} strokeWidth={2} fill="url(#weightGradient)" />
+              <Tooltip contentStyle={{ background: isDark ? '#1a1a2e' : '#ffffff', border: `1px solid ${isDark ? '#14b8a6' : '#14b8a6'}`, borderRadius: '8px', fontSize: '12px' }} />
+              <Area type="monotone" dataKey="weight" stroke={isDark ? '#14b8a6' : '#14b8a6'} strokeWidth={2} fill="url(#weightGradient)" />
             </AreaChart>
           </ResponsiveContainer>
         </div>
       )}
 
       {!profile && (
-        <div className={`rounded-2xl p-6 border theme-transition ${isDark ? 'bg-gradient-to-l from-[#d4af37]/10 to-transparent border-[#d4af37]/30' : 'bg-gradient-to-l from-[#f0fdfa] to-white border-[#14b8a6]/30'}`}>
+        <div className={`rounded-2xl p-6 border theme-transition ${isDark ? 'bg-gradient-to-l from-[#14b8a6]/10 to-transparent border-[#14b8a6]/30' : 'bg-gradient-to-l from-[#f0fdfa] to-white border-[#14b8a6]/30'}`}>
           <div className="flex items-center gap-3">
-            <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${isDark ? 'bg-[#d4af37]/20' : 'bg-[#14b8a6]/15'}`}>
-              <Sparkles size={24} className={isDark ? 'text-[#d4af37]' : 'text-[#0d9488]'} />
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${isDark ? 'bg-[#14b8a6]/20' : 'bg-[#14b8a6]/15'}`}>
+              <Sparkles size={24} className={isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'} />
             </div>
             <div>
-              <p className={`font-bold ${isDark ? 'text-[#d4af37]' : 'text-[#0d9488]'}`}>⚡ شروع کنید</p>
+              <p className={`font-bold ${isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'}`}>⚡ شروع کنید</p>
               <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}`}>برای شروع، ابتدا پروفایل ورزشکار خود را تکمیل کنید</p>
             </div>
           </div>
@@ -382,7 +498,7 @@ function StatCard({ icon, label, value, subtext, color, bgColor, borderColor, is
       <p className={`text-[10px] ${isDark ? 'text-gray-500' : 'text-[#0f766e]/50'}`}>{subtext}</p>
       {progress !== undefined && (
         <div className={`w-full h-1 rounded-full mt-2 ${isDark ? 'bg-gray-800' : 'bg-[#f0fdfa]'}`}>
-          <div className={`h-full rounded-full transition-all duration-1000 ${isDark ? 'bg-[#d4af37]' : 'bg-[#14b8a6]'}`} style={{ width: `${progress}%` }} />
+          <div className={`h-full rounded-full transition-all duration-1000 ${isDark ? 'bg-[#14b8a6]' : 'bg-[#14b8a6]'}`} style={{ width: `${progress}%` }} />
         </div>
       )}
     </div>

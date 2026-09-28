@@ -56,15 +56,15 @@ export default function PromptGenerator() {
   return (
     <div className="space-y-6">
       <h2 className={`text-2xl font-bold flex items-center gap-2 ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>
-        <Brain size={24} className={isDark ? 'text-[#d4af37]' : 'text-[#0d9488]'} />
+        <Brain size={24} className={isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'} />
         تولید پرامپت هوش مصنوعی
       </h2>
 
       {/* Prompt Type Selector */}
       <div className={`rounded-2xl p-4 border theme-transition ${
-        isDark ? 'bg-[#1a1a2e] border-[#d4af37]/10' : 'bg-white border-[#14b8a6]/15'
+        isDark ? 'bg-[#1a1a2e] border-[#14b8a6]/10' : 'bg-white border-[#14b8a6]/15'
       }`}>
-        <h3 className={`font-bold mb-3 ${isDark ? 'text-[#d4af37]' : 'text-[#0d9488]'}`}>
+        <h3 className={`font-bold mb-3 ${isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'}`}>
           نوع پرامپت
         </h3>
         <div className="grid grid-cols-3 gap-3">
@@ -73,10 +73,10 @@ export default function PromptGenerator() {
             className={`flex flex-col items-center gap-2 p-4 rounded-xl transition-all ${
               promptType === 'workout'
                 ? isDark
-                  ? 'bg-[#d4af37]/20 border-2 border-[#d4af37] text-[#d4af37]'
+                  ? 'bg-[#14b8a6]/20 border-2 border-[#14b8a6] text-[#14b8a6]'
                   : 'bg-[#14b8a6]/15 border-2 border-[#14b8a6] text-[#0d9488]'
                 : isDark
-                  ? 'bg-[#0d0d1a] border border-gray-700 text-gray-400 hover:border-[#d4af37]'
+                  ? 'bg-[#0d0d1a] border border-gray-700 text-gray-400 hover:border-[#14b8a6]'
                   : 'bg-[#f0fdfa] border border-[#14b8a6]/30 text-[#0f766e]/70 hover:border-[#14b8a6]'
             }`}
           >
@@ -88,10 +88,10 @@ export default function PromptGenerator() {
             className={`flex flex-col items-center gap-2 p-4 rounded-xl transition-all ${
               promptType === 'nutrition'
                 ? isDark
-                  ? 'bg-[#d4af37]/20 border-2 border-[#d4af37] text-[#d4af37]'
+                  ? 'bg-[#14b8a6]/20 border-2 border-[#14b8a6] text-[#14b8a6]'
                   : 'bg-[#14b8a6]/15 border-2 border-[#14b8a6] text-[#0d9488]'
                 : isDark
-                  ? 'bg-[#0d0d1a] border border-gray-700 text-gray-400 hover:border-[#d4af37]'
+                  ? 'bg-[#0d0d1a] border border-gray-700 text-gray-400 hover:border-[#14b8a6]'
                   : 'bg-[#f0fdfa] border border-[#14b8a6]/30 text-[#0f766e]/70 hover:border-[#14b8a6]'
             }`}
           >
@@ -103,10 +103,10 @@ export default function PromptGenerator() {
             className={`flex flex-col items-center gap-2 p-4 rounded-xl transition-all ${
               promptType === 'supplement'
                 ? isDark
-                  ? 'bg-[#d4af37]/20 border-2 border-[#d4af37] text-[#d4af37]'
+                  ? 'bg-[#14b8a6]/20 border-2 border-[#14b8a6] text-[#14b8a6]'
                   : 'bg-[#14b8a6]/15 border-2 border-[#14b8a6] text-[#0d9488]'
                 : isDark
-                  ? 'bg-[#0d0d1a] border border-gray-700 text-gray-400 hover:border-[#d4af37]'
+                  ? 'bg-[#0d0d1a] border border-gray-700 text-gray-400 hover:border-[#14b8a6]'
                   : 'bg-[#f0fdfa] border border-[#14b8a6]/30 text-[#0f766e]/70 hover:border-[#14b8a6]'
             }`}
           >
@@ -118,9 +118,9 @@ export default function PromptGenerator() {
 
       {/* Profile Summary */}
       <div className={`rounded-2xl p-5 border theme-transition ${
-        isDark ? 'bg-[#1a1a2e] border-[#d4af37]/10' : 'bg-white border-[#14b8a6]/15'
+        isDark ? 'bg-[#1a1a2e] border-[#14b8a6]/10' : 'bg-white border-[#14b8a6]/15'
       }`}>
-        <h3 className={`font-bold mb-3 ${isDark ? 'text-[#d4af37]' : 'text-[#0d9488]'}`}>
+        <h3 className={`font-bold mb-3 ${isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'}`}>
           خلاصه اطلاعات ارسالی
         </h3>
         <div className="grid grid-cols-2 gap-3 text-sm">
@@ -144,7 +144,7 @@ export default function PromptGenerator() {
         onClick={handleGenerate}
         className={`w-full py-4 rounded-xl font-bold text-lg transition-all shadow-lg ${
           isDark
-            ? 'bg-gradient-to-l from-[#d4af37] to-[#f0d060] text-[#0d0d1a] shadow-[#d4af37]/20 hover:opacity-90'
+            ? 'bg-gradient-to-l from-[#14b8a6] to-[#2dd4bf] text-[#0d0d1a] shadow-[#14b8a6]/20 hover:opacity-90'
             : 'bg-gradient-to-l from-[#14b8a6] to-[#0d9488] text-white shadow-[#14b8a6]/20 hover:opacity-90'
         }`}
       >
@@ -182,7 +182,7 @@ export default function PromptGenerator() {
           </div>
 
           <div className={`rounded-xl p-4 border ${
-            isDark ? 'bg-[#1a1a2e] border-[#d4af37]/10' : 'bg-white border-[#14b8a6]/15'
+            isDark ? 'bg-[#1a1a2e] border-[#14b8a6]/10' : 'bg-white border-[#14b8a6]/15'
           }`}>
             <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}`}>
               💡 <strong>راهنما:</strong> پرامپت بالا را کپی کنید و در ChatGPT، Gemini یا Claude پیست کنید. 
