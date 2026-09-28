@@ -68,6 +68,7 @@ jobs:
           # Avoid Duplicate resources: Capacitor ships values/ic_launcher_background.xml
           rm -f "$RES/values/ic_launcher_background.xml"
           for D in mdpi hdpi xhdpi xxhdpi xxxhdpi; do mkdir -p "$RES/drawable-$D"; cp -f native-assets/android/drawable-$D/* "$RES/drawable-$D/"; done
+          for D in mdpi hdpi xhdpi xxhdpi xxxhdpi; do mkdir -p "$RES/mipmap-$D"; cp -f native-assets/android/mipmap-$D/* "$RES/mipmap-$D/"; done
           cp -f native-assets/android/mipmap-anydpi-v26/* "$RES/mipmap-anydpi-v26/"
           cp -f native-assets/android/values/ic_launcher_colors.xml "$RES/values/"
           echo "✅ Coachino launcher icons applied"

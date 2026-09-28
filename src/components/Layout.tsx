@@ -7,6 +7,7 @@ import {
 import { useState } from 'react';
 import { toPersianNumber, getPersianDate } from '../utils/jalali';
 import { useTheme } from '../context/ThemeContext';
+import Logo from './Logo';
 import { useSubscription } from '../subscription/SubscriptionContext';
 
 const premiumPaths = ['/prompt', '/import'];
@@ -61,13 +62,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               {menuOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
             <div className="flex items-center gap-3">
-              <div className={'w-10 h-10 rounded-2xl flex items-center justify-center ' + (
-                isDark
-                  ? 'bg-[#14b8a6] shadow-lg shadow-[#14b8a6]/25'
-                  : 'bg-gradient-to-br from-[#14b8a6] to-[#0d9488]'
-              )}>
-                <Dumbbell size={20} className={isDark ? 'text-[#0a0a0a]' : 'text-white'} />
-              </div>
+              <Logo size={40} />
               <div>
                 <h1 className={'font-bold text-base sm:text-lg leading-tight ' + (
                   isDark ? 'text-white' : 'text-[#0d9488]'
@@ -136,11 +131,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               onClick={e => e.stopPropagation()}
             >
               <div className={'flex items-center gap-3 mb-6 pb-5 border-b ' + (isDark ? 'border-white/10' : 'border-[#14b8a6]/20')}>
-                <div className={'w-12 h-12 rounded-2xl flex items-center justify-center ' + (
-                  isDark ? 'bg-[#14b8a6]' : 'bg-[#14b8a6]'
-                )}>
-                  <Dumbbell size={24} className={isDark ? 'text-[#0a0a0a]' : 'text-white'} />
-                </div>
+                <Logo size={48} />
                 <div>
                   <span className={'font-bold text-lg block ' + (isDark ? 'text-white' : 'text-[#0d9488]')}>کوچینو</span>
                   <span className={'text-xs ' + (isDark ? 'text-gray-500' : 'text-[#0f766e]/70')}>Coachino · دستیار هوشمند بدنسازی</span>

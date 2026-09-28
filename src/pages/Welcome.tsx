@@ -1,4 +1,5 @@
-import { Dumbbell, Sparkles, ArrowLeft } from 'lucide-react';
+import { Sparkles, ArrowLeft } from 'lucide-react';
+import Logo from '../components/Logo';
 import { useTheme } from '../context/ThemeContext';
 
 interface WelcomeProps { onContinue: () => void; }
@@ -10,9 +11,7 @@ export default function Welcome({ onContinue }: WelcomeProps) {
   return (
     <main dir="rtl" className={`min-h-screen flex items-center justify-center p-6 ${isDark ? 'bg-[#0d0d1a] text-white' : 'bg-gradient-to-br from-white to-[#f0fdfa] text-[#134e4a]'}`}>
       <section className="w-full max-w-md text-center">
-        <div className={`mx-auto mb-7 w-24 h-24 rounded-3xl flex items-center justify-center shadow-2xl ${isDark ? 'bg-gradient-to-br from-[#14b8a6] to-[#2dd4bf] shadow-[#14b8a6]/20' : 'bg-gradient-to-br from-[#14b8a6] to-[#0d9488] shadow-[#14b8a6]/20'}`}>
-          <Dumbbell size={44} className={isDark ? 'text-[#0d0d1a]' : 'text-white'} />
-        </div>
+        <div className="mx-auto mb-7 flex justify-center"><Logo size={120} /></div>
         <div className="flex items-center justify-center gap-2 mb-2">
           <Sparkles size={17} className={isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'} />
           <span className={`text-sm font-bold ${isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'}`}>دستیار هوشمند بدنسازی</span>
