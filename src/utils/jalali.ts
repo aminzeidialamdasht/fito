@@ -73,4 +73,91 @@ export function isLeapYear(year: number): boolean {
   return isLeapJalaaliYear(year);
 }
 
+export function parseDurationInDays(durationStr: string): number {
+  if (!durationStr) return 28;
+  const normalized = String(durationStr)
+    .replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d).toString())
+    .toLowerCase()
+    .trim();
+
+  if (normalized.includes('یک ماه') || normalized.includes('یک‌ماه')) return 30;
+  if (normalized.includes('دو ماه') || normalized.includes('دو‌ماه')) return 60;
+  if (normalized.includes('سه ماه') || normalized.includes('سه‌ماه')) return 90;
+  if (normalized.includes('یک هفته') || normalized.includes('یک‌هفته')) return 7;
+  if (normalized.includes('دو هفته') || normalized.includes('دو‌هفته')) return 14;
+
+  const matchNum = normalized.match(/\d+/);
+  const num = matchNum ? parseInt(matchNum[0], 10) : null;
+
+  if (normalized.includes('ماه') || normalized.includes('month')) {
+    return (num || 1) * 30;
+  }
+  if (normalized.includes('هفته') || normalized.includes('week')) {
+    return (num || 4) * 7;
+  }
+  if (normalized.includes('روز') || normalized.includes('day')) {
+    return num || 30;
+  }
+
+  return num ? num * 7 : 28;
+}
+
+export interface ProgramTimelineDetails {
+  startDate: Date;
+  startDateIso: string;
+  startDateJalali: string;
+  endDate: Date;
+  endDateIso: string;
+  endDateJalali: string;
+  totalDays: number;
+  daysPassed: number;
+  daysRemaining: number;
+  progressPercent: number;
+  isAlarmRequired: boolean;
+  isExpired: boolean;
+}
+
+export function getProgramTimelineDetails(
+  startDateStr?: string,
+  durationStr?: string,
+  createdAtStr?: string
+): ProgramTimelineDetails {
+  const rawStart = startDateStr || createdAtStr || new Date().toISOString();
+  const startDate = new Date(rawStart);
+  if (isNaN(startDate.getTime())) {
+    startDate.setTime(Date.now());
+  }
+
+  const startDay = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+  const today = new Date();
+  const currentDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+  const totalDays = parseDurationInDays(durationStr || '4 هفته');
+  const endDate = new Date(startDay.getTime() + totalDays * 24 * 60 * 60 * 1000);
+
+  const diffTime = currentDay.getTime() - startDay.getTime();
+  const daysPassed = Math.max(0, Math.floor(diffTime / (1000 * 60 * 60 * 24)));
+  const daysRemaining = Math.ceil((endDate.getTime() - currentDay.getTime()) / (1000 * 60 * 60 * 24));
+
+  const progressPercent = Math.min(100, Math.max(0, Math.round((daysPassed / totalDays) * 100)));
+
+  const isAlarmRequired = daysRemaining <= 1 && daysRemaining >= -7;
+  const isExpired = daysRemaining < 0;
+
+  return {
+    startDate: startDay,
+    startDateIso: startDay.toISOString().split('T')[0],
+    startDateJalali: formatDateJalali(startDay.toISOString()),
+    endDate,
+    endDateIso: endDate.toISOString().split('T')[0],
+    endDateJalali: formatDateJalali(endDate.toISOString()),
+    totalDays,
+    daysPassed,
+    daysRemaining,
+    progressPercent,
+    isAlarmRequired,
+    isExpired,
+  };
+}
+
 export { PERSIAN_MONTHS, PERSIAN_WEEKDAYS };

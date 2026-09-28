@@ -31,6 +31,13 @@ const PROGRAM_TYPE_TRANSLATIONS: Record<string, string> = {
   'ai_suggested': 'AI Suggested (based on athlete profile)',
 };
 
+const EQUIPMENT_TYPE_TRANSLATIONS: Record<string, string> = {
+  'full_gym': 'Full Commercial Gym',
+  'home': 'Home Gym',
+  'park': 'Outdoor / Park',
+  'custom': 'Custom Equipment List',
+};
+
 const MUSCLE_TRANSLATIONS: Record<string, string> = {
   'سینه': 'Chest',
   'پشت': 'Back',
@@ -83,12 +90,26 @@ export function generateWorkoutPrompt(profile: AthleteProfile): string {
   const secondaryGoalEn = profile.secondaryGoal ? translateGoal(profile.secondaryGoal) : null;
   const experienceEn = translateExperience(profile.experience);
   const locationEn = translateLocation(profile.location);
+  const equipmentTypeEn = EQUIPMENT_TYPE_TRANSLATIONS[profile.equipmentType] || profile.equipmentType || 'Commercial Gym';
   const programTypeEn = translateProgramType(profile.programType || 'ai_suggested');
   const targetMusclesEn = (profile.targetMuscles || [])
     .map((m, i) => `${i + 1}. ${translateMuscle(m)}`)
     .join(', ');
 
+  const bodyMeasEntries = profile.bodyMeasurements
+    ? Object.entries(profile.bodyMeasurements).filter(([, val]) => val != null && Number(val) > 0)
+    : [];
+  const bodyMeasStr = bodyMeasEntries.length > 0
+    ? bodyMeasEntries.map(([k, v]) => `${k}: ${v} cm`).join(', ')
+    : '';
+
+  const preferredExercisesStr = (profile.preferredExercises || []).filter(Boolean).join(', ');
+
   const prompt = `You are an expert strength and conditioning coach, certified by NSCA and ACSM, with 20+ years of experience designing evidence-based training programs for athletes of all levels. You specialize in ${goalEn.toLowerCase()} and use the latest scientific research from Schoenfeld, Helms, and Israetel.
+
+## CRITICAL DURATION MANDATE
+The athlete explicitly requested a program timeframe / duration of: **"${profile.timeline || '4 weeks'}"**.
+You MUST set the JSON "duration" field strictly to match this exact requested timeframe (e.g. if requested timeframe is "1 ماه" or "1 month" or "4 هفته", the JSON "duration" MUST be "۱ ماه" or "۴ هفته" / "4 weeks"). DO NOT DEFAULT TO 8 WEEKS OR 12 WEEKS! Pay strict attention to all athlete profile parameters.
 
 ## Athlete Profile
 - **Name**: ${profile.name}
@@ -100,19 +121,22 @@ export function generateWorkoutPrompt(profile: AthleteProfile): string {
 - **Activity Level**: ${profile.activityLevel || 'Moderately Active'}
 ${profile.bodyFatPercent != null ? `- **Body Fat**: ~${profile.bodyFatPercent}%` : ''}
 ${profile.bodyComposition ? `- **Body Composition**: ${profile.bodyComposition}` : ''}
+${bodyMeasStr ? `- **Body Measurements**: ${bodyMeasStr}` : ''}
 ${profile.sleepHours != null ? `- **Sleep**: ${profile.sleepHours} hours/night` : ''}
 ${profile.jobStress ? `- **Job Stress**: ${profile.jobStress}` : ''}
 
 ## Training Parameters
 - **Primary Goal**: ${goalEn}
 ${secondaryGoalEn ? `- **Secondary Goal**: ${secondaryGoalEn}` : ''}
+- **Program Duration / Timeline (STRICT)**: **${profile.timeline || '4 weeks'}**
 - **Training Days per Week**: ${profile.trainingDays} days
 - **Session Duration**: ${profile.sessionDuration} minutes
 - **Training Location**: ${locationEn}
+- **Equipment Setup**: ${equipmentTypeEn}
 - **Program Type**: ${programTypeEn}
 ${targetMusclesEn ? `- **Priority Muscle Groups (ordered, 1 = highest priority)**: ${targetMusclesEn}` : ''}
-- **Timeline**: ${profile.timeline || '8-12 weeks'}
 ${profile.competitionDate ? `- **Competition / Deadline**: ${profile.competitionDate}` : ''}
+${profile.trainingHistory ? `- **Training History**: ${profile.trainingHistory}` : ''}
 
 ## Available Equipment
 ${(profile.equipment || []).length > 0 ? profile.equipment.join(', ') : 'Standard gym equipment'}
@@ -126,12 +150,13 @@ ${profile.recoveryQuality ? `- **Recovery Quality**: ${profile.recoveryQuality}`
 ${profile.jobStress ? `- **Job Stress**: ${profile.jobStress}` : ''}
 ${profile.workShift ? `- **Work Schedule**: ${profile.workShift}` : ''}
 
-## Health Considerations
+## Health Considerations & Exercise Preferences
 ${(profile.injuries || []).length > 0 ? `- **Injuries**: ${profile.injuries.join(', ')}` : '- No reported injuries'}
 ${profile.injuryDetails ? `- **Injury History Details**: ${profile.injuryDetails}` : ''}
 ${(profile.limitations || []).length > 0 ? `- **Medical Limitations**: ${profile.limitations.join(', ')}` : '- No medical limitations'}
 ${(profile.avoidedExercises || []).length > 0 ? `- **Exercises to Avoid**: ${profile.avoidedExercises.join(', ')}` : '- No exercises to avoid'}
-${profile.exercisePreferences ? `- **Exercise Preferences**: ${profile.exercisePreferences}` : ''}
+${preferredExercisesStr ? `- **Preferred Exercises**: ${preferredExercisesStr}` : ''}
+${profile.exercisePreferences ? `- **Exercise Preferences / Style**: ${profile.exercisePreferences}` : ''}
 ${profile.hormoneMedNotes ? `- **Medication / Hormone Notes**: ${profile.hormoneMedNotes}` : ''}
 
 ## Strength Records
@@ -177,6 +202,7 @@ The JSON must follow this EXACT structure:
 
 Important:
 - All text values in JSON must be in Persian (Farsi)
+- **duration** in JSON MUST be strictly set to Persian string matching requested timeframe: "${profile.timeline || '۴ هفته'}" (e.g. if 1 month: "۱ ماه" or "۴ هفته")
 - Ensure total session time fits within ${profile.sessionDuration} minutes
 - Respect injuries, limitations, and avoided exercises strictly
 - Prioritize muscle groups in the order given (1 = highest priority)

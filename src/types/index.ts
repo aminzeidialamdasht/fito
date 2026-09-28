@@ -71,6 +71,7 @@ export interface WorkoutProgram {
   name: string;
   duration: string;
   createdAt: string;
+  startDate?: string;
   days: WorkoutDay[];
 }
 
@@ -147,6 +148,7 @@ export interface NutritionProgram {
   hydration: string;
   supplements?: string;
   createdAt: string;
+  startDate?: string;
 }
 
 export interface NutritionDay { day: string; meals: Meal[]; total_calories: number; notes?: string; }
@@ -176,6 +178,7 @@ export interface SupplementProgram {
   important_notes?: string;
   warnings?: string;
   createdAt: string;
+  startDate?: string;
 }
 
 export interface AppState {

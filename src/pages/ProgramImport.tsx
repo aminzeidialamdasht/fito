@@ -4,14 +4,15 @@ import { useTheme } from '../context/ThemeContext';
 import { validateWorkoutJSON } from '../utils/promptGenerator';
 import { WorkoutProgram } from '../types';
 import { v4 as uuidv4 } from 'uuid';
-import { Import as ImportIcon, Check, AlertCircle, Trash2, Save, Eye } from 'lucide-react';
-import { toPersianNumber } from '../utils/jalali';
+import { Import as ImportIcon, Check, AlertCircle, Trash2, Save, Eye, Calendar as CalendarIcon, Clock } from 'lucide-react';
+import { toPersianNumber, formatDateJalali, getProgramTimelineDetails } from '../utils/jalali';
 
 export default function ProgramImport() {
-  const { activeProfile, programs, addProgram, removeProgram, setActiveProgram, state } = useAppContext();
+  const { activeProfile, programs, addProgram, updateProgram, removeProgram, setActiveProgram, state } = useAppContext();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const [jsonInput, setJsonInput] = useState('');
+  const [startDate, setStartDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [validationResult, setValidationResult] = useState<{ valid: boolean; data?: any; error?: string } | null>(null);
   const [showPreview, setShowPreview] = useState(false);
   const [imported, setImported] = useState(false);
@@ -33,6 +34,7 @@ export default function ProgramImport() {
       profileId: activeProfile.id,
       name: validationResult.data.program_name,
       duration: validationResult.data.duration,
+      startDate: startDate || new Date().toISOString().split('T')[0],
       createdAt: new Date().toISOString(),
       days: validationResult.data.days.map((day: any) => ({
         id: uuidv4(),
@@ -221,6 +223,17 @@ export default function ProgramImport() {
               </span>
             </div>
             <div className="flex items-center gap-4 text-sm">
+              <span className={isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}>تاریخ شروع برنامه:</span>
+              <input
+                type="date"
+                value={startDate}
+                onChange={e => setStartDate(e.target.value)}
+                className={`rounded-lg px-3 py-1.5 text-xs font-bold border focus:outline-none ${
+                  isDark ? 'bg-[#0d0d1a] border-gray-700 text-white' : 'bg-[#f0fdfa] border-[#14b8a6]/30 text-[#134e4a]'
+                }`}
+              />
+            </div>
+            <div className="flex items-center gap-4 text-sm">
               <span className={isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}>تعداد روزها:</span>
               <span className={isDark ? 'text-white' : 'text-[#134e4a]'}>
                 {toPersianNumber(validationResult.data.days.length)} روز
@@ -272,59 +285,95 @@ export default function ProgramImport() {
           </p>
         ) : (
           <div className="space-y-3">
-            {programs.map(program => (
-              <div
-                key={program.id}
-                className={`rounded-xl p-4 border ${
-                  state.activeProgram === program.id
-                    ? isDark
-                      ? 'bg-[#0d0d1a] border-[#22c55e]/50'
-                      : 'bg-[#f0fdfa] border-[#10b981]/40'
-                    : isDark
-                      ? 'bg-[#0d0d1a] border-gray-800'
-                      : 'bg-[#f0fdfa] border-[#14b8a6]/20'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className={'font-bold ' + (isDark ? 'text-white' : 'text-[#134e4a]')}>
-                      {program.name}
-                    </h4>
-                    <p className={'text-sm mt-1 ' + (isDark ? 'text-gray-400' : 'text-[#0f766e]/70')}>
-                      {program.duration} • {toPersianNumber(program.days.length)} روز • {toPersianNumber(program.days.reduce((acc, d) => acc + d.exercises.length, 0))} تمرین
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {state.activeProgram === program.id ? (
-                      <span className={`text-xs px-2 py-1 rounded-full ${
-                        isDark ? 'bg-[#22c55e]/20 text-[#22c55e]' : 'bg-[#10b981]/15 text-[#059669]'
-                      }`}>
-                        فعال
-                      </span>
-                    ) : (
+            {programs.map(program => {
+              const timeline = getProgramTimelineDetails(program.startDate, program.duration, program.createdAt);
+              return (
+                <div
+                  key={program.id}
+                  className={`rounded-xl p-4 border ${
+                    state.activeProgram === program.id
+                      ? isDark
+                        ? 'bg-[#0d0d1a] border-[#22c55e]/50'
+                        : 'bg-[#f0fdfa] border-[#10b981]/40'
+                      : isDark
+                        ? 'bg-[#0d0d1a] border-gray-800'
+                        : 'bg-[#f0fdfa] border-[#14b8a6]/20'
+                  }`}
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                      <h4 className={'font-bold ' + (isDark ? 'text-white' : 'text-[#134e4a]')}>
+                        {program.name}
+                      </h4>
+                      <p className={'text-xs mt-1 flex flex-wrap items-center gap-2 ' + (isDark ? 'text-gray-400' : 'text-[#0f766e]/70')}>
+                        <span>مدت: <strong>{program.duration}</strong> ({toPersianNumber(timeline.totalDays)} روز)</span>
+                        <span>• {toPersianNumber(program.days.length)} روز تمرین</span>
+                        <span>• {toPersianNumber(program.days.reduce((acc, d) => acc + d.exercises.length, 0))} حرکت</span>
+                      </p>
+
+                      <div className="flex items-center gap-2 mt-2 text-xs">
+                        <CalendarIcon size={14} className={isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'} />
+                        <span className={isDark ? 'text-gray-300' : 'text-[#134e4a]'}>
+                          شروع: <strong>{timeline.startDateJalali}</strong> | پایان: <strong>{timeline.endDateJalali}</strong>
+                        </span>
+                        <input
+                          type="date"
+                          value={program.startDate ? program.startDate.split('T')[0] : timeline.startDateIso}
+                          onChange={e => {
+                            updateProgram({ ...program, startDate: e.target.value });
+                          }}
+                          className={`mr-2 px-2 py-0.5 text-[11px] rounded border ${
+                            isDark ? 'bg-gray-800 border-gray-700 text-gray-200' : 'bg-white border-gray-300 text-gray-800'
+                          }`}
+                          title="تغییر تاریخ شروع"
+                        />
+                      </div>
+
+                      <div className="mt-2 flex items-center gap-2 text-xs">
+                        <Clock size={14} className={timeline.isAlarmRequired ? 'text-amber-500 animate-pulse' : (isDark ? 'text-gray-400' : 'text-[#0f766e]/70')} />
+                        <span className={timeline.isAlarmRequired ? 'text-amber-500 font-bold' : (isDark ? 'text-gray-400' : 'text-[#0f766e]/70')}>
+                          {timeline.daysRemaining > 0
+                            ? `${toPersianNumber(timeline.daysRemaining)} روز باقی مانده`
+                            : timeline.daysRemaining === 0
+                            ? 'امروز آخرین روز برنامه است!'
+                            : `برنامه ${toPersianNumber(Math.abs(timeline.daysRemaining))} روز پیش پایان یافته`}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      {state.activeProgram === program.id ? (
+                        <span className={`text-xs px-2.5 py-1 rounded-full font-bold ${
+                          isDark ? 'bg-[#22c55e]/20 text-[#22c55e]' : 'bg-[#10b981]/15 text-[#059669]'
+                        }`}>
+                          فعال
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => setActiveProgram(program.id)}
+                          className={`text-xs px-3 py-1.5 rounded-full font-bold transition-all ${
+                            isDark
+                              ? 'bg-[#4a90d9]/20 text-[#4a90d9] hover:bg-[#4a90d9]/30'
+                              : 'bg-[#14b8a6]/15 text-[#0d9488] hover:bg-[#14b8a6]/25'
+                          }`}
+                        >
+                          فعال‌سازی
+                        </button>
+                      )}
                       <button
-                        onClick={() => setActiveProgram(program.id)}
-                        className={`text-xs px-3 py-1 rounded-full transition-all ${
-                          isDark
-                            ? 'bg-[#4a90d9]/20 text-[#4a90d9] hover:bg-[#4a90d9]/30'
-                            : 'bg-[#14b8a6]/15 text-[#0d9488] hover:bg-[#14b8a6]/25'
-                        }`}
+                        onClick={() => {
+                          if (confirm('آیا مطمئن هستید؟')) removeProgram(program.id);
+                        }}
+                        className="text-[#ef4444] p-1.5 hover:bg-[#ef4444]/10 rounded-lg transition-all"
+                        title="حذف برنامه"
                       >
-                        فعال‌سازی
+                        <Trash2 size={16} />
                       </button>
-                    )}
-                    <button
-                      onClick={() => {
-                        if (confirm('آیا مطمئن هستید؟')) removeProgram(program.id);
-                      }}
-                      className="text-[#ef4444] p-1 hover:bg-[#ef4444]/10 rounded"
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

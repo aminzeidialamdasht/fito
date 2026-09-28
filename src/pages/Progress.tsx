@@ -1,14 +1,15 @@
 import { useMemo, useState } from 'react';
-import { BarChart3, Plus, Trophy, TrendingUp, Save, Dumbbell, Scale, Activity } from 'lucide-react';
+import { BarChart3, Plus, Trophy, TrendingUp, Save, Dumbbell, Scale, Activity, Calendar as CalendarIcon, Clock, Bell, Brain } from 'lucide-react';
 import {
   LineChart, Line, BarChart, Bar, AreaChart, Area,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
 import { v4 as uuidv4 } from 'uuid';
+import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { ProgressEntry } from '../types';
-import { formatDateJalali, toPersianNumber } from '../utils/jalali';
+import { formatDateJalali, toPersianNumber, getProgramTimelineDetails } from '../utils/jalali';
 
 type MeasurementKey = 'weight' | 'chest' | 'waist' | 'hips' | 'arms' | 'thighs' | 'calves' | 'shoulders';
 
@@ -24,9 +25,15 @@ const MEASUREMENT_LABELS: Record<MeasurementKey, { label: string; unit: string }
 };
 
 export default function Progress() {
-  const { sessions, progress, activeProfile, addProgress } = useAppContext();
+  const { state, programs, sessions, progress, activeProfile, addProgress } = useAppContext();
   const { theme } = useTheme();
+  const navigate = useNavigate();
   const isDark = theme === 'dark';
+
+  const activeProgram = programs.find(p => p.id === state.activeProgram);
+  const activeProgramTimeline = activeProgram
+    ? getProgramTimelineDetails(activeProgram.startDate, activeProgram.duration, activeProgram.createdAt)
+    : null;
   const [showForm, setShowForm] = useState(false);
   const [selectedExercise, setSelectedExercise] = useState<string>('');
   const [selectedMetric, setSelectedMetric] = useState<MeasurementKey>('weight');
@@ -154,6 +161,97 @@ export default function Progress() {
           <Plus size={16} /> ثبت اندازه‌گیری
         </button>
       </div>
+
+      {/* Active Workout Program Timeline & Expiration Alarm */}
+      {activeProgram && activeProgramTimeline && (
+        <div className={`rounded-2xl p-5 border theme-transition ${card}`}>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+            <div className="flex items-center gap-3">
+              <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${isDark ? 'bg-[#14b8a6]/20 text-[#14b8a6]' : 'bg-[#14b8a6]/15 text-[#0d9488]'}`}>
+                <Clock size={22} />
+              </div>
+              <div>
+                <span className="text-xs font-bold text-[#14b8a6]">برنامه تمرینی فعال</span>
+                <h3 className={`text-lg font-bold ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>
+                  {activeProgram.name}
+                </h3>
+              </div>
+            </div>
+
+            <button
+              onClick={() => navigate('/import')}
+              className={`text-xs font-bold px-3 py-1.5 rounded-lg border transition-all ${
+                isDark ? 'border-gray-700 text-gray-300 hover:bg-gray-800' : 'border-teal-200 text-[#0d9488] hover:bg-[#f0fdfa]'
+              }`}
+            >
+              تغییر برنامه
+            </button>
+          </div>
+
+          {activeProgramTimeline.isAlarmRequired && (
+            <div className={`mb-4 rounded-xl p-4 border flex flex-col sm:flex-row items-center justify-between gap-3 ${
+              isDark ? 'bg-amber-500/15 border-amber-500/40 text-amber-200' : 'bg-amber-50 border-amber-300 text-amber-900'
+            }`}>
+              <div className="flex items-center gap-3">
+                <Bell size={22} className="text-amber-500 animate-bounce shrink-0" />
+                <div className="text-xs">
+                  <p className="font-bold text-sm">
+                    🚨 هشدار پایان برنامه تمرینی (تنها {toPersianNumber(Math.max(0, activeProgramTimeline.daysRemaining))} روز باقی مانده)
+                  </p>
+                  <p className="opacity-90 mt-0.5">
+                    برنامه فعلی شما به انتهای مدت تعیین شده رسیده است. برای حفظ روند پیشرفت، نسبت به تهیه برنامه جدید اقدام فرمایید.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => navigate('/prompt')}
+                className="px-4 py-2 rounded-xl text-xs font-bold bg-amber-500 text-black hover:bg-amber-400 shrink-0 flex items-center gap-1.5 shadow"
+              >
+                <Brain size={16} />
+                تولید پرامپت جدید
+              </button>
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs mb-4">
+            <div className={`rounded-xl p-3 ${isDark ? 'bg-[#0d0d1a]' : 'bg-[#f0fdfa]'}`}>
+              <span className="text-gray-400">تاریخ شروع:</span>
+              <p className="font-bold mt-1">{activeProgramTimeline.startDateJalali}</p>
+            </div>
+            <div className={`rounded-xl p-3 ${isDark ? 'bg-[#0d0d1a]' : 'bg-[#f0fdfa]'}`}>
+              <span className="text-gray-400">تاریخ پایان:</span>
+              <p className="font-bold mt-1">{activeProgramTimeline.endDateJalali}</p>
+            </div>
+            <div className={`rounded-xl p-3 ${isDark ? 'bg-[#0d0d1a]' : 'bg-[#f0fdfa]'}`}>
+              <span className="text-gray-400">مدت کل برنامه:</span>
+              <p className="font-bold mt-1">{activeProgram.duration} ({toPersianNumber(activeProgramTimeline.totalDays)} روز)</p>
+            </div>
+            <div className={`rounded-xl p-3 ${isDark ? 'bg-[#0d0d1a]' : 'bg-[#f0fdfa]'}`}>
+              <span className="text-gray-400">زمان باقی‌مانده:</span>
+              <p className={`font-bold mt-1 ${activeProgramTimeline.isAlarmRequired ? 'text-amber-500 font-black' : ''}`}>
+                {activeProgramTimeline.daysRemaining >= 0
+                  ? `${toPersianNumber(activeProgramTimeline.daysRemaining)} روز باقی مانده`
+                  : 'پایان یافته'}
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <div className="flex justify-between text-xs font-bold">
+              <span className="text-gray-400">درصد سپری شده از زمان برنامه:</span>
+              <span className="text-[#14b8a6]">{toPersianNumber(activeProgramTimeline.progressPercent)}٪</span>
+            </div>
+            <div className={`w-full h-2.5 rounded-full overflow-hidden ${isDark ? 'bg-gray-800' : 'bg-gray-100'}`}>
+              <div
+                className={`h-full rounded-full transition-all duration-1000 ${
+                  activeProgramTimeline.isAlarmRequired ? 'bg-amber-500' : 'bg-[#14b8a6]'
+                }`}
+                style={{ width: `${activeProgramTimeline.progressPercent}%` }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
