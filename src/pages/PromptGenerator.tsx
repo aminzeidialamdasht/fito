@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
-import { generateWorkoutPrompt, generateNutritionPrompt, generateSupplementPrompt } from '../utils/promptGenerator';
-import { Brain, Dumbbell, Apple, Pill, Copy, Check, AlertTriangle } from 'lucide-react';
+import { generateWorkoutPrompt, generateSupersetPrompt, generateNutritionPrompt, generateSupplementPrompt } from '../utils/promptGenerator';
+import { Brain, Dumbbell, Apple, Pill, Copy, Check, AlertTriangle, Zap } from 'lucide-react';
+import { soundEffects } from '../utils/sound';
 
-type PromptType = 'workout' | 'nutrition' | 'supplement';
+type PromptType = 'workout' | 'superset' | 'nutrition' | 'supplement';
 
 export default function PromptGenerator() {
   const { activeProfile } = useAppContext();
@@ -14,13 +15,19 @@ export default function PromptGenerator() {
   const [generatedPrompt, setGeneratedPrompt] = useState('');
   const [copied, setCopied] = useState(false);
 
+  const [supersetDuration, setSupersetDuration] = useState<number>(30);
+
   const handleGenerate = () => {
     if (!activeProfile) return;
+    soundEffects.playClick();
     
     let prompt = '';
     switch (promptType) {
       case 'workout':
         prompt = generateWorkoutPrompt(activeProfile);
+        break;
+      case 'superset':
+        prompt = generateSupersetPrompt(activeProfile, supersetDuration);
         break;
       case 'nutrition':
         prompt = generateNutritionPrompt(activeProfile);
@@ -67,9 +74,9 @@ export default function PromptGenerator() {
         <h3 className={`font-bold mb-3 ${isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'}`}>
           نوع پرامپت
         </h3>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <button
-            onClick={() => setPromptType('workout')}
+            onClick={() => { setPromptType('workout'); soundEffects.playClick(); }}
             className={`flex flex-col items-center gap-2 p-4 rounded-xl transition-all ${
               promptType === 'workout'
                 ? isDark
@@ -80,11 +87,28 @@ export default function PromptGenerator() {
                   : 'bg-[#f0fdfa] border border-[#14b8a6]/30 text-[#0f766e]/70 hover:border-[#14b8a6]'
             }`}
           >
-            <Dumbbell size={24} />
-            <span className="text-sm font-bold">تمرین</span>
+            <Dumbbell size={22} />
+            <span className="text-xs sm:text-sm font-bold">تمرین استاندارد</span>
           </button>
+
           <button
-            onClick={() => setPromptType('nutrition')}
+            onClick={() => { setPromptType('superset'); soundEffects.playClick(); }}
+            className={`flex flex-col items-center gap-2 p-4 rounded-xl transition-all ${
+              promptType === 'superset'
+                ? isDark
+                  ? 'bg-amber-500/20 border-2 border-amber-500 text-amber-400'
+                  : 'bg-amber-100 border-2 border-amber-500 text-amber-800'
+                : isDark
+                  ? 'bg-[#0d0d1a] border border-gray-700 text-gray-400 hover:border-amber-500'
+                  : 'bg-[#f0fdfa] border border-[#14b8a6]/30 text-[#0f766e]/70 hover:border-amber-500'
+            }`}
+          >
+            <Zap size={22} className="text-amber-500" />
+            <span className="text-xs sm:text-sm font-bold">جلسه فشرده سوپرست</span>
+          </button>
+
+          <button
+            onClick={() => { setPromptType('nutrition'); soundEffects.playClick(); }}
             className={`flex flex-col items-center gap-2 p-4 rounded-xl transition-all ${
               promptType === 'nutrition'
                 ? isDark
@@ -95,11 +119,12 @@ export default function PromptGenerator() {
                   : 'bg-[#f0fdfa] border border-[#14b8a6]/30 text-[#0f766e]/70 hover:border-[#14b8a6]'
             }`}
           >
-            <Apple size={24} />
-            <span className="text-sm font-bold">تغذیه</span>
+            <Apple size={22} />
+            <span className="text-xs sm:text-sm font-bold">تغذیه</span>
           </button>
+
           <button
-            onClick={() => setPromptType('supplement')}
+            onClick={() => { setPromptType('supplement'); soundEffects.playClick(); }}
             className={`flex flex-col items-center gap-2 p-4 rounded-xl transition-all ${
               promptType === 'supplement'
                 ? isDark
@@ -110,11 +135,44 @@ export default function PromptGenerator() {
                   : 'bg-[#f0fdfa] border border-[#14b8a6]/30 text-[#0f766e]/70 hover:border-[#14b8a6]'
             }`}
           >
-            <Pill size={24} />
-            <span className="text-sm font-bold">مکمل</span>
+            <Pill size={22} />
+            <span className="text-xs sm:text-sm font-bold">مکمل</span>
           </button>
         </div>
       </div>
+
+      {/* Superset Specific Options */}
+      {promptType === 'superset' && (
+        <div className={`rounded-2xl p-4 border theme-transition ${
+          isDark ? 'bg-amber-950/20 border-amber-500/30' : 'bg-amber-50 border-amber-300'
+        }`}>
+          <div className="flex items-center gap-2 mb-2 text-amber-500 font-bold">
+            <Zap size={18} />
+            <span>تنظیمات جلسه فشرده سوپرست</span>
+          </div>
+          <p className={`text-xs mb-3 ${isDark ? 'text-gray-300' : 'text-amber-900'}`}>
+            مخصوص روزهایی که وقت یا انگیزه تمرین طولانی ندارید. برنامه‌ای سریع، پرتراکم و پرانرژی تولید می‌شود.
+          </p>
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-bold">زمان کل جلسه:</span>
+            {[20, 30, 45].map((mins) => (
+              <button
+                key={mins}
+                onClick={() => { setSupersetDuration(mins); soundEffects.playClick(); }}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  supersetDuration === mins
+                    ? 'bg-amber-500 text-black shadow-md'
+                    : isDark
+                    ? 'bg-[#0d0d1a] text-gray-300 border border-gray-700'
+                    : 'bg-white text-gray-700 border border-gray-300'
+                }`}
+              >
+                {mins} دقیقه
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Profile Summary */}
       <div className={`rounded-2xl p-5 border theme-transition ${

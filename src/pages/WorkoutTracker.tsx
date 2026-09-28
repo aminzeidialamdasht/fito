@@ -6,6 +6,8 @@ import { useAppContext } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { SetRecord, WorkoutSession } from '../types';
 import { toPersianNumber, getWeekdayName } from '../utils/jalali';
+import { soundEffects } from '../utils/sound';
+import confetti from 'canvas-confetti';
 
 const WEEKDAY_NAMES = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
 
@@ -52,7 +54,11 @@ export default function WorkoutTracker() {
   useEffect(() => {
     if (!isResting || restTimer <= 0) return;
     restRef.current = setInterval(() => setRestTimer(t => {
-      if (t <= 1) { setIsResting(false); return 0; }
+      if (t <= 1) {
+        setIsResting(false);
+        soundEffects.playTimerComplete();
+        return 0;
+      }
       return t - 1;
     }), 1000);
     return () => { if (restRef.current) clearInterval(restRef.current); };
@@ -108,6 +114,7 @@ export default function WorkoutTracker() {
 
   const completeSet = (index: number) => {
     if (!session) return;
+    soundEffects.playSetComplete();
     const current = session.sets[index];
     updateSet(index, { completed: true, actualReps: current.actualReps || parseTargetReps(current.targetReps) });
     const currentDay = activeProgram?.days[selectedDayIndex];
@@ -122,6 +129,12 @@ export default function WorkoutTracker() {
 
   const completeWorkout = () => {
     if (!session) return;
+    soundEffects.playWorkoutFinish();
+    try {
+      confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+    } catch {
+      // Ignore confetti fallback
+    }
     const completed = session.sets.filter(s => s.completed);
     const finalSession: WorkoutSession = { ...session, completed: true, endTime: new Date().toISOString(), duration: workoutTime, totalVolume: completed.reduce((sum, s) => sum + s.weight * s.actualReps, 0) };
     addSession(finalSession);

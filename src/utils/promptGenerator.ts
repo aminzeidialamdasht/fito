@@ -85,6 +85,77 @@ function cleanJsonInput(json: string): string {
   return clean;
 }
 
+export function generateSupersetPrompt(profile: AthleteProfile, durationMinutes: number = 30): string {
+  const goalEn = translateGoal(profile.primaryGoal);
+  const experienceEn = translateExperience(profile.experience);
+  const locationEn = translateLocation(profile.location);
+
+  const prompt = `You are a high-intensity strength & conditioning specialist (CSCS, METCON expert) specializing in time-efficient, high-density workout protocols (Supersets, Antagonistic Supersets, Tri-sets, and Giant Sets).
+
+## Session Objective
+The athlete needs a **FAST, INTENSE, SUPERSET-DRIVEN WORKOUT** for days when they lack time or motivation for a long routine. The workout MUST be completed within **${durationMinutes} minutes** maximum with minimal rest and maximum metabolic stress & metabolic conditioning.
+
+## Athlete Profile
+- **Name**: ${profile.name}
+- **Age**: ${profile.age} years old
+- **Gender**: ${profile.gender === 'male' ? 'Male' : 'Female'}
+- **Height**: ${profile.height} cm | **Current Weight**: ${profile.weight} kg
+- **Experience Level**: ${experienceEn}
+- **Primary Goal**: ${goalEn}
+- **Training Location**: ${locationEn}
+- **Time Available**: STRICTLY ${durationMinutes} MINUTES MAXIMUM
+
+## Available Equipment
+${(profile.equipment || []).length > 0 ? profile.equipment.join(', ') : 'Standard gym equipment'}
+
+## Health & Safety Rules
+${(profile.injuries || []).length > 0 ? `- **Injuries**: ${profile.injuries.join(', ')}` : '- No reported injuries'}
+${(profile.avoidedExercises || []).length > 0 ? `- **Avoid Exercises**: ${profile.avoidedExercises.join(', ')}` : ''}
+
+## Superset Programming Rules
+1. Structure exercises as **Antagonistic Supersets** (e.g. Chest/Back, Biceps/Triceps, Quads/Hamstrings) or **Non-competing Supersets** (Upper/Lower).
+2. Keep rest between superset exercises to 0–15 seconds, and 60 seconds rest between completed superset rounds.
+3. Keep the entire workout dense: 2–3 superset pairs (total 4–6 exercises max) with high intensity.
+4. Clear Iranian/Persian names for each exercise and superset description in notes.
+
+## Output Requirements
+You MUST respond with ONLY valid JSON. No markdown, no explanations outside JSON.
+
+{
+  "program_name": "جلسه فشرده سوپرست (تمرین سریع ${durationMinutes} دقیقه‌ای)",
+  "duration": "${durationMinutes} دقیقه",
+  "days": [
+    {
+      "day": "تمرین فشرده سوپرست - امروز",
+      "muscle_groups": ["عضلات کل بدن / سوپرست"],
+      "exercises": [
+        {
+          "name": "نام حرکت (سوپرست A1)",
+          "sets": 3,
+          "reps": "10-12 (بلافاصله با حرکت بعدی)",
+          "rest": 0,
+          "tempo": "2-0-1-0",
+          "notes": "سوپرست با حرکت بعدی - بدون استراحت بین دو حرکت"
+        },
+        {
+          "name": "نام حرکت (سوپرست A2)",
+          "sets": 3,
+          "reps": "10-12",
+          "rest": 60,
+          "tempo": "2-0-1-0",
+          "notes": "پایان سوپرست A - 60 ثانیه استراحت بعد از این حرکت"
+        }
+      ]
+    }
+  ]
+}
+
+Important: All text values in JSON must be in Persian (Farsi).
+`;
+
+  return prompt;
+}
+
 export function generateWorkoutPrompt(profile: AthleteProfile): string {
   const goalEn = translateGoal(profile.primaryGoal);
   const secondaryGoalEn = profile.secondaryGoal ? translateGoal(profile.secondaryGoal) : null;

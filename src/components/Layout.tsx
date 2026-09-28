@@ -2,15 +2,11 @@ import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, User, Brain, Dumbbell, Calendar,
-  Import, Trophy, Menu, X, Sun, Moon, Apple, Pill, Lock
+  Import, Trophy, Menu, X, Sun, Moon, Apple, Pill
 } from 'lucide-react';
 import { useState } from 'react';
 import { toPersianNumber, getPersianDate } from '../utils/jalali';
 import { useTheme } from '../context/ThemeContext';
-import Logo from './Logo';
-import { useSubscription } from '../subscription/SubscriptionContext';
-
-const premiumPaths = ['/prompt', '/import'];
 
 const navItems = [
   { path: '/', label: 'داشبورد', icon: LayoutDashboard },
@@ -38,7 +34,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === 'dark';
-  const { isPremium } = useSubscription();
 
   return (
     <div className={'min-h-screen flex flex-col theme-transition ' + (
@@ -62,7 +57,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               {menuOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
             <div className="flex items-center gap-3">
-              <Logo size={40} />
+              <div className={'w-10 h-10 rounded-2xl flex items-center justify-center overflow-hidden ' + (
+                isDark
+                  ? 'bg-[#0D0D1A] shadow-lg shadow-[#88C038]/20'
+                  : 'bg-[#0D0D1A] shadow-md'
+              )}>
+                <img src="/coachino-icon.png" alt="کوچینو" className="w-9 h-9 object-contain" />
+              </div>
               <div>
                 <h1 className={'font-bold text-base sm:text-lg leading-tight ' + (
                   isDark ? 'text-white' : 'text-[#0d9488]'
@@ -116,7 +117,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               >
                 <Icon size={18} />
                 <span>{item.label}</span>
-                {!isPremium && premiumPaths.includes(item.path) && <Lock size={12} className="mr-auto opacity-60" />}
               </button>
             );
           })}
@@ -131,7 +131,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               onClick={e => e.stopPropagation()}
             >
               <div className={'flex items-center gap-3 mb-6 pb-5 border-b ' + (isDark ? 'border-white/10' : 'border-[#14b8a6]/20')}>
-                <Logo size={48} />
+                <div className={'w-12 h-12 rounded-2xl flex items-center justify-center overflow-hidden ' + (
+                  isDark ? 'bg-[#0D0D1A]' : 'bg-[#0D0D1A]'
+                )}>
+                  <img src="/coachino-icon.png" alt="کوچینو" className="w-11 h-11 object-contain" />
+                </div>
                 <div>
                   <span className={'font-bold text-lg block ' + (isDark ? 'text-white' : 'text-[#0d9488]')}>کوچینو</span>
                   <span className={'text-xs ' + (isDark ? 'text-gray-500' : 'text-[#0f766e]/70')}>Coachino · دستیار هوشمند بدنسازی</span>
@@ -152,7 +156,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   >
                     <Icon size={20} />
                     <span>{item.label}</span>
-                {!isPremium && premiumPaths.includes(item.path) && <Lock size={12} className="mr-auto opacity-60" />}
                   </button>
                 );
               })}
