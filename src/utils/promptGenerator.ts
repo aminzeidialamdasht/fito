@@ -163,6 +163,7 @@ export function generateWorkoutPrompt(profile: AthleteProfile): string {
   const locationEn = translateLocation(profile.location);
   const equipmentTypeEn = EQUIPMENT_TYPE_TRANSLATIONS[profile.equipmentType] || profile.equipmentType || 'Commercial Gym';
   const programTypeEn = translateProgramType(profile.programType || 'ai_suggested');
+  
   const targetMusclesEn = (profile.targetMuscles || [])
     .map((m, i) => `${i + 1}. ${translateMuscle(m)}`)
     .join(', ');
@@ -176,11 +177,36 @@ export function generateWorkoutPrompt(profile: AthleteProfile): string {
 
   const preferredExercisesStr = (profile.preferredExercises || []).filter(Boolean).join(', ');
 
-  const prompt = `You are an expert strength and conditioning coach, certified by NSCA and ACSM, with 20+ years of experience designing evidence-based training programs for athletes of all levels. You specialize in ${goalEn.toLowerCase()} and use the latest scientific research from Schoenfeld, Helms, and Israetel.
+  // --- DYNAMIC STRICT RULES BASED ON PROGRAM TYPE ---
+  let programSpecificRules = "";
+  const pt = (profile.programType || '').toLowerCase();
+  if (pt === 'split') {
+    programSpecificRules = `- **STRICT MUSCLE SPLIT MANDATE**: You MUST cover ALL major muscle groups across the week: Chest, Back, Quadriceps, Hamstrings/Glutes, Shoulders, Biceps, Triceps, Calves, and Abs. It is STRICTLY FORBIDDEN to omit any major muscle group. Do not schedule the same muscle group on consecutive days (minimum 48-72 hours recovery required).`;
+  } else if (pt === 'push_pull_legs') {
+    programSpecificRules = `- **STRICT PPL MANDATE**: Ensure a strict Push / Pull / Legs rotation. Legs day MUST include both Quadriceps (knee-dominant) and Hamstrings/Glutes (hip-dominant) movements. Do not turn Legs day into just a Quad day.`;
+  } else if (pt === 'upper_lower') {
+    programSpecificRules = `- **STRICT UPPER/LOWER MANDATE**: Ensure balanced volume between Upper and Lower body days. Every Lower body day must include both knee-dominant and hip-dominant movements.`;
+  } else if (pt === 'full_body') {
+    programSpecificRules = `- **STRICT FULL BODY MANDATE**: Every single session must include at least one compound movement for Lower Body (Squat/Hinge pattern) and one for Upper Body (Push/Pull pattern).`;
+  }
+
+  // --- PRIORITY MUSCLE RULE ---
+  let priorityRule = "";
+  if (targetMusclesEn) {
+    priorityRule = `- **PRIORITY MUSCLE RULE**: The muscles listed in "Priority Muscle Groups" must be placed on high-energy days (e.g., beginning of the week) and receive optimal volume. HOWEVER, you are STRICTLY FORBIDDEN from ignoring non-priority muscles. All other major muscle groups must still be trained at least once per week with maintenance volume.`;
+  }
+
+  // --- SECONDARY GOAL RULE ---
+  let secondaryGoalRule = "";
+  if (secondaryGoalEn) {
+    secondaryGoalRule = `- **SECONDARY GOAL INTEGRATION**: You MUST explicitly include specific exercises, techniques, or protocols that directly address the Secondary Goal (${secondaryGoalEn}) without compromising the Primary Goal.`;
+  }
+
+  const prompt = `You are an expert strength and conditioning coach, certified by NSCA and ACSM, with 20+ years of experience designing evidence-based training programs. You specialize in ${goalEn.toLowerCase()} and use the latest scientific research from Schoenfeld, Helms, and Israetel.
 
 ## CRITICAL DURATION MANDATE
 The athlete explicitly requested a program timeframe / duration of: **"${profile.timeline || '4 weeks'}"**.
-You MUST set the JSON "duration" field strictly to match this exact requested timeframe (e.g. if requested timeframe is "1 ماه" or "1 month" or "4 هفته", the JSON "duration" MUST be "۱ ماه" or "۴ هفته" / "4 weeks"). DO NOT DEFAULT TO 8 WEEKS OR 12 WEEKS! Pay strict attention to all athlete profile parameters.
+You MUST set the JSON "duration" field strictly to match this exact requested timeframe in Persian (e.g., if requested is "1 ماه", JSON "duration" MUST be "۱ ماه"). DO NOT DEFAULT TO 8 OR 12 WEEKS!
 
 ## Athlete Profile
 - **Name**: ${profile.name}
@@ -213,14 +239,6 @@ ${profile.trainingHistory ? `- **Training History**: ${profile.trainingHistory}`
 ${(profile.equipment || []).length > 0 ? profile.equipment.join(', ') : 'Standard gym equipment'}
 ${(profile.customEquipment || []).length > 0 ? `\n## Custom Equipment\n${profile.customEquipment.join(', ')}` : ''}
 
-## Body Composition & Recovery
-${profile.bodyFatPercent != null ? `- **Body Fat**: ~${profile.bodyFatPercent}%` : ''}
-${profile.bodyComposition ? `- **Body Composition**: ${profile.bodyComposition}` : ''}
-${profile.sleepHours != null ? `- **Sleep**: ${profile.sleepHours} hours/night` : ''}
-${profile.recoveryQuality ? `- **Recovery Quality**: ${profile.recoveryQuality}` : ''}
-${profile.jobStress ? `- **Job Stress**: ${profile.jobStress}` : ''}
-${profile.workShift ? `- **Work Schedule**: ${profile.workShift}` : ''}
-
 ## Health Considerations & Exercise Preferences
 ${(profile.injuries || []).length > 0 ? `- **Injuries**: ${profile.injuries.join(', ')}` : '- No reported injuries'}
 ${profile.injuryDetails ? `- **Injury History Details**: ${profile.injuryDetails}` : ''}
@@ -235,16 +253,20 @@ ${Object.keys(profile.strengthRecords || {}).length > 0
   ? Object.entries(profile.strengthRecords).map(([ex, w]) => `- ${ex}: ${w}`).join('\n')
   : '- No recorded strength data'}
 
+## ⚠️ STRICT PROGRAMMING RULES (MANDATORY - VIOLATION WILL RESULT IN REJECTION)
+${programSpecificRules}
+${priorityRule}
+${secondaryGoalRule}
+- **Recovery Rule**: Never schedule heavy compound movements for the same muscle group on consecutive days.
+
 ## Scientific Framework
 Apply these evidence-based principles:
-1. **Volume**: Follow RP volume landmarks (MEV, MAV, MRV) appropriate for experience level
-2. **Frequency**: Optimize training frequency (2x/week per muscle group minimum for ${experienceEn.toLowerCase()})
-3. **Progressive Overload**: Include clear progression scheme
-4. **Exercise Selection**: Biomechanically appropriate exercises with proper movement patterns
-5. **Rest Periods**: Science-based rest intervals (2-5min for compounds, 1-2min for isolation)
-6. **Tempo**: Include tempo prescriptions for key exercises
-7. **Periodization**: Include weekly undulation if appropriate
-8. **Muscle Priority**: Allocate more volume and better placement to higher-priority muscle groups listed above
+1. **Volume**: Follow RP volume landmarks (MEV, MAV, MRV) appropriate for experience level.
+2. **Frequency**: Optimize training frequency (minimum 2x/week per muscle group for Intermediate+).
+3. **Progressive Overload**: Include clear progression scheme (e.g., double progression).
+4. **Exercise Selection**: Biomechanically appropriate exercises with proper movement patterns.
+5. **Rest Periods**: Science-based rest intervals (2-5min for heavy compounds, 1-2min for isolation).
+6. **Tempo**: Include tempo prescriptions for key exercises (e.g., 3-1-1-0).
 
 ## Output Requirements
 You MUST respond with ONLY valid JSON. No markdown, no explanations outside JSON.
@@ -252,10 +274,10 @@ You MUST respond with ONLY valid JSON. No markdown, no explanations outside JSON
 The JSON must follow this EXACT structure:
 {
   "program_name": "نام برنامه به فارسی",
-  "duration": "مدت برنامه به فارسی",
+  "duration": "مدت برنامه به فارسی (دقیقاً مطابق درخواست کاربر)",
   "days": [
     {
-      "day": "نام روز به فارسی",
+      "day": "نام روز به فارسی (مثلاً: روز اول: سینه و پشت بازو)",
       "muscle_groups": ["گروه عضلانی به فارسی"],
       "exercises": [
         {
@@ -264,7 +286,7 @@ The JSON must follow this EXACT structure:
           "reps": "محدوده تکرار (مثلاً: 8-12)",
           "rest": "زمان استراحت به ثانیه (عدد)",
           "tempo": "تمپو (مثلاً: 3-1-1-0)",
-          "notes": "نکات مهم به فارسی"
+          "notes": "نکات مهم به فارسی (مثل نوع انقباض یا زاویه)"
         }
       ]
     }
@@ -272,11 +294,11 @@ The JSON must follow this EXACT structure:
 }
 
 Important:
-- All text values in JSON must be in Persian (Farsi)
-- **duration** in JSON MUST be strictly set to Persian string matching requested timeframe: "${profile.timeline || '۴ هفته'}" (e.g. if 1 month: "۱ ماه" or "۴ هفته")
-- Ensure total session time fits within ${profile.sessionDuration} minutes
-- Respect injuries, limitations, and avoided exercises strictly
-- Prioritize muscle groups in the order given (1 = highest priority)
+- All text values in JSON must be in Persian (Farsi).
+- **duration** in JSON MUST be strictly set to Persian string matching requested timeframe: "${profile.timeline || '۴ هفته'}".
+- Ensure total session time fits within ${profile.sessionDuration} minutes.
+- Respect injuries, limitations, and avoided exercises strictly.
+- Prioritize muscle groups in the order given, BUT DO NOT OMIT OTHER MAJOR MUSCLE GROUPS.
 `;
 
   return prompt;
@@ -467,9 +489,6 @@ export function validateSupplementJSON(json: string): { valid: boolean; data?: a
       return { valid: false, error: 'JSON باید یک آبجکت باشد' };
     }
 
-    // Normalize both schemas:
-    // UI schema: recommendation_title + supplements
-    // legacy/prompt schema: plan_name + daily_supplements
     const title =
       (typeof raw.recommendation_title === 'string' && raw.recommendation_title) ||
       (typeof raw.plan_name === 'string' && raw.plan_name) ||
