@@ -22,8 +22,9 @@ export default function Dashboard() {
   const { theme } = useTheme();
   const navigate = useNavigate();
   const isDark = theme === 'dark';
-  const profile = activeProfile || (!isPremium ? SAMPLE_PROFILE : null); // SAMPLE_PROFILE as fallback
   const { isPremium } = useSubscription();
+  const profile = activeProfile ?? (!isPremium ? SAMPLE_PROFILE : null);
+
 
   const [showSupersetModal, setShowSupersetModal] = useState(false);
   const [supersetDuration, setSupersetDuration] = useState(30);
