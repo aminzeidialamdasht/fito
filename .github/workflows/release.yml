@@ -10,7 +10,7 @@ env:
 
 jobs:
   release:
-    name: Build and Release APK
+    name: Build and Release Personal APK
     runs-on: ubuntu-latest
     
     steps:
@@ -44,7 +44,7 @@ jobs:
 
       - name: Build Web Application
         run: |
-          npm run build
+          npm run build:personal
           echo "✅ Web app built"
 
       - name: Add Android Platform
@@ -67,7 +67,7 @@ jobs:
 
       - name: Sync Capacitor
         run: |
-          npx cap sync android
+          npm run sync:personal
           echo "✅ Capacitor synced"
 
       - name: Apply Coachino launcher icons
