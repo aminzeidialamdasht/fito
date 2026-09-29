@@ -4,7 +4,7 @@ import { Pill, AlertTriangle, Plus, Trash2, Clock, DollarSign, Shield } from 'lu
 import { toPersianNumber } from '../utils/jalali';
 import { useNavigate } from 'react-router-dom';
 import { useSubscription } from '../subscription/SubscriptionContext';
-import { DEFAULT_SUPPLEMENT_PLAN } from '../data/defaultPlans';
+import { DEFAULT_SUPPLEMENT_PLAN, SAMPLE_PROFILE } from '../data/defaultPlans';
 
 export default function Supplements() {
   const { state, activeProfile, supplementPrograms, removeSupplementProgram, setActiveSupplementProgram } = useAppContext();
@@ -13,7 +13,7 @@ export default function Supplements() {
   const navigate = useNavigate();
   const { isPremium } = useSubscription();
 
-  if (!activeProfile) {
+  if (!activeProfile && isPremium) { // Bypass for non-premium to show sample data
     return (
       <div className="flex flex-col items-center justify-center py-20">
         <div className={`w-24 h-24 rounded-full flex items-center justify-center mb-6 ${

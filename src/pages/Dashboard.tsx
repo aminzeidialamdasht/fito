@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useSubscription } from '../subscription/SubscriptionContext';
-import { DEFAULT_WORKOUT_PLAN, DEFAULT_NUTRITION_PLAN, DEFAULT_SUPPLEMENT_PLAN } from '../data/defaultPlans';
+import { DEFAULT_WORKOUT_PLAN, DEFAULT_NUTRITION_PLAN, DEFAULT_SUPPLEMENT_PLAN, SAMPLE_PROFILE } from '../data/defaultPlans';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 
 export default function Dashboard() {
@@ -22,7 +22,7 @@ export default function Dashboard() {
   const { theme } = useTheme();
   const navigate = useNavigate();
   const isDark = theme === 'dark';
-  const profile = activeProfile;
+  const profile = activeProfile || (!isPremium ? SAMPLE_PROFILE : null); // SAMPLE_PROFILE as fallback
   const { isPremium } = useSubscription();
 
   const [showSupersetModal, setShowSupersetModal] = useState(false);

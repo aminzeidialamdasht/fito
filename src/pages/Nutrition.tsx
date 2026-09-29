@@ -4,7 +4,7 @@ import { Apple, AlertTriangle, Target, Utensils, Plus, Trash2, Droplets, Clock }
 import { toPersianNumber, getWeekdayName } from '../utils/jalali';
 import { useNavigate } from 'react-router-dom';
 import { useSubscription } from '../subscription/SubscriptionContext';
-import { DEFAULT_NUTRITION_PLAN } from '../data/defaultPlans';
+import { DEFAULT_NUTRITION_PLAN, SAMPLE_PROFILE } from '../data/defaultPlans';
 
 const WEEKDAY_NAMES = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
 
@@ -15,7 +15,7 @@ export default function Nutrition() {
   const navigate = useNavigate();
   const { isPremium } = useSubscription();
 
-  if (!activeProfile) {
+  if (!activeProfile && isPremium) { // Bypass for non-premium to show sample data
     return (
       <div className="flex flex-col items-center justify-center py-20">
         <div className={`w-24 h-24 rounded-full flex items-center justify-center mb-6 ${
