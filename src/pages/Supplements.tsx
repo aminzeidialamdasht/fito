@@ -248,22 +248,22 @@ export default function Supplements() {
               اطلاعات مکمل پروفایل
             </h3>
             <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}`}>
-              {activeProfile.name}
+              {profile.name}
             </p>
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          {activeProfile.supplementGoal && (
-            <InfoCard label="هدف مصرف" value={activeProfile.supplementGoal} isDark={isDark} />
+          {profile.supplementGoal && (
+            <InfoCard label="هدف مصرف" value={profile.supplementGoal} isDark={isDark} />
           )}
-          {activeProfile.supplementBudget && (
-            <InfoCard label="بودجه ماهانه" value={activeProfile.supplementBudget} isDark={isDark} />
+          {profile.supplementBudget && (
+            <InfoCard label="بودجه ماهانه" value={profile.supplementBudget} isDark={isDark} />
           )}
           <InfoCard 
             label="مکمل‌های فعلی" 
-            value={activeProfile.currentSupplements.length > 0 
-              ? `${toPersianNumber(activeProfile.currentSupplements.length)} مورد` 
+            value={profile.currentSupplements.length > 0 
+              ? `${toPersianNumber(profile.currentSupplements.length)} مورد` 
               : 'هیچ'} 
             isDark={isDark} 
           />
@@ -271,7 +271,7 @@ export default function Supplements() {
       </div>
 
       {/* Current Supplements */}
-      {activeProfile.currentSupplements.length > 0 && (
+      {profile.currentSupplements.length > 0 && (
         <div className={`rounded-2xl p-5 border theme-transition ${
           isDark ? 'bg-[#1a1a2e] border-[#14b8a6]/10' : 'bg-white border-[#14b8a6]/15'
         }`}>
@@ -279,7 +279,7 @@ export default function Supplements() {
             مکمل‌های فعلی
           </h3>
           <div className="flex flex-wrap gap-2">
-            {activeProfile.currentSupplements.map((supp, idx) => (
+            {profile.currentSupplements.map((supp, idx) => (
               <span key={idx} className={`px-3 py-1.5 rounded-lg text-sm ${
                 isDark ? 'bg-[#4a90d9]/20 text-[#6bb5ff]' : 'bg-[#14b8a6]/15 text-[#0d9488]'
               }`}>
@@ -291,7 +291,7 @@ export default function Supplements() {
       )}
 
       {/* Health Conditions */}
-      {activeProfile.healthConditions.length > 0 && (
+      {profile.healthConditions.length > 0 && (
         <div className={`rounded-2xl p-5 border theme-transition ${
           isDark ? 'bg-[#1a1a2e] border-[#ef4444]/20' : 'bg-white border-red-200'
         }`}>
@@ -300,7 +300,7 @@ export default function Supplements() {
             شرایط پزشکی
           </h3>
           <div className="flex flex-wrap gap-2">
-            {activeProfile.healthConditions.map((condition, idx) => (
+            {profile.healthConditions.map((condition, idx) => (
               <span key={idx} className={`px-3 py-1.5 rounded-lg text-sm font-bold ${
                 isDark ? 'bg-[#ef4444]/20 text-[#ef4444]' : 'bg-red-50 text-red-700'
               }`}>

@@ -33,7 +33,7 @@ export default function Nutrition() {
     );
   }
 
-  const hasNutritionInfo = activeProfile.dietaryGoal || activeProfile.dietType || activeProfile.favoriteFoods.length > 0;
+  const hasNutritionInfo = profile.dietaryGoal || profile.dietType || profile.favoriteFoods.length > 0;
   const activeProgram = nutritionPrograms.find(p => p.id === state.activeNutritionProgram) || nutritionPrograms[0] || (!isPremium ? DEFAULT_NUTRITION_PLAN : null);
 
   // Today's day name in Persian
@@ -218,7 +218,7 @@ export default function Nutrition() {
               خلاصه تغذیه پروفایل
             </h3>
             <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}`}>
-              {activeProfile.name}
+              {profile.name}
             </p>
           </div>
         </div>
@@ -237,22 +237,22 @@ export default function Nutrition() {
           </div>
         ) : (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            {activeProfile.dietaryGoal && (
-              <InfoCard label="هدف رژیم" value={activeProfile.dietaryGoal} isDark={isDark} />
+            {profile.dietaryGoal && (
+              <InfoCard label="هدف رژیم" value={profile.dietaryGoal} isDark={isDark} />
             )}
-            {activeProfile.dietType && (
-              <InfoCard label="نوع رژیم" value={activeProfile.dietType} isDark={isDark} />
+            {profile.dietType && (
+              <InfoCard label="نوع رژیم" value={profile.dietType} isDark={isDark} />
             )}
-            <InfoCard label="وعده‌های روزانه" value={`${toPersianNumber(activeProfile.mealsPerDay || 3)} وعده`} isDark={isDark} />
-            {activeProfile.calorieTarget && (
-              <InfoCard label="کالری هدف" value={`${toPersianNumber(activeProfile.calorieTarget)} کالری`} isDark={isDark} />
+            <InfoCard label="وعده‌های روزانه" value={`${toPersianNumber(profile.mealsPerDay || 3)} وعده`} isDark={isDark} />
+            {profile.calorieTarget && (
+              <InfoCard label="کالری هدف" value={`${toPersianNumber(profile.calorieTarget)} کالری`} isDark={isDark} />
             )}
           </div>
         )}
       </div>
 
       {/* Favorite / Disliked / Allergies */}
-      {activeProfile.favoriteFoods.length > 0 && (
+      {profile.favoriteFoods.length > 0 && (
         <div className={`rounded-2xl p-5 border theme-transition ${
           isDark ? 'bg-[#1a1a2e] border-[#14b8a6]/10' : 'bg-white border-[#14b8a6]/15'
         }`}>
@@ -261,7 +261,7 @@ export default function Nutrition() {
             غذاهای مورد علاقه
           </h3>
           <div className="flex flex-wrap gap-2">
-            {activeProfile.favoriteFoods.map((food, idx) => (
+            {profile.favoriteFoods.map((food, idx) => (
               <span key={idx} className={`px-3 py-1.5 rounded-lg text-sm ${
                 isDark ? 'bg-[#22c55e]/20 text-[#22c55e]' : 'bg-[#10b981]/15 text-[#059669]'
               }`}>
@@ -272,7 +272,7 @@ export default function Nutrition() {
         </div>
       )}
 
-      {activeProfile.dislikedFoods.length > 0 && (
+      {profile.dislikedFoods.length > 0 && (
         <div className={`rounded-2xl p-5 border theme-transition ${
           isDark ? 'bg-[#1a1a2e] border-[#14b8a6]/10' : 'bg-white border-[#14b8a6]/15'
         }`}>
@@ -281,7 +281,7 @@ export default function Nutrition() {
             غذاهای مورد عدم علاقه
           </h3>
           <div className="flex flex-wrap gap-2">
-            {activeProfile.dislikedFoods.map((food, idx) => (
+            {profile.dislikedFoods.map((food, idx) => (
               <span key={idx} className={`px-3 py-1.5 rounded-lg text-sm ${
                 isDark ? 'bg-[#ef4444]/20 text-[#ef4444]' : 'bg-red-50 text-red-700'
               }`}>
@@ -292,7 +292,7 @@ export default function Nutrition() {
         </div>
       )}
 
-      {activeProfile.foodAllergies.length > 0 && (
+      {profile.foodAllergies.length > 0 && (
         <div className={`rounded-2xl p-5 border theme-transition ${
           isDark ? 'bg-[#1a1a2e] border-[#ef4444]/20' : 'bg-white border-red-200'
         }`}>
@@ -301,7 +301,7 @@ export default function Nutrition() {
             آلرژی‌های غذایی
           </h3>
           <div className="flex flex-wrap gap-2">
-            {activeProfile.foodAllergies.map((allergy, idx) => (
+            {profile.foodAllergies.map((allergy, idx) => (
               <span key={idx} className={`px-3 py-1.5 rounded-lg text-sm font-bold ${
                 isDark ? 'bg-[#ef4444]/20 text-[#ef4444]' : 'bg-red-50 text-red-700'
               }`}>
