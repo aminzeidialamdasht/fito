@@ -14,8 +14,9 @@ export default function Nutrition() {
   const isDark = theme === 'dark';
   const navigate = useNavigate();
   const { isPremium } = useSubscription();
+  const profile = activeProfile ?? (!isPremium ? SAMPLE_PROFILE : null);
 
-  if (!activeProfile && isPremium) { // Bypass for non-premium to show sample data
+  if (!profile) { // Bypass for non-premium to show sample data
     return (
       <div className="flex flex-col items-center justify-center py-20">
         <div className={`w-24 h-24 rounded-full flex items-center justify-center mb-6 ${
@@ -261,7 +262,7 @@ export default function Nutrition() {
             غذاهای مورد علاقه
           </h3>
           <div className="flex flex-wrap gap-2">
-            {profile.favoriteFoods.map((food, idx) => (
+            {profile.favoriteFoods.map((food: string, idx: number) => (
               <span key={idx} className={`px-3 py-1.5 rounded-lg text-sm ${
                 isDark ? 'bg-[#22c55e]/20 text-[#22c55e]' : 'bg-[#10b981]/15 text-[#059669]'
               }`}>
@@ -281,7 +282,7 @@ export default function Nutrition() {
             غذاهای مورد عدم علاقه
           </h3>
           <div className="flex flex-wrap gap-2">
-            {profile.dislikedFoods.map((food, idx) => (
+            {profile.dislikedFoods.map((food: string, idx: number) => (
               <span key={idx} className={`px-3 py-1.5 rounded-lg text-sm ${
                 isDark ? 'bg-[#ef4444]/20 text-[#ef4444]' : 'bg-red-50 text-red-700'
               }`}>
@@ -301,7 +302,7 @@ export default function Nutrition() {
             آلرژی‌های غذایی
           </h3>
           <div className="flex flex-wrap gap-2">
-            {profile.foodAllergies.map((allergy, idx) => (
+            {profile.foodAllergies.map((allergy: string, idx: number) => (
               <span key={idx} className={`px-3 py-1.5 rounded-lg text-sm font-bold ${
                 isDark ? 'bg-[#ef4444]/20 text-[#ef4444]' : 'bg-red-50 text-red-700'
               }`}>

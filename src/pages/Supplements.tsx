@@ -12,8 +12,9 @@ export default function Supplements() {
   const isDark = theme === 'dark';
   const navigate = useNavigate();
   const { isPremium } = useSubscription();
+  const profile = activeProfile ?? (!isPremium ? SAMPLE_PROFILE : null);
 
-  if (!activeProfile && isPremium) { // Bypass for non-premium to show sample data
+  if (!profile) { // Bypass for non-premium to show sample data
     return (
       <div className="flex flex-col items-center justify-center py-20">
         <div className={`w-24 h-24 rounded-full flex items-center justify-center mb-6 ${
@@ -279,7 +280,7 @@ export default function Supplements() {
             مکمل‌های فعلی
           </h3>
           <div className="flex flex-wrap gap-2">
-            {profile.currentSupplements.map((supp, idx) => (
+            {profile.currentSupplements.map((supp: string, idx: number) => (
               <span key={idx} className={`px-3 py-1.5 rounded-lg text-sm ${
                 isDark ? 'bg-[#4a90d9]/20 text-[#6bb5ff]' : 'bg-[#14b8a6]/15 text-[#0d9488]'
               }`}>
@@ -300,7 +301,7 @@ export default function Supplements() {
             شرایط پزشکی
           </h3>
           <div className="flex flex-wrap gap-2">
-            {profile.healthConditions.map((condition, idx) => (
+            {profile.healthConditions.map((condition: string, idx: number) => (
               <span key={idx} className={`px-3 py-1.5 rounded-lg text-sm font-bold ${
                 isDark ? 'bg-[#ef4444]/20 text-[#ef4444]' : 'bg-red-50 text-red-700'
               }`}>
