@@ -13,6 +13,8 @@ import {
   Copy, Check, X, Import
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useSubscription } from '../subscription/SubscriptionContext';
+import { DEFAULT_WORKOUT_PLAN, DEFAULT_NUTRITION_PLAN, DEFAULT_SUPPLEMENT_PLAN } from '../data/defaultPlans';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 
 export default function Dashboard() {
@@ -21,6 +23,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const isDark = theme === 'dark';
   const profile = activeProfile;
+  const { isPremium } = useSubscription();
 
   const [showSupersetModal, setShowSupersetModal] = useState(false);
   const [supersetDuration, setSupersetDuration] = useState(30);
@@ -31,14 +34,14 @@ export default function Dashboard() {
   const totalSessions = completedSessions.length;
   const totalVolume = completedSessions.reduce((acc, s) => acc + s.totalVolume, 0);
   const currentStreak = calculateStreak(sessions);
-  const activeProgram = programs.find(p => p.id === state.activeProgram);
+  const activeProgram = programs.find(p => p.id === state.activeProgram) || (!isPremium ? DEFAULT_WORKOUT_PLAN : null);
 
   const today = new Date();
   const dayOfWeek = (today.getDay() + 1) % 7;
   const todayWorkout = activeProgram?.days[dayOfWeek % (activeProgram?.days.length || 1)];
 
-  const activeNutrition = nutritionPrograms.find(p => p.id === state.activeNutritionProgram) || nutritionPrograms[0];
-  const activeSupplement = supplementPrograms.find(p => p.id === state.activeSupplementProgram) || supplementPrograms[0];
+  const activeNutrition = nutritionPrograms.find(p => p.id === state.activeNutritionProgram) || nutritionPrograms[0] || (!isPremium ? DEFAULT_NUTRITION_PLAN : null);
+  const activeSupplement = supplementPrograms.find(p => p.id === state.activeSupplementProgram) || supplementPrograms[0] || (!isPremium ? DEFAULT_SUPPLEMENT_PLAN : null);
   const WEEKDAY_NAMES = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
   const todayNutritionDay = activeNutrition?.days?.find(d =>
     d.day.includes(WEEKDAY_NAMES[dayOfWeek]) || d.day === WEEKDAY_NAMES[dayOfWeek]
@@ -114,6 +117,22 @@ export default function Dashboard() {
                   {p.name}
                 </button>
               ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      
+      {/* Sample Plan Banner for Bazaar Version */}
+      {!isPremium && programs.length === 0 && (
+        <div className={`rounded-2xl p-4 border-2 border-dashed mb-4 ${isDark ? 'bg-amber-950/20 border-amber-500/50' : 'bg-amber-50 border-amber-400'}`}>
+          <div className="flex items-start gap-3">
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${isDark ? 'bg-amber-500/20 text-amber-400' : 'bg-amber-100 text-amber-600'}`}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+            </div>
+            <div className="flex-1">
+              <h3 className={`font-black text-sm mb-1 ${isDark ? 'text-amber-300' : 'text-amber-800'}`}>🎁 این یک برنامه نمونه است</h3>
+              <p className={`text-xs leading-5 ${isDark ? 'text-amber-200/80' : 'text-amber-700'}`}>برای دریافت برنامه اختصاصی هوش مصنوعی، <button onClick={() => navigate('/prompt')} className="font-black underline">اشتراک تهیه کنید</button>.</p>
             </div>
           </div>
         </div>

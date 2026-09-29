@@ -3,6 +3,8 @@ import { useTheme } from '../context/ThemeContext';
 import { Apple, AlertTriangle, Target, Utensils, Plus, Trash2, Droplets, Clock } from 'lucide-react';
 import { toPersianNumber, getWeekdayName } from '../utils/jalali';
 import { useNavigate } from 'react-router-dom';
+import { useSubscription } from '../subscription/SubscriptionContext';
+import { DEFAULT_NUTRITION_PLAN } from '../data/defaultPlans';
 
 const WEEKDAY_NAMES = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
 
@@ -11,6 +13,7 @@ export default function Nutrition() {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const navigate = useNavigate();
+  const { isPremium } = useSubscription();
 
   if (!activeProfile) {
     return (
@@ -31,7 +34,7 @@ export default function Nutrition() {
   }
 
   const hasNutritionInfo = activeProfile.dietaryGoal || activeProfile.dietType || activeProfile.favoriteFoods.length > 0;
-  const activeProgram = nutritionPrograms.find(p => p.id === state.activeNutritionProgram) || nutritionPrograms[0];
+  const activeProgram = nutritionPrograms.find(p => p.id === state.activeNutritionProgram) || nutritionPrograms[0] || (!isPremium ? DEFAULT_NUTRITION_PLAN : null);
 
   // Today's day name in Persian
   const today = new Date();

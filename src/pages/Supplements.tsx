@@ -3,12 +3,15 @@ import { useTheme } from '../context/ThemeContext';
 import { Pill, AlertTriangle, Plus, Trash2, Clock, DollarSign, Shield } from 'lucide-react';
 import { toPersianNumber } from '../utils/jalali';
 import { useNavigate } from 'react-router-dom';
+import { useSubscription } from '../subscription/SubscriptionContext';
+import { DEFAULT_SUPPLEMENT_PLAN } from '../data/defaultPlans';
 
 export default function Supplements() {
   const { state, activeProfile, supplementPrograms, removeSupplementProgram, setActiveSupplementProgram } = useAppContext();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const navigate = useNavigate();
+  const { isPremium } = useSubscription();
 
   if (!activeProfile) {
     return (
@@ -28,7 +31,7 @@ export default function Supplements() {
     );
   }
 
-  const activeProgram = supplementPrograms.find(p => p.id === state.activeSupplementProgram) || supplementPrograms[0];
+  const activeProgram = supplementPrograms.find(p => p.id === state.activeSupplementProgram) || supplementPrograms[0] || (!isPremium ? DEFAULT_SUPPLEMENT_PLAN : null);
 
   return (
     <div className="space-y-6">
