@@ -448,7 +448,7 @@ export default function Dashboard() {
             </div>
 
             <div className="flex flex-wrap gap-2 mb-4">
-              {(todayWorkout.muscleGroups || todayWorkout.muscle_groups || []).map((mg: string, i: number) => (
+              {((todayWorkout as any).muscleGroups || (todayWorkout as any).muscle_groups || []).map((mg: string, i: number) => (
                 <span key={i} className={`px-3 py-1 rounded-xl text-xs font-black ${
                   isDark ? 'bg-teal-500/20 text-teal-300 border border-teal-500/30' : 'bg-teal-200/80 text-teal-900'
                 }`}>{mg}</span>
