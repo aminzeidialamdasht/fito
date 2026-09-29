@@ -35,7 +35,7 @@ export default function Dashboard() {
   const totalSessions = completedSessions.length;
   const totalVolume = completedSessions.reduce((acc, s) => acc + s.totalVolume, 0);
   const currentStreak = calculateStreak(sessions);
-  const activeProgram = programs.find(p => p.id === state.activeProgram) || (!isPremium ? DEFAULT_WORKOUT_PLAN : null);
+  const activeProgram = programs.find(p => p.id === state.activeProgram) || DEFAULT_WORKOUT_PLAN;
 
   const today = new Date();
   const dayOfWeek = (today.getDay() + 1) % 7;

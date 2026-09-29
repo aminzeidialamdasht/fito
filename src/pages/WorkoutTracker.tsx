@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Dumbbell, Timer, Trophy, X, AlertTriangle, Play, Check, TrendingUp, Calendar } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { useAppContext } from '../context/AppContext';
+import { DEFAULT_WORKOUT_PLAN } from '../data/defaultPlans';
 import { useTheme } from '../context/ThemeContext';
 import { SetRecord, WorkoutSession } from '../types';
 import { toPersianNumber, getWeekdayName } from '../utils/jalali';
