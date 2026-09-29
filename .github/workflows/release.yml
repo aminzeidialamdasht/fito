@@ -71,7 +71,6 @@ jobs:
           BAZAAR_RSA_KEY: ${{ secrets.BAZAAR_RSA_KEY }}
           VERSION_CODE: ${{ github.run_number }}
         run: |
-          # Extract version without '-bazaar' suffix for android
           TAG=${GITHUB_REF#refs/tags/}
           CLEAN_VERSION=${TAG%-bazaar}
           export VERSION_NAME="$CLEAN_VERSION"
@@ -104,6 +103,43 @@ jobs:
           sed -i 's|gradle-[0-9.]*-bin.zip|gradle-8.13-bin.zip|g' gradle/wrapper/gradle-wrapper.properties
           echo "✅ Gradle wrapper updated"
 
+      # ==========================================================
+      # ✅ مرحله جدید و حیاتی: تزریق تنظیمات امضا به build.gradle
+      # ==========================================================
+      - name: Patch Android Signing Config
+        run: |
+          cd android/app
+          node -e "
+          const fs = require('fs');
+          let content = fs.readFileSync('build.gradle', 'utf8');
+          
+          if (!content.includes('signingConfigs {')) {
+            const signingBlock = \`    signingConfigs {
+                release {
+                    def keystorePath = System.getenv(\"KEYSTORE_PATH\")
+                    if (keystorePath) {
+                        storeFile file(keystorePath)
+                        storePassword System.getenv(\"KEYSTORE_PASSWORD\")
+                        keyAlias System.getenv(\"KEY_ALIAS\")
+                        keyPassword System.getenv(\"KEY_PASSWORD\")
+                    }
+                }
+            }
+          \`;
+            content = content.replace('buildTypes {', signingBlock + '    buildTypes {');
+            
+            content = content.replace(
+              'release {\\n            minifyEnabled false',
+              'release {\\n            def keystorePath = System.getenv(\"KEYSTORE_PATH\")\\n            if (keystorePath) {\\n                signingConfig signingConfigs.release\\n            }\\n            minifyEnabled false'
+            );
+            
+            fs.writeFileSync('build.gradle', content);
+            console.log('✅ build.gradle patched with signing config');
+          } else {
+            console.log('✅ build.gradle already has signing config');
+          }
+          "
+
       - name: Build Release APK
         env:
           KEYSTORE_PATH: ${{ runner.temp }}/release-key.jks
@@ -112,8 +148,25 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           cd android
-          ./gradlew assembleRelease --no-daemon --stacktrace
-          echo "✅ Release APK built"
+          ./gradlew :app:assembleRelease --no-daemon --stacktrace
+
+          echo "Generated APK files:"
+          find app/build/outputs/apk -type f -name '*.apk' -print
+
+          APK_PATH="$(find app/build/outputs/apk/release \
+            -maxdepth 1 \
+            -type f \
+            -name '*.apk' \
+            ! -name '*-unaligned.apk' \
+            | head -n 1)"
+
+          if [ -z "$APK_PATH" ]; then
+            echo "::error::No release APK was generated"
+            exit 1
+          fi
+
+          echo "APK_PATH=android/$APK_PATH" >> "$GITHUB_ENV"
+          echo "✅ Release APK built: $APK_PATH"
 
       - name: Get Version from Tag
         id: get_version
@@ -125,8 +178,13 @@ jobs:
 
       - name: Rename APK
         run: |
+          test -f "$APK_PATH" || {
+            echo "::error::APK not found at $APK_PATH"
+            exit 1
+          }
+
           mkdir -p release
-          cp android/app/build/outputs/apk/release/app-release.apk "release/${{ env.APK_PREFIX }}-v${{ env.VERSION }}.apk"
+          cp "$APK_PATH" "release/${{ env.APK_PREFIX }}-v${{ env.VERSION }}.apk"
           echo "✅ APK renamed"
 
       - name: Create Release
