@@ -5,8 +5,8 @@ import { getPersianDate, toPersianNumber, getTodayJalali, getWeekdayName, getMon
 import { EXPERIENCE_LABELS, getGoalLabel } from '../types';
 import { generateSupersetPrompt } from '../utils/promptGenerator';
 import { soundEffects } from '../utils/sound';
-import { 
-  Dumbbell, TrendingUp, Calendar, Target, 
+import {
+  Dumbbell, TrendingUp, Calendar, Target,
   Flame, Award, Activity, Clock, Sparkles,
   CheckCircle2, Timer, Zap, User, ChevronLeft,
   Trophy, TrendingDown, Heart, Apple, Pill, Brain,
@@ -25,7 +25,6 @@ export default function Dashboard() {
   const { isPremium } = useSubscription();
   const profile = activeProfile ?? (!isPremium ? SAMPLE_PROFILE : null);
 
-
   const [showSupersetModal, setShowSupersetModal] = useState(false);
   const [supersetDuration, setSupersetDuration] = useState(30);
   const [generatedSupersetPrompt, setGeneratedSupersetPrompt] = useState('');
@@ -35,17 +34,70 @@ export default function Dashboard() {
   const totalSessions = completedSessions.length;
   const totalVolume = completedSessions.reduce((acc, s) => acc + s.totalVolume, 0);
   const currentStreak = calculateStreak(sessions);
+
   const activeProgram = programs.find(p => p.id === state.activeProgram) || DEFAULT_WORKOUT_PLAN;
+  const programAny = activeProgram as any;
+  const programDays: any[] = Array.isArray(programAny?.days) ? programAny.days : [];
+  const programRestDays: string[] = Array.isArray(programAny?.restDays) ? programAny.restDays : [];
+
+  const hasExplicitSchedule =
+    programDays.some((d: any) => typeof d?.weekday === 'string' && d.weekday.trim().length > 0) ||
+    programRestDays.length > 0;
 
   const today = new Date();
   const dayOfWeek = (today.getDay() + 1) % 7;
-  const todayWorkout = activeProgram?.days[dayOfWeek % (activeProgram?.days.length || 1)];
+  const WEEKDAY_NAMES = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
+  const todayName = WEEKDAY_NAMES[dayOfWeek];
+
+  const normalizePersian = (value?: string) =>
+    String(value || '').replace(/\u200c|\u200f|\u200e/g, '').trim();
+
+  const weekdayMatches = (value?: string, target?: string) => {
+    const v = normalizePersian(value);
+    const t = normalizePersian(target);
+    if (!v || !t) return false;
+    return v === t || v.includes(t);
+  };
+
+  const findProgramDayByWeekday = (name: string) =>
+    programDays.find((d: any) => weekdayMatches(d?.weekday, name) || weekdayMatches(d?.day, name));
+
+  const todayWorkout = hasExplicitSchedule
+    ? findProgramDayByWeekday(todayName)
+    : programDays.length
+      ? programDays[dayOfWeek % programDays.length]
+      : undefined;
+
+  const isTodayRest = hasExplicitSchedule && !todayWorkout;
+  const todayDayIndex = todayWorkout ? programDays.indexOf(todayWorkout) : -1;
+
+  const nextTrainingDayIndex = (() => {
+    if (todayDayIndex !== -1) return todayDayIndex;
+    if (!hasExplicitSchedule) return 0;
+
+    for (let offset = 1; offset <= 7; offset++) {
+      const idx = (dayOfWeek + offset) % 7;
+      const found = findProgramDayByWeekday(WEEKDAY_NAMES[idx]);
+      if (found) return programDays.indexOf(found);
+    }
+
+    return 0;
+  })();
+
+  const getExercises = (day: any): any[] => Array.isArray(day?.exercises) ? day.exercises : [];
+  const todayExercises = getExercises(todayWorkout);
+
+  const todayMuscleGroups: string[] = Array.isArray((todayWorkout as any)?.muscleGroups)
+    ? (todayWorkout as any).muscleGroups
+    : Array.isArray((todayWorkout as any)?.muscle_groups)
+      ? (todayWorkout as any).muscle_groups
+      : [];
 
   const activeNutrition = nutritionPrograms.find(p => p.id === state.activeNutritionProgram) || nutritionPrograms[0] || (!isPremium ? DEFAULT_NUTRITION_PLAN : null);
   const activeSupplement = supplementPrograms.find(p => p.id === state.activeSupplementProgram) || supplementPrograms[0] || (!isPremium ? DEFAULT_SUPPLEMENT_PLAN : null);
-  const WEEKDAY_NAMES = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
-  const todayNutritionDay = activeNutrition?.days?.find(d =>
-    d.day.includes(WEEKDAY_NAMES[dayOfWeek]) || d.day === WEEKDAY_NAMES[dayOfWeek]
+
+  const todayNutritionDay = activeNutrition?.days?.find((d: any) =>
+    weekdayMatches(d?.day, todayName)
   ) || activeNutrition?.days?.[dayOfWeek % (activeNutrition?.days?.length || 1)];
 
   const lastSession = completedSessions
@@ -123,13 +175,12 @@ export default function Dashboard() {
         </div>
       )}
 
-      
       {/* Sample Plan Banner for Bazaar Version */}
       {!isPremium && programs.length === 0 && (
         <div className={`rounded-2xl p-4 border-2 border-dashed mb-4 ${isDark ? 'bg-amber-950/20 border-amber-500/50' : 'bg-amber-50 border-amber-400'}`}>
           <div className="flex items-start gap-3">
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${isDark ? 'bg-amber-500/20 text-amber-400' : 'bg-amber-100 text-amber-600'}`}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
             </div>
             <div className="flex-1">
               <h3 className={`font-black text-sm mb-1 ${isDark ? 'text-amber-300' : 'text-amber-800'}`}>🎁 این یک برنامه نمونه است</h3>
@@ -178,7 +229,7 @@ export default function Dashboard() {
             <p className={`text-[11px] mt-0.5 ${isDark ? 'text-teal-300/70' : 'text-teal-100'}`}>ثبت ست‌ها و زمان</p>
           </div>
 
-          {/* Special Intense Superset Prompt (High Priority Feature) */}
+          {/* Special Intense Superset Prompt */}
           <div
             onClick={handleOpenSupersetModal}
             className={`group cursor-pointer rounded-2xl p-4 border transition-all duration-200 active:scale-95 hover:shadow-lg relative overflow-hidden ${
@@ -422,6 +473,57 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* Today Rest Card */}
+      {hasExplicitSchedule && isTodayRest && (
+        <div className={`relative rounded-3xl p-6 overflow-hidden theme-transition ${
+          isDark
+            ? 'bg-gradient-to-br from-slate-900/90 via-slate-950 to-slate-900 border border-slate-700 shadow-2xl'
+            : 'bg-gradient-to-br from-slate-50 via-white to-slate-100 border border-slate-300 shadow-lg'
+        }`}>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="w-2.5 h-2.5 rounded-full bg-slate-400 animate-pulse" />
+                  <span className={`text-xs font-black ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>برنامه امروز</span>
+                </div>
+                <h2 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-slate-900'}`}>روز استراحت</h2>
+                <p className={`text-xs mt-1 ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
+                  {getWeekdayName(today)}، {toPersianNumber(getTodayJalali().day)} {getMonthName(getTodayJalali().month)}
+                </p>
+              </div>
+              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg ${
+                isDark ? 'bg-slate-700 text-slate-200 shadow-slate-900/30' : 'bg-slate-200 text-slate-700 shadow-slate-300/30'
+              }`}>
+                <Heart size={28} />
+              </div>
+            </div>
+
+            {programRestDays.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-4">
+                <span className={`text-xs font-bold ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>روزهای استراحت برنامه:</span>
+                {programRestDays.map((rd: string, i: number) => (
+                  <span key={i} className={`px-3 py-1 rounded-xl text-xs font-black ${
+                    isDark ? 'bg-slate-800 text-slate-300 border border-slate-700' : 'bg-white text-slate-700 border border-slate-200'
+                  }`}>{rd}</span>
+                ))}
+              </div>
+            )}
+
+            <button
+              onClick={() => {
+                soundEffects.playClick();
+                navigate(`/workout?day=${nextTrainingDayIndex}&autoStart=false`);
+              }}
+              className="w-full py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-2 transition-all bg-gradient-to-l from-slate-600 to-slate-500 text-white shadow-lg shadow-slate-500/20 hover:brightness-110 active:scale-[0.98]"
+            >
+              <span>مشاهده تمرین بعدی</span>
+              <ChevronLeft size={18} />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Today Workout Card */}
       {todayWorkout && (
         <div className={`relative rounded-3xl p-6 overflow-hidden theme-transition ${
@@ -435,11 +537,23 @@ export default function Dashboard() {
                 <div className="flex items-center gap-2 mb-1">
                   <span className="w-2.5 h-2.5 rounded-full bg-teal-400 animate-pulse" />
                   <span className={`text-xs font-black ${isDark ? 'text-teal-300' : 'text-teal-700'}`}>برنامه پیشنهادی امروز</span>
+                  {typeof (todayWorkout as any).weekday === 'string' && (todayWorkout as any).weekday ? (
+                    <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black ${
+                      isDark ? 'bg-teal-500/20 text-teal-300 border border-teal-500/30' : 'bg-teal-100 text-teal-800 border border-teal-200'
+                    }`}>
+                      {(todayWorkout as any).weekday}
+                    </span>
+                  ) : null}
                 </div>
                 <h2 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-slate-900'}`}>{todayWorkout.day}</h2>
                 <p className={`text-xs mt-1 ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
                   {getWeekdayName(today)}، {toPersianNumber(getTodayJalali().day)} {getMonthName(getTodayJalali().month)}
                 </p>
+                {programRestDays.length > 0 && (
+                  <p className={`text-[11px] mt-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                    روزهای استراحت برنامه: {programRestDays.join('، ')}
+                  </p>
+                )}
               </div>
               <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg ${
                 isDark ? 'bg-teal-500 text-slate-950 shadow-teal-500/30' : 'bg-teal-600 text-white shadow-teal-600/30'
@@ -449,7 +563,7 @@ export default function Dashboard() {
             </div>
 
             <div className="flex flex-wrap gap-2 mb-4">
-              {((todayWorkout as any).muscleGroups || (todayWorkout as any).muscle_groups || []).map((mg: string, i: number) => (
+              {todayMuscleGroups.map((mg: string, i: number) => (
                 <span key={i} className={`px-3 py-1 rounded-xl text-xs font-black ${
                   isDark ? 'bg-teal-500/20 text-teal-300 border border-teal-500/30' : 'bg-teal-200/80 text-teal-900'
                 }`}>{mg}</span>
@@ -459,16 +573,23 @@ export default function Dashboard() {
             <div className="grid grid-cols-3 gap-3 mb-5">
               <div className={`rounded-2xl p-3 text-center ${isDark ? 'bg-slate-950/60 border border-slate-800' : 'bg-white/80 border border-teal-200'}`}>
                 <p className={`text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>تمرینات</p>
-                <p className={`text-lg font-black ${isDark ? 'text-white' : 'text-slate-900'}`}>{toPersianNumber(todayWorkout.exercises.length)}</p>
+                <p className={`text-lg font-black ${isDark ? 'text-white' : 'text-slate-900'}`}>{toPersianNumber(todayExercises.length)}</p>
               </div>
               <div className={`rounded-2xl p-3 text-center ${isDark ? 'bg-slate-950/60 border border-slate-800' : 'bg-white/80 border border-teal-200'}`}>
                 <p className={`text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>ست‌ها</p>
-                <p className={`text-lg font-black ${isDark ? 'text-white' : 'text-slate-900'}`}>{toPersianNumber(todayWorkout.exercises.reduce((a, e) => a + e.sets, 0))}</p>
+                <p className={`text-lg font-black ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                  {toPersianNumber(todayExercises.reduce((a: number, e: any) => a + Number(e.sets || 0), 0))}
+                </p>
               </div>
               <div className={`rounded-2xl p-3 text-center ${isDark ? 'bg-slate-950/60 border border-slate-800' : 'bg-white/80 border border-teal-200'}`}>
                 <p className={`text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>زمان تقریبی</p>
                 <p className={`text-lg font-black ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                  {toPersianNumber(Math.round(todayWorkout.exercises.reduce((a: number, e) => a + (e.sets * (parseInt(e.reps) || 10) * 3 + (e.rest || 60) * e.sets) / 60, 0)))}
+                  {toPersianNumber(Math.round(todayExercises.reduce((a: number, e: any) => {
+                    const sets = Number(e.sets || 0);
+                    const reps = parseInt(e.reps, 10) || 10;
+                    const rest = Number(e.rest || 0) || 60;
+                    return a + (sets * reps * 3 + rest * sets) / 60;
+                  }, 0)))}
                   <span className="text-xs"> د</span>
                 </p>
               </div>
@@ -477,8 +598,8 @@ export default function Dashboard() {
             <button
               onClick={() => {
                 soundEffects.playClick();
-                const dayIndex = dayOfWeek % (activeProgram?.days.length || 1);
-                navigate(`/workout?day=${dayIndex}&autoStart=true`);
+                const idx = todayDayIndex !== -1 ? todayDayIndex : nextTrainingDayIndex;
+                navigate(`/workout?day=${idx}&autoStart=true`);
               }}
               className="w-full py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-2 transition-all bg-gradient-to-l from-teal-400 to-emerald-400 text-slate-950 shadow-lg shadow-teal-500/30 hover:brightness-110 active:scale-[0.98]"
             >
