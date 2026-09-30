@@ -1,9 +1,10 @@
 import { useAppContext } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
+import { useActiveWorkout } from '../hooks/useActiveWorkout';
 import { getPersianDate, toPersianNumber, getTodayJalali, getWeekdayName, getMonthName } from '../utils/jalali';
 import { EXPERIENCE_LABELS, getGoalLabel } from '../types';
-import { 
-  Dumbbell, TrendingUp, Calendar, Target, 
+import {
+  Dumbbell, TrendingUp, Calendar, Target,
   Flame, Award, Activity, Clock, Sparkles,
   CheckCircle2, Timer, Zap, User, ChevronLeft,
   Trophy, TrendingDown, Heart, Apple, Pill, Brain
@@ -16,8 +17,10 @@ export default function Dashboard() {
   const { theme } = useTheme();
   const navigate = useNavigate();
   const isDark = theme === 'dark';
+  
+  const { isActive, session } = useActiveWorkout();
+  
   const profile = activeProfile;
-
   const completedSessions = sessions.filter(s => s.completed);
   const totalSessions = completedSessions.length;
   const totalVolume = completedSessions.reduce((acc, s) => acc + s.totalVolume, 0);
@@ -27,6 +30,8 @@ export default function Dashboard() {
   const today = new Date();
   const dayOfWeek = (today.getDay() + 1) % 7;
   const todayWorkout = activeProgram?.days[dayOfWeek % (activeProgram?.days.length || 1)];
+
+  const isTodaySessionActive = isActive && session?.dayId === String(dayOfWeek % (activeProgram?.days.length || 1));
 
   const activeNutrition = nutritionPrograms.find(p => p.id === state.activeNutritionProgram) || nutritionPrograms[0];
   const activeSupplement = supplementPrograms.find(p => p.id === state.activeSupplementProgram) || supplementPrograms[0];
@@ -90,7 +95,6 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Quick Actions */}
       <div className="flex gap-2">
         <button
           onClick={() => navigate('/prompt')}
@@ -175,18 +179,21 @@ export default function Dashboard() {
                 navigate(`/workout?day=${dayIndex}&autoStart=true`);
               }}
               className={`w-full py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${
-                isDark
-                  ? 'bg-gradient-to-l from-[#d4af37] to-[#f0d060] text-[#0d0d1a] shadow-lg shadow-[#d4af37]/30 hover:opacity-90'
-                  : 'bg-gradient-to-l from-[#14b8a6] to-[#0d9488] text-white shadow-lg shadow-[#14b8a6]/30 hover:opacity-90'
+                isTodaySessionActive
+                  ? 'bg-gradient-to-l from-[#22c55e] to-[#16a34a] text-white shadow-lg shadow-green-500/30'
+                  : isDark
+                    ? 'bg-gradient-to-l from-[#d4af37] to-[#f0d060] text-[#0d0d1a] shadow-lg shadow-[#d4af37]/30 hover:opacity-90'
+                    : 'bg-gradient-to-l from-[#14b8a6] to-[#0d9488] text-white shadow-lg shadow-[#14b8a6]/30 hover:opacity-90'
               }`}
             >
-              <span>شروع تمرین</span>
+              <span>{isTodaySessionActive ? 'ادامه جلسه تمرین' : 'شروع تمرین'}</span>
               <ChevronLeft size={18} />
             </button>
           </div>
         </div>
       )}
 
+      {/* بقیه کدها بدون تغییر */}
       {activeNutrition && todayNutritionDay && (
         <div className={`rounded-2xl p-5 border theme-transition ${
           isDark ? 'bg-gradient-to-l from-[#22c55e]/5 to-transparent border-[#22c55e]/20' : 'bg-gradient-to-l from-[#ecfdf5] to-white border-[#10b981]/20'
