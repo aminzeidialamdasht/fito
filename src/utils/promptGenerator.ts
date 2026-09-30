@@ -193,7 +193,7 @@ export function generateWorkoutPrompt(profile: AthleteProfile): string {
   // --- PRIORITY MUSCLE RULE ---
   let priorityRule = "";
   if (targetMusclesEn) {
-    priorityRule = `- **PRIORITY MUSCLE RULE**: The muscles listed in "Priority Muscle Groups" must be placed on high-energy days (e.g., beginning of the week) and receive optimal volume. HOWEVER, you are STRICTLY FORBIDDEN from ignoring non-priority muscles. All other major muscle groups must still be trained at least once per week with maintenance volume.`;
+    priorityRule = `- **PRIORITY MUSCLE RULE**: The muscles listed in "Priority Muscle Groups" must be placed on high-energy days (e.g., beginning of the week) and receive optimal volume (typically 2x/week). HOWEVER, you are STRICTLY FORBIDDEN from ignoring non-priority muscles. All other major muscle groups must still be trained at least once per week with maintenance volume (MEV or slightly above).`;
   }
 
   // --- SECONDARY GOAL RULE ---
@@ -205,53 +205,86 @@ export function generateWorkoutPrompt(profile: AthleteProfile): string {
   const prompt = `You are an expert strength and conditioning coach, certified by NSCA and ACSM, with 20+ years of experience designing evidence-based training programs. You specialize in ${goalEn.toLowerCase()} and use the latest scientific research from Schoenfeld, Helms, and Israetel.
 
 ## CRITICAL DURATION MANDATE
-The athlete explicitly requested a program timeframe / duration of: **"${profile.timeline || '4 weeks'}"**.
+The athlete explicitly requested a program timeframe / duration of: **"${profile.timeline || '1 ماه'}"**.
 You MUST set the JSON "duration" field strictly to match this exact requested timeframe in Persian (e.g., if requested is "1 ماه", JSON "duration" MUST be "۱ ماه"). DO NOT DEFAULT TO 8 OR 12 WEEKS!
 
-## Athlete Profile
-- **Name**: ${profile.name}
-- **Age**: ${profile.age} years old
-- **Gender**: ${profile.gender === 'male' ? 'Male' : 'Female'}
-- **Height**: ${profile.height} cm
-- **Current Weight**: ${profile.weight} kg${profile.targetWeight ? `\n- **Target Weight**: ${profile.targetWeight} kg` : ''}
-- **Experience Level**: ${experienceEn}
-- **Activity Level**: ${profile.activityLevel || 'Moderately Active'}
-${profile.bodyFatPercent != null ? `- **Body Fat**: ~${profile.bodyFatPercent}%` : ''}
-${profile.bodyComposition ? `- **Body Composition**: ${profile.bodyComposition}` : ''}
-${bodyMeasStr ? `- **Body Measurements**: ${bodyMeasStr}` : ''}
-${profile.sleepHours != null ? `- **Sleep**: ${profile.sleepHours} hours/night` : ''}
-${profile.jobStress ? `- **Job Stress**: ${profile.jobStress}` : ''}
+## PRE-PROGRAMMING ANALYSIS (MANDATORY)
+Before selecting exercises, you MUST analyze:
+1. **Primary Goal**: ${goalEn}
+2. **Experience Level**: ${experienceEn} (DO NOT assume high training history = high recovery capacity)
+3. **Age**: ${profile.age} years old
+4. **Sleep Quality**: ${profile.sleepHours || 'Not specified'} hours/night
+5. **Job Stress**: ${profile.jobStress || 'Not specified'}
+6. **Activity Level**: ${profile.activityLevel || 'Moderately Active'}
+7. **Target Weight**: ${profile.targetWeight ? profile.targetWeight + ' kg' : 'Not specified'}
+8. **Recovery Quality**: ${profile.recoveryQuality || 'Not specified'}
+9. **Injuries**: ${(profile.injuries || []).join(', ') || 'None'}
 
-## Training Parameters
-- **Primary Goal**: ${goalEn}
-${secondaryGoalEn ? `- **Secondary Goal**: ${secondaryGoalEn}` : ''}
-- **Program Duration / Timeline (STRICT)**: **${profile.timeline || '4 weeks'}**
-- **Training Days per Week**: ${profile.trainingDays} days
-- **Session Duration**: ${profile.sessionDuration} minutes
-- **Training Location**: ${locationEn}
-- **Equipment Setup**: ${equipmentTypeEn}
-- **Program Type**: ${programTypeEn}
-${targetMusclesEn ? `- **Priority Muscle Groups (ordered, 1 = highest priority)**: ${targetMusclesEn}` : ''}
-${profile.competitionDate ? `- **Competition / Deadline**: ${profile.competitionDate}` : ''}
-${profile.trainingHistory ? `- **Training History**: ${profile.trainingHistory}` : ''}
+## MESOCYCLE STRUCTURE (4 WEEKS)
+Generate a precise 4-week mesocycle. Each week should show progressive overload while maintaining RIR targets.
 
-## Available Equipment
-${(profile.equipment || []).length > 0 ? profile.equipment.join(', ') : 'Standard gym equipment'}
-${(profile.customEquipment || []).length > 0 ? `\n## Custom Equipment\n${profile.customEquipment.join(', ')}` : ''}
+## VOLUME CALCULATION (MANDATORY)
+For each muscle group, calculate:
+- **Direct Volume**: Sets performed directly targeting the muscle
+- **Indirect Volume**: Sets from compound movements that also engage the muscle
+- **Weekly Frequency**: Priority muscles = 2x/week, Non-priority = 1x/week (minimum MEV)
+- **Starting Volume**: Begin at MEV (Minimum Effective Volume) and only increase if recovery is adequate
 
-## Health Considerations & Exercise Preferences
-${(profile.injuries || []).length > 0 ? `- **Injuries**: ${profile.injuries.join(', ')}` : '- No reported injuries'}
-${profile.injuryDetails ? `- **Injury History Details**: ${profile.injuryDetails}` : ''}
-${(profile.limitations || []).length > 0 ? `- **Medical Limitations**: ${profile.limitations.join(', ')}` : '- No medical limitations'}
-${(profile.avoidedExercises || []).length > 0 ? `- **Exercises to Avoid**: ${profile.avoidedExercises.join(', ')}` : '- No exercises to avoid'}
-${preferredExercisesStr ? `- **Preferred Exercises**: ${preferredExercisesStr}` : ''}
-${profile.exercisePreferences ? `- **Exercise Preferences / Style**: ${profile.exercisePreferences}` : ''}
-${profile.hormoneMedNotes ? `- **Medication / Hormone Notes**: ${profile.hormoneMedNotes}` : ''}
+## RIR/RPE PRESCRIPTION (MANDATORY)
+For EVERY exercise, specify RIR (Reps In Reserve):
+- **Compound Multi-Joint**: RIR 2-3 (e.g., Squat, Bench Press, Deadlift)
+- **Machine Exercises**: RIR 1-2
+- **Isolation Exercises**: RIR 0-2
+- **Spine-Sensitive Movements**: NEVER allow forced muscular failure (maintain RIR 2+)
 
-## Strength Records
-${Object.keys(profile.strengthRecords || {}).length > 0
-  ? Object.entries(profile.strengthRecords).map(([ex, w]) => `- ${ex}: ${w}`).join('\n')
-  : '- No recorded strength data'}
+## EXERCISE SPECIFICATION (MANDATORY FOR EACH EXERCISE)
+For each exercise, you MUST provide:
+1. **Load Selection Method**: (e.g., "% of 1RM", "RPE-based", "Last successful session + 2.5%")
+2. **Sets**: Number of working sets
+3. **Rep Range**: (e.g., "6-8", "8-12", "12-15")
+4. **Rest**: Seconds between sets
+5. **Tempo**: (e.g., "3-1-1-0" - eccentric-pause-concentric-pause)
+6. **Target Muscle**: Primary muscle being trained
+7. **Substitute**: Alternative exercise if equipment unavailable or injury flare-up
+8. **Stopping Criterion**: When to stop the set (e.g., "RIR 2 reached", "Form breakdown", "Pain")
+9. **Progression Method**: How to progress (e.g., "Double progression: when all sets hit top of rep range with target RIR, increase load 2-5% next session")
+
+## DOUBLE PROGRESSION MODEL (MANDATORY)
+Use double progression: When the athlete completes all sets at the TOP of the rep range while maintaining the prescribed RIR, increase the load by 2-5% in the next session.
+
+## SESSION STRUCTURE (MANDATORY)
+Each session MUST include:
+1. **General Warm-up**: 5-10 minutes (light cardio, mobility)
+2. **Preparation Sets**: 2-3 warm-up sets for first compound movement
+3. **Main Exercises**: Compound movements first
+4. **Accessory Exercises**: Isolation and machine work
+5. **Core Work**: If appropriate for goal
+6. **Low-Intensity Cardio**: If compatible with goal (e.g., fat loss)
+**Total Session Time**: MUST NOT exceed 90 minutes (including warm-up and rest)
+
+## SAFETY & INJURY PROTOCOL (MANDATORY)
+If any of these occur, STOP the exercise and substitute:
+- Sharp pain
+- Pain radiating down the leg
+- Numbness or tingling
+- Weakness or loss of motor control
+- Sustained worsening of symptoms
+
+For EVERY spine-sensitive exercise (e.g., Barbell Squat, Deadlift, Bent-Over Row), you MUST provide a spine-friendly alternative (e.g., Leg Press, Hip Thrust, Chest-Supported Row).
+
+## AESTHETIC GOALS (IF SPECIFIED)
+- **"Broad Shoulders"**: Emphasize lateral and rear deltoids (e.g., Lateral Raises, Face Pulls, Reverse Flyes)
+- **"Chest/Back Separation"**: Focus on muscle hypertrophy, proper angles, and overall fat reduction (NOT spot reduction)
+
+## SCIENTIFIC FRAMEWORK
+Apply these evidence-based principles:
+1. **Volume Landmarks**: Follow RP MEV, MAV, MRV for each muscle based on experience level
+2. **Frequency**: Minimum 2x/week per muscle group for Intermediate+
+3. **Progressive Overload**: Double progression model (see above)
+4. **Exercise Selection**: Biomechanically appropriate with proper movement patterns
+5. **Rest Periods**: 2-5min for heavy compounds, 1-2min for isolation
+6. **Tempo**: Include tempo prescriptions for key exercises
+7. **Periodization**: Weekly undulation if appropriate
 
 ## ⚠️ STRICT PROGRAMMING RULES (MANDATORY - VIOLATION WILL RESULT IN REJECTION)
 ${programSpecificRules}
@@ -259,46 +292,65 @@ ${priorityRule}
 ${secondaryGoalRule}
 - **Recovery Rule**: Never schedule heavy compound movements for the same muscle group on consecutive days.
 
-## Scientific Framework
-Apply these evidence-based principles:
-1. **Volume**: Follow RP volume landmarks (MEV, MAV, MRV) appropriate for experience level.
-2. **Frequency**: Optimize training frequency (minimum 2x/week per muscle group for Intermediate+).
-3. **Progressive Overload**: Include clear progression scheme (e.g., double progression).
-4. **Exercise Selection**: Biomechanically appropriate exercises with proper movement patterns.
-5. **Rest Periods**: Science-based rest intervals (2-5min for heavy compounds, 1-2min for isolation).
-6. **Tempo**: Include tempo prescriptions for key exercises (e.g., 3-1-1-0).
-
-## Output Requirements
+## OUTPUT REQUIREMENTS
 You MUST respond with ONLY valid JSON. No markdown, no explanations outside JSON.
 
 The JSON must follow this EXACT structure:
 {
   "program_name": "نام برنامه به فارسی",
   "duration": "مدت برنامه به فارسی (دقیقاً مطابق درخواست کاربر)",
+  "weekly_volume_summary": {
+    "Chest": "X sets direct, Y sets indirect",
+    "Back": "X sets direct, Y sets indirect",
+    "Quadriceps": "X sets direct, Y sets indirect",
+    "Hamstrings": "X sets direct, Y sets indirect",
+    "Shoulders": "X sets direct, Y sets indirect",
+    "Biceps": "X sets direct, Y sets indirect",
+    "Triceps": "X sets direct, Y sets indirect",
+    "Calves": "X sets direct, Y sets indirect",
+    "Abs": "X sets direct"
+  },
+  "session_duration_summary": {
+    "Day 1": "XX minutes",
+    "Day 2": "XX minutes",
+    "Day 3": "XX minutes"
+  },
+  "adjustment_rules": "قوانین تعدیل برنامه بر اساس خواب، استرس، درد و افت عملکرد به فارسی",
   "days": [
     {
-      "day": "نام روز به فارسی (مثلاً: روز اول: سینه و پشت بازو)",
+      "day": "نام روز به فارسی (مثلاً: روز اول: پوش - سینه، سرشانه، پشت بازو)",
       "muscle_groups": ["گروه عضلانی به فارسی"],
+      "warm_up": "توضیح گرم‌کردن عمومی و ست‌های آماده‌سازی به فارسی",
       "exercises": [
         {
           "name": "نام تمرین به فارسی",
           "sets": "تعداد ست (عدد)",
-          "reps": "محدوده تکرار (مثلاً: 8-12)",
+          "reps": "محدوده تکرار (مثلاً: 6-8)",
           "rest": "زمان استراحت به ثانیه (عدد)",
           "tempo": "تمپو (مثلاً: 3-1-1-0)",
+          "rir": "RIR (مثلاً: 2-3)",
+          "load_method": "روش انتخاب بار (مثلاً: RPE-based)",
+          "target_muscle": "عضله هدف به فارسی",
+          "substitute": "حرکت جایگزین به فارسی",
+          "stopping_criterion": "معیار توقف (مثلاً: RIR 2 reached)",
+          "progression": "روش پیشرفت (مثلاً: Double progression)",
           "notes": "نکات مهم به فارسی (مثل نوع انقباض یا زاویه)"
         }
-      ]
+      ],
+      "core_work": "تمرین مرکزی (در صورت وجود) به فارسی",
+      "cardio": "هوازی کم‌فشار (در صورت وجود) به فارسی"
     }
   ]
 }
 
 Important:
-- All text values in JSON must be in Persian (Farsi).
-- **duration** in JSON MUST be strictly set to Persian string matching requested timeframe: "${profile.timeline || '۴ هفته'}".
-- Ensure total session time fits within ${profile.sessionDuration} minutes.
-- Respect injuries, limitations, and avoided exercises strictly.
-- Prioritize muscle groups in the order given, BUT DO NOT OMIT OTHER MAJOR MUSCLE GROUPS.
+- All text values in JSON must be in Persian (Farsi)
+- **duration** in JSON MUST be strictly set to Persian string matching requested timeframe: "${profile.timeline || '۱ ماه'}"
+- Ensure total session time fits within ${profile.sessionDuration} minutes (max 90 minutes)
+- Respect injuries, limitations, and avoided exercises strictly
+- Prioritize muscle groups in the order given, BUT DO NOT OMIT OTHER MAJOR MUSCLE GROUPS
+- EVERY exercise must have RIR, substitute, stopping criterion, and progression method
+- Include weekly volume summary and adjustment rules at the end
 `;
 
   return prompt;
