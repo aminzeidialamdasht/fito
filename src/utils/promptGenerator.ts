@@ -59,6 +59,8 @@ const MUSCLE_TRANSLATIONS: Record<string, string> = {
   'پشت‌سرشانه': 'Rear Delts',
 };
 
+const PERSIAN_WEEKDAYS = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
+
 function translateGoal(goal?: string): string {
   if (!goal) return 'General Fitness';
   return GOAL_TRANSLATIONS[goal] || goal;
@@ -247,6 +249,9 @@ export function generateWorkoutPrompt(profile: AthleteProfile): string {
     ? Math.min(7, Math.round(requestedTrainingDays))
     : 4;
 
+  const restDaysCount = 7 - trainingDays;
+  const weekdayList = PERSIAN_WEEKDAYS.join('، ');
+
   const timeline = (profile.timeline || '').trim() || '۱ ماه';
   const safeTimeline = timeline.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
   const sessionDuration = Number(profile.sessionDuration) || 60;
@@ -294,6 +299,19 @@ The JSON "days" array MUST contain exactly ${trainingDays} objects.
 Do not generate fewer or more days.
 If injuries, equipment, or recovery require changes, substitute safer exercises or redistribute volume, but keep exactly ${trainingDays} sessions.
 
+## CRITICAL WEEKLY SCHEDULE, REST DAYS, AND RECOVERY MANDATE
+- The Iranian week starts on "شنبه" and ends on "جمعه".
+- You MUST choose exactly ${trainingDays} training weekdays from this list: ${weekdayList}.
+- Each object in "days" MUST include a "weekday" field with one of those Persian weekday names.
+- The "weekday" values in "days" MUST be unique. No weekday may appear twice.
+- You MUST include a top-level "rest_days" array containing the remaining ${restDaysCount} weekdays that are not used for training.
+- "rest_days" MUST NOT overlap with any "weekday" in "days".
+- Order the "days" array by the natural Iranian weekday order: ${weekdayList}.
+- Recovery placement is mandatory: do not schedule heavy compound movements for the same major muscle group on consecutive calendar days unless the requested split explicitly requires it and volume is carefully managed.
+- Priority muscles should usually be trained 2x/week when compatible with ${trainingDays} days, separated by enough recovery time, often 48-72 hours.
+- For ${trainingDays} days, choose a sustainable weekly pattern. Do not dump all sessions at the beginning of the week unless scientifically justified. Distribute stimulus and fatigue across the week.
+- If injuries, equipment, or recovery issues require changes, substitute safer exercises or redistribute volume, but keep exactly ${trainingDays} training weekdays and ${restDaysCount} rest weekdays.
+
 ## CRITICAL DURATION MANDATE
 The athlete explicitly requested a program timeframe / duration of: "${timeline}".
 You MUST set the JSON "duration" field strictly to match this exact requested timeframe in Persian.
@@ -312,6 +330,7 @@ Design a weekly template that can be progressed over this requested timeframe.
 - **Experience Level**: ${experienceEn}
 - **Program Type Requested**: ${programTypeEn}
 - **Training Days Per Week**: ${trainingDays} (HARD CONSTRAINT)
+- **Rest Days Per Week**: ${restDaysCount} (HARD CONSTRAINT)
 - **Session Duration Target**: ${sessionDuration} minutes (max 90 minutes)
 - **Location**: ${locationEn}
 - **Equipment Type**: ${equipmentTypeEn}
@@ -346,6 +365,7 @@ Before selecting exercises, analyze:
 8. Recovery Quality
 9. Injuries/Limitations
 10. Exactly ${trainingDays} available training days per week
+11. Optimal placement of those ${trainingDays} training days across the Iranian week to maximize recovery and adherence
 
 ## VOLUME CALCULATION (MANDATORY)
 For each muscle group, calculate direct and indirect weekly volume across exactly ${trainingDays} sessions.
@@ -409,12 +429,14 @@ Apply these evidence-based principles:
 5. **Rest Periods**: 2-5min for heavy compounds, 1-2min for isolation
 6. **Tempo**: Include tempo prescriptions for key exercises
 7. **Periodization**: Weekly undulation if appropriate
+8. **Recovery Programming**: Place training days and rest days strategically to manage systemic fatigue, muscle damage, and soreness.
 
 ## STRICT PROGRAMMING RULES (MANDATORY - VIOLATION WILL RESULT IN REJECTION)
 ${programSpecificRules}
 ${priorityRule}
 ${secondaryGoalRule}
 - **Recovery Rule**: Never schedule heavy compound movements for the same muscle group on consecutive days unless the chosen split explicitly requires it and volume is managed.
+- **Weekly Calendar Rule**: The program must be usable inside a real 7-day Iranian week, with explicit training weekdays and explicit rest weekdays.
 
 ## OUTPUT REQUIREMENTS
 You MUST respond with ONLY valid JSON. No markdown, no explanations outside JSON.
@@ -423,6 +445,8 @@ The JSON must follow this EXACT structure. The "days" array MUST contain exactly
 {
   "program_name": "نام برنامه به فارسی",
   "duration": "${safeTimeline}",
+  "training_days": ${trainingDays},
+  "rest_days": ["روزهای استراحت به فارسی، دقیقاً ${restDaysCount} مورد"],
   "weekly_volume_summary": {
     "Chest": "X sets direct, Y sets indirect",
     "Back": "X sets direct, Y sets indirect",
@@ -440,6 +464,8 @@ ${sessionDurationSummaryExample}
   "adjustment_rules": "قوانین تعدیل برنامه بر اساس خواب، استرس، درد و افت عملکرد به فارسی",
   "days": [
     {
+      "weekday": "نام روز هفته به فارسی (مثلاً: شنبه)",
+      "order": 1,
       "day": "نام روز به فارسی (مثلاً: روز ۱: ...)",
       "muscle_groups": ["گروه عضلانی به فارسی"],
       "warm_up": "توضیح گرم‌کردن عمومی و ست‌های آماده‌سازی به فارسی",
@@ -468,6 +494,8 @@ ${sessionDurationSummaryExample}
 Important:
 - All text values in JSON must be in Persian (Farsi), except exercise names may include English if common.
 - "days" MUST have exactly ${trainingDays} elements.
+- "days"[].weekday MUST be unique and MUST be from this list: ${weekdayList}.
+- "rest_days" MUST have exactly ${restDaysCount} elements and MUST contain the unused weekdays.
 - "session_duration_summary" MUST have keys Day 1 through Day ${trainingDays}.
 - "duration" MUST be exactly "${safeTimeline}".
 - Ensure total session time fits within ${sessionDuration} minutes (max 90 minutes).
