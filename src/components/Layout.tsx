@@ -15,14 +15,14 @@ const navItems = [
   { path: '/import', label: 'تمرین', icon: Import },
   { path: '/nutrition', label: 'تغذیه', icon: Apple },
   { path: '/supplements', label: 'مکمل', icon: Pill },
-  { path: '/calendar', label: 'تقویم', icon: Calendar },
-  { path: '/calendar', label: 'تقویم', icon: Calendar },
+  { path: '/calendar', label: 'تقویم', icon: Calendar }, // فقط اینجا تقویم داریم
   { path: '/progress', label: 'پیشرفت', icon: Trophy },
 ];
 
+// در نوار پایین، تقویم را جایگزین اجرا می‌کنیم
 const bottomNavItems = [
   { path: '/', label: 'داشبورد', icon: LayoutDashboard },
-  { path: '/calendar', label: 'تقویم', icon: Calendar },
+  { path: '/calendar', label: 'تقویم', icon: Calendar }, // تغییر از workout به calendar
   { path: '/nutrition', label: 'تغذیه', icon: Apple },
   { path: '/supplements', label: 'مکمل', icon: Pill },
   { path: '/progress', label: 'پیشرفت', icon: Trophy },
