@@ -117,6 +117,7 @@ export default function WorkoutTracker() {
       date: new Date().toISOString(),
       startTime: new Date(session?.startTime || Date.now()).toISOString(),
       endTime: new Date().toISOString(),
+      duration: workoutTime,
       duration: workoutTime, // ✅ فیلد مدت زمان تمرین اضافه شد
       completed: true,
       sets: localSets,
