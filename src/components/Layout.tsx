@@ -15,14 +15,14 @@ const navItems = [
   { path: '/import', label: 'تمرین', icon: Import },
   { path: '/nutrition', label: 'تغذیه', icon: Apple },
   { path: '/supplements', label: 'مکمل', icon: Pill },
-  { path: '/workout', label: 'اجرا', icon: Dumbbell },
+  { path: '/calendar', label: 'تقویم', icon: Calendar },
   { path: '/calendar', label: 'تقویم', icon: Calendar },
   { path: '/progress', label: 'پیشرفت', icon: Trophy },
 ];
 
 const bottomNavItems = [
   { path: '/', label: 'داشبورد', icon: LayoutDashboard },
-  { path: '/workout', label: 'اجرا', icon: Dumbbell },
+  { path: '/calendar', label: 'تقویم', icon: Calendar },
   { path: '/nutrition', label: 'تغذیه', icon: Apple },
   { path: '/supplements', label: 'مکمل', icon: Pill },
   { path: '/progress', label: 'پیشرفت', icon: Trophy },
