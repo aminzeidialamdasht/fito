@@ -48,41 +48,43 @@ export default function SuggestedPrograms({ isDark, isPremium }: Props) {
                   isDark ? 'bg-[#d4af37]/20 text-[#d4af37]' : 'bg-teal-100 text-teal-700'
                 }`}
               >
-                شروع با این برنامه
+                شروع تمرین
               </button>
             </div>
           </div>
         </div>
 
-        <div
-          onClick={() => { soundEffects.playClick(); navigate('/prompt'); }}
-          className={`rounded-2xl p-4 border cursor-pointer active:scale-[0.98] transition-transform ${
-            isDark
-              ? 'bg-gradient-to-br from-indigo-950/50 to-violet-950/30 border-indigo-500/30'
-              : 'bg-gradient-to-br from-indigo-50 to-purple-50 border-indigo-200'
-          }`}
-        >
+        <div className={`rounded-2xl p-4 border relative overflow-hidden ${
+          isDark ? 'bg-[#1a1a2e] border-[#d4af37]/20' : 'bg-white border-amber-200 shadow-sm'
+        }`}>
           <div className="flex items-start gap-3">
             <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${
-              isDark ? 'bg-indigo-500/20 text-indigo-300' : 'bg-indigo-100 text-indigo-600'
+              isDark ? 'bg-indigo-500/15 text-indigo-300' : 'bg-indigo-100 text-indigo-700'
             }`}>
               <Brain size={22} />
             </div>
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <h3 className={`font-bold text-sm ${isDark ? 'text-white' : 'text-slate-800'}`}>
                   برنامه اختصاصی AI
                 </h3>
-                <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-black ${
-                  isDark ? 'bg-[#d4af37]/30 text-[#d4af37]' : 'bg-amber-100 text-amber-700'
-                }`}>ویژه</span>
+                {!isPremium && (
+                  <span className={`text-[9px] font-black px-1.5 py-0.5 rounded ${
+                    isDark ? 'bg-amber-500/20 text-amber-300' : 'bg-amber-100 text-amber-700'
+                  }`}>ویژه</span>
+                )}
               </div>
               <p className={`text-[11px] mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-                پرامپت علمی بر اساس پروفایل شما → ChatGPT / Gemini
+                بر اساس پروفایل و هدف شما ساخته می‌شود
               </p>
-              <p className={`mt-2 text-xs font-bold ${isDark ? 'text-indigo-300' : 'text-indigo-600'}`}>
-                {isPremium ? 'تولید پرامپت →' : 'تهیه اشتراک →'}
-              </p>
+              <button
+                onClick={() => { soundEffects.playClick(); navigate('/prompt'); }}
+                className={`mt-2 text-xs font-bold px-3 py-1.5 rounded-lg ${
+                  isDark ? 'bg-indigo-500/20 text-indigo-300' : 'bg-indigo-100 text-indigo-700'
+                }`}
+              >
+                {isPremium ? 'ساخت برنامه' : 'ارتقا و ساخت'}
+              </button>
             </div>
           </div>
         </div>

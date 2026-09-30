@@ -58,33 +58,31 @@ export default function DashboardHero({
         }}
         className={`w-full py-4 rounded-2xl font-black text-base flex items-center justify-center gap-3 shadow-lg active:scale-[0.98] transition-transform ${
           isDark
-            ? 'bg-gradient-to-l from-[#d4af37] to-amber-500 text-black shadow-[#d4af37]/25'
-            : 'bg-gradient-to-l from-teal-500 to-emerald-600 text-white shadow-teal-500/25'
+            ? 'bg-gradient-to-l from-[#d4af37] to-amber-600 text-slate-950 shadow-[#d4af37]/25'
+            : 'bg-gradient-to-l from-teal-600 to-emerald-600 text-white shadow-teal-500/30'
         }`}
       >
         <Dumbbell size={22} />
-        {isTodayRest ? 'شروع تمرین بعدی' : 'شروع تمرین امروز'}
+        {isTodayRest ? 'شروع جلسه بعدی' : 'شروع تمرین امروز'}
       </button>
 
       <div className="grid grid-cols-2 gap-3">
         <div className={`rounded-2xl p-4 border flex flex-col items-center justify-center ${
           isDark ? 'bg-[#1a1a2e] border-white/5' : 'bg-white border-teal-100 shadow-sm'
         }`}>
-          <div className="relative w-20 h-20 mb-2">
-            <svg className="w-20 h-20 -rotate-90" viewBox="0 0 80 80">
-              <circle cx="40" cy="40" r="34" fill="none" stroke={isDark ? '#1f2937' : '#e5e7eb'} strokeWidth="7" />
+          <div className="relative w-16 h-16 mb-2">
+            <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
+              <circle cx="18" cy="18" r="15.5" fill="none" stroke={isDark ? '#334155' : '#e2e8f0'} strokeWidth="3" />
               <circle
-                cx="40" cy="40" r="34" fill="none"
-                stroke={isDark ? '#d4af37' : '#14b8a6'}
-                strokeWidth="7"
+                cx="18" cy="18" r="15.5" fill="none"
+                stroke={isDark ? '#d4af37' : '#0d9488'}
+                strokeWidth="3"
                 strokeLinecap="round"
-                strokeDasharray={`${2 * Math.PI * 34}`}
-                strokeDashoffset={`${2 * Math.PI * 34 * (1 - weeklyProgress / 100)}`}
-                className="transition-all duration-1000"
+                strokeDasharray={`${weeklyProgress * 0.97} 100`}
               />
             </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className={`text-lg font-black ${isDark ? 'text-[#d4af37]' : 'text-teal-600'}`}>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className={`text-sm font-black ${isDark ? 'text-[#d4af37]' : 'text-teal-600'}`}>
                 {toPersianNumber(weeklyCompleted)}/{toPersianNumber(weeklyGoal)}
               </span>
             </div>
