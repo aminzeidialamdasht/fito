@@ -4,10 +4,8 @@ import { useAppContext } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { useActiveWorkout } from '../hooks/useActiveWorkout';
 import { v4 as uuidv4 } from 'uuid';
-import { Dumbbell, Timer, Check, Trophy, X, Play, ChevronLeft } from 'lucide-react';
+import { Dumbbell, Timer, Check, Trophy, X, Play, ChevronLeft, AlertTriangle } from 'lucide-react';
 import { toPersianNumber } from '../utils/jalali';
-
-const soundEffects = { playSetComplete: () => {} };
 
 export default function WorkoutTracker() {
   const { state, activeProfile, programs, addSession } = useAppContext();
@@ -30,6 +28,7 @@ export default function WorkoutTracker() {
   const [isResting, setIsResting] = useState(false);
   const [workoutTime, setWorkoutTime] = useState(0);
   const [showComplete, setShowComplete] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
   const timerRef = useRef<any>(null);
   const restTimerRef = useRef<any>(null);
   
@@ -57,7 +56,7 @@ export default function WorkoutTracker() {
     }
   }, [isActive, selectedDay]);
 
-  // منطق AutoStart: اگر پارامتر وجود داشت و سشن فعال نبود، خودکار شروع کن
+  // AutoStart logic
   useEffect(() => {
     if (searchParams.get('autoStart') === 'true' && activeProgram && !isActive) {
       handleStartOrResume();
@@ -97,12 +96,18 @@ export default function WorkoutTracker() {
 
   const completeSet = (index: number) => {
     if (!session) return;
-    soundEffects.playSetComplete();
     updateSet(index, 'completed', true);
-    
     const current = session.setsLog?.[index];
     const ex = selectedDay?.exercises?.find((e: any) => (e.id || e.name) === current?.exerciseId);
     if (ex?.rest) { setRestTimer(Number(ex.rest) || 60); setIsResting(true); }
+  };
+
+  const confirmCancel = () => {
+    endSession();
+    setShowCancelModal(false);
+    if (timerRef.current) clearInterval(timerRef.current);
+    if (restTimerRef.current) clearInterval(restTimerRef.current);
+    navigate('/dashboard');
   };
 
   const completeWorkout = () => {
@@ -139,30 +144,64 @@ export default function WorkoutTracker() {
     return toPersianNumber(String(mins).padStart(2, '0')) + ':' + toPersianNumber(String(secs).padStart(2, '0'));
   };
 
-  if (!activeProgram) return <div className="p-10 text-center">برنامه‌ای یافت نشد</div>;
-  if (showComplete) return <div className="flex flex-col items-center justify-center py-20"><Trophy size={48} className="text-[#b8f542] mb-4" /><h2 className="text-2xl font-bold">جلسه تمام شد!</h2><button onClick={() => navigate('/dashboard')} className="mt-4 px-6 py-2 bg-[#b8f542] rounded-xl text-black font-bold">بازگشت به داشبورد</button></div>;
+  // --- UI Components ---
 
-  // اگر سشن فعال نیست (و autoStart هم نبوده)، صفحه انتخاب روز را نشان بده
+  if (!activeProgram) return <div className="p-10 text-center">برنامه‌ای یافت نشد</div>;
+  
+  if (showComplete) {
+    return (
+      <div className={`flex flex-col items-center justify-center min-h-[80vh] ${isDark ? 'text-white' : 'text-gray-900'}`}>
+        <Trophy size={64} className="text-[#b8f542] mb-6" />
+        <h2 className="text-3xl font-bold mb-2">جلسه عالی بود!</h2>
+        <p className={`mb-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>مدت زمان: {formatTime(workoutTime)}</p>
+        <button onClick={() => navigate('/dashboard')} className="px-8 py-3 bg-[#b8f542] text-black font-bold rounded-xl shadow-lg hover:scale-105 transition-transform">
+          بازگشت به داشبورد
+        </button>
+      </div>
+    );
+  }
+
+  if (showCancelModal) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
+        <div className={`rounded-2xl p-6 max-w-sm w-full ${isDark ? 'bg-[#1a1a2e]' : 'bg-white'}`}>
+          <AlertTriangle className="text-[#ef4444] mx-auto mb-4" size={48} />
+          <h3 className={`font-bold text-xl text-center mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>لغو جلسه؟</h3>
+          <p className={`text-sm text-center mb-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>آیا مطمئن هستید؟ اطلاعات ثبت شده ذخیره نخواهد شد.</p>
+          <div className="flex gap-3">
+            <button onClick={() => setShowCancelModal(false)} className={`flex-1 py-3 rounded-xl font-bold ${isDark ? 'bg-gray-700 text-white' : 'bg-gray-200'}`}>خیر</button>
+            <button onClick={confirmCancel} className="flex-1 py-3 rounded-xl font-bold bg-[#ef4444] text-white">بله، لغو کن</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // صفحه انتخاب روز (وقتی سشن فعال نیست)
   if (!isActive) {
     return (
-      <div className="space-y-5 p-4">
-        <div className="flex items-center justify-between">
-           <button onClick={() => navigate(-1)} className="p-2 rounded-full bg-gray-800"><ChevronLeft size={20} /></button>
+      <div className={`space-y-5 p-4 min-h-screen ${isDark ? 'bg-[#0d0d1a] text-white' : 'bg-gray-50 text-gray-900'}`}>
+        <div className="flex items-center justify-between mb-6">
+           <button onClick={() => navigate(-1)} className={`p-2 rounded-full ${isDark ? 'bg-gray-800' : 'bg-white shadow'}`}><ChevronLeft size={20} /></button>
            <h2 className="text-xl font-bold">انتخاب روز تمرین</h2>
            <div className="w-8"></div>
         </div>
         <div className="grid gap-3">
           {activeProgram.days.map((day: any, i: number) => (
             <button key={i} onClick={() => { setSelectedDayIndex(i); navigate(`/workout?day=${i}`); }}
-              className={`p-4 rounded-2xl border text-left transition-all ${i === selectedDayIndex ? 'border-[#b8f542] bg-[#b8f542]/10' : 'border-gray-700 hover:border-gray-500'}`}>
-              <h3 className="font-bold">{day.day}</h3>
-              <p className="text-sm text-gray-400 mt-1">{day.muscleGroups?.join('، ')}</p>
+              className={`p-4 rounded-2xl border text-right transition-all ${
+                i === selectedDayIndex 
+                  ? 'border-[#b8f542] bg-[#b8f542]/10' 
+                  : isDark ? 'border-gray-700 bg-[#1a1a2e]' : 'border-gray-200 bg-white'
+              }`}>
+              <h3 className="font-bold text-lg">{day.day}</h3>
+              <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{day.muscleGroups?.join('، ')}</p>
             </button>
           ))}
         </div>
         <button 
           onClick={handleStartOrResume} 
-          className="w-full py-3 bg-[#b8f542] text-black font-bold rounded-xl mt-4 active:scale-95 transition-transform"
+          className="w-full py-4 bg-[#b8f542] text-black font-bold rounded-xl mt-6 text-lg shadow-lg active:scale-95 transition-transform"
         >
           شروع تمرین {selectedDay?.day}
         </button>
@@ -170,75 +209,100 @@ export default function WorkoutTracker() {
     );
   }
 
-  // محیط اصلی تمرین (وقتی isActive true است)
+  // محیط اصلی تمرین
   const sets = session?.setsLog || [];
 
   return (
-    <div className="space-y-4 pb-28 p-4">
-      <div className="flex items-center justify-between mb-4 sticky top-0 z-10 bg-[#0d0d1a]/90 backdrop-blur-md py-2 -mx-4 px-4">
-        <button onClick={() => { endSession(); navigate('/dashboard'); }} className="p-2 rounded-full bg-gray-800"><X size={20} /></button>
+    <div className={`min-h-screen pb-28 p-4 ${isDark ? 'bg-[#0d0d1a] text-white' : 'bg-gray-50 text-gray-900'}`}>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6 sticky top-0 z-10 py-2">
+        <button onClick={() => setShowCancelModal(true)} className={`p-2 rounded-full ${isDark ? 'bg-gray-800 text-gray-400' : 'bg-white shadow text-gray-600'}`}>
+          <X size={24} />
+        </button>
         <div className="text-center">
-          <p className="text-xs text-gray-400">زمان جلسه</p>
-          <p className="font-bold text-xl text-[#b8f542]">{formatTime(workoutTime)}</p>
+          <h2 className="font-bold text-lg">{selectedDay?.day}</h2>
+          <p className={`text-xs font-mono ${isDark ? 'text-[#b8f542]' : 'text-[#0d9488]'}`}>{formatTime(workoutTime)}</p>
         </div>
-        <button onClick={completeWorkout} className="px-4 py-1.5 bg-[#b8f542] text-black text-sm font-bold rounded-lg">پایان</button>
+        <button onClick={completeWorkout} className="px-4 py-2 bg-[#b8f542] text-black text-sm font-bold rounded-xl shadow-md">
+          پایان
+        </button>
       </div>
 
+      {/* Rest Timer */}
       {isResting && restTimer > 0 && (
-        <div className="bg-blue-900/20 border border-blue-500/30 p-4 rounded-2xl text-center mb-4 animate-pulse">
-          <p className="font-bold text-2xl text-blue-400">{formatTime(restTimer)}</p>
-          <p className="text-xs text-blue-300">زمان استراحت</p>
-          <button onClick={() => setIsResting(false)} className="mt-2 text-xs bg-blue-600 px-3 py-1 rounded-full text-white">رد کردن</button>
+        <div className={`mb-6 p-4 rounded-2xl text-center border ${isDark ? 'bg-blue-900/20 border-blue-500/30' : 'bg-blue-50 border-blue-200'}`}>
+          <p className={`font-bold text-3xl mb-1 ${isDark ? 'text-blue-400' : 'text-blue-600'}`}>{formatTime(restTimer)}</p>
+          <p className="text-xs opacity-70">زمان استراحت</p>
+          <button onClick={() => setIsResting(false)} className="mt-3 text-xs px-4 py-1.5 rounded-full bg-blue-600 text-white font-bold">رد کردن استراحت</button>
         </div>
       )}
 
-      {(selectedDay?.exercises || []).map((ex: any, ei: number) => {
-        const exerciseSets = sets.filter((s: any) => s.exerciseId === (ex.id || ex.name));
-        return (
-          <div key={ei} className="bg-gray-800/50 rounded-2xl p-4 border border-gray-700">
-            <h4 className="font-bold mb-3 text-[#b8f542] flex justify-between">
-              <span>{ex.name}</span>
-              <span className="text-xs text-gray-400 font-normal">{ex.sets} ست × {ex.reps}</span>
-            </h4>
-            <div className="space-y-3">
-              {exerciseSets.map((set: any, si: number) => {
-                const globalIndex = sets.indexOf(set);
-                return (
-                  <div key={si} className={`flex items-center gap-2 p-2 rounded-xl transition-colors ${set.completed ? 'bg-green-900/20 border border-green-500/30' : 'bg-gray-900 border border-gray-800'}`}>
-                    <span className="text-xs w-8 text-gray-400 font-bold">#{toPersianNumber(String(set.setNumber))}</span>
-                    
-                    <div className="flex-1 flex items-center gap-2">
-                      <input 
-                        type="number" 
-                        placeholder="وزنه"
-                        className="w-full bg-gray-800 rounded-lg p-2 text-center text-sm focus:ring-1 focus:ring-[#b8f542] outline-none"
-                        value={set.weight === 0 ? '' : set.weight}
-                        onChange={(e) => updateSet(globalIndex, 'weight', Number(e.target.value))}
-                      />
-                      <span className="text-gray-500">×</span>
-                      <input 
-                        type="number" 
-                        placeholder="تکرار"
-                        className="w-full bg-gray-800 rounded-lg p-2 text-center text-sm focus:ring-1 focus:ring-[#b8f542] outline-none"
-                        value={set.actualReps === 0 ? '' : set.actualReps}
-                        onChange={(e) => updateSet(globalIndex, 'actualReps', Number(e.target.value))}
-                      />
-                    </div>
+      {/* Exercises List */}
+      <div className="space-y-6">
+        {(selectedDay?.exercises || []).map((ex: any, ei: number) => {
+          const exerciseSets = sets.filter((s: any) => s.exerciseId === (ex.id || ex.name));
+          return (
+            <div key={ei} className={`rounded-2xl p-5 border ${isDark ? 'bg-[#1a1a2e] border-gray-800' : 'bg-white border-gray-200 shadow-sm'}`}>
+              <div className="flex justify-between items-end mb-4 border-b pb-3 border-gray-700/50">
+                <h4 className={`font-bold text-lg ${isDark ? 'text-[#b8f542]' : 'text-[#0d9488]'}`}>{ex.name}</h4>
+                <span className="text-xs opacity-60">{ex.sets} ست × {ex.reps}</span>
+              </div>
+              
+              <div className="space-y-3">
+                {exerciseSets.map((set: any, si: number) => {
+                  const globalIndex = sets.indexOf(set);
+                  return (
+                    <div key={si} className={`flex items-center gap-3 p-3 rounded-xl transition-all ${
+                      set.completed 
+                        ? (isDark ? 'bg-green-900/20 border border-green-500/30' : 'bg-green-50 border border-green-200') 
+                        : (isDark ? 'bg-[#0d0d1a] border border-gray-700' : 'bg-gray-50 border border-gray-200')
+                    }`}>
+                      <span className="text-xs font-bold w-6 opacity-50">#{set.setNumber}</span>
+                      
+                      <div className="flex-1 flex items-center gap-2">
+                        <div className="relative flex-1">
+                          <input 
+                            type="number" 
+                            placeholder="وزنه"
+                            className={`w-full rounded-lg p-2 text-center text-sm outline-none focus:ring-2 focus:ring-[#b8f542] ${isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-900 border border-gray-300'}`}
+                            value={set.weight === 0 ? '' : set.weight}
+                            onChange={(e) => updateSet(globalIndex, 'weight', Number(e.target.value))}
+                          />
+                          <span className="absolute left-2 top-2 text-[10px] opacity-40">kg</span>
+                        </div>
+                        
+                        <span className="opacity-30">×</span>
+                        
+                        <div className="relative flex-1">
+                          <input 
+                            type="number" 
+                            placeholder="تکرار"
+                            className={`w-full rounded-lg p-2 text-center text-sm outline-none focus:ring-2 focus:ring-[#b8f542] ${isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-900 border border-gray-300'}`}
+                            value={set.actualReps === 0 ? '' : set.actualReps}
+                            onChange={(e) => updateSet(globalIndex, 'actualReps', Number(e.target.value))}
+                          />
+                        </div>
+                      </div>
 
-                    <button 
-                      onClick={() => completeSet(globalIndex)} 
-                      disabled={set.completed}
-                      className={`p-2 rounded-lg transition-all ${set.completed ? 'text-green-500 bg-green-500/10' : 'bg-[#b8f542] text-black hover:bg-[#a3d93b]'}`}
-                    >
-                      <Check size={18} />
-                    </button>
-                  </div>
-                );
-              })}
+                      <button 
+                        onClick={() => completeSet(globalIndex)} 
+                        disabled={set.completed}
+                        className={`p-2.5 rounded-xl transition-all ${
+                          set.completed 
+                            ? 'bg-green-500 text-white shadow-inner' 
+                            : 'bg-[#b8f542] text-black hover:bg-[#a3d93b] shadow-md'
+                        }`}
+                      >
+                        <Check size={20} strokeWidth={3} />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }
