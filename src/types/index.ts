@@ -114,7 +114,7 @@ export interface SetRecord {
   exerciseName: string;
   setNumber: number;
   targetReps: string;
-  actualReps: number;
+  actualReps?: number;
   weight: number;
   rir?: number;
   rpe?: number;
