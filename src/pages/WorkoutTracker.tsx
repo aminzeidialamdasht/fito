@@ -102,23 +102,23 @@ export default function WorkoutTracker() {
     if (ex?.rest) { setRestTimer(Number(ex.rest) || 60); setIsResting(true); }
   };
 
-  // اصلاح شده: هدایت به داشبورد پس از لغو
+  // ✅ اصلاح شده: لغو ایمن بدون صفحه سفید
   const confirmCancel = () => {
     setShowCancelModal(false);
-    // پاک کردن تایمرها
+    // 1. اول تایمرها را متوقف کن
     if (timerRef.current) clearInterval(timerRef.current);
     if (restTimerRef.current) clearInterval(restTimerRef.current);
     
-    // هدایت ایمن به داشبورد
+    // 2. کاربر را به داشبورد بفرست (با replace تا دکمه بازگشت کار نکند)
     navigate('/dashboard', { replace: true });
     
-    // پاک کردن سشن با کمی تاخیر برای جلوگیری از صفحه سفید
+    // 3. با کمی تاخیر سشن را پاک کن تا کامپوننت فرصت داشته باشد قبل از ناپدید شدن رندر شود
     setTimeout(() => {
       endSession();
-    }, 100);
+    }, 200);
   };
 
-  // اصلاح شده: ذخیره و هدایت به صفحه پیشرفت
+  // ✅ اصلاح شده: پایان و رفتن به گزارش پیشرفت
   const completeWorkout = () => {
     if (!activeProfile || !activeProgram || !session) return;
     
@@ -143,17 +143,14 @@ export default function WorkoutTracker() {
       totalVolume,
     });
     
-    // پاک کردن تایمرها
     if (timerRef.current) clearInterval(timerRef.current);
     if (restTimerRef.current) clearInterval(restTimerRef.current);
 
-    // نمایش پیام موفقیت
     setShowComplete(true);
     
-    // پاک کردن سشن با تاخیر
     setTimeout(() => {
       endSession();
-    }, 100);
+    }, 200);
   };
 
   const formatTime = (seconds: number) => {
@@ -171,7 +168,6 @@ export default function WorkoutTracker() {
         <Trophy size={64} className="text-[#b8f542] mb-6" />
         <h2 className="text-3xl font-bold mb-2">جلسه عالی بود!</h2>
         <p className={`mb-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>مدت زمان: {formatTime(workoutTime)}</p>
-        {/* هدایت به صفحه پیشرفت */}
         <button onClick={() => navigate('/progress')} className="px-8 py-3 bg-[#b8f542] text-black font-bold rounded-xl shadow-lg hover:scale-105 transition-transform">
           مشاهده گزارش پیشرفت
         </button>
@@ -234,7 +230,6 @@ export default function WorkoutTracker() {
     <div className={`min-h-screen pb-28 p-4 ${isDark ? 'bg-[#0d0d1a] text-white' : 'bg-gray-50 text-gray-900'}`}>
       {/* Header */}
       <div className="flex items-center justify-between mb-6 sticky top-0 z-10 py-2">
-        {/* دکمه ضربدر برای لغو */}
         <button onClick={() => setShowCancelModal(true)} className={`p-2 rounded-full ${isDark ? 'bg-gray-800 text-gray-400' : 'bg-white shadow text-gray-600'}`}>
           <X size={24} />
         </button>
@@ -242,7 +237,6 @@ export default function WorkoutTracker() {
           <h2 className="font-bold text-lg">{selectedDay?.day}</h2>
           <p className={`text-xs font-mono ${isDark ? 'text-[#b8f542]' : 'text-[#0d9488]'}`}>{formatTime(workoutTime)}</p>
         </div>
-        {/* دکمه پایان برای ذخیره و رفتن به گزارش */}
         <button onClick={completeWorkout} className="px-4 py-2 bg-[#b8f542] text-black text-sm font-bold rounded-xl shadow-md">
           پایان
         </button>
