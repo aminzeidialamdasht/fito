@@ -177,7 +177,6 @@ export default function WorkoutTracker() {
 
     const current = session.sets[index];
     updateSet(index, {
-      duration: workoutTime,
       completed: true,
       actualReps: current.actualReps || parseTargetReps(current.targetReps),
     });
@@ -224,7 +223,6 @@ export default function WorkoutTracker() {
     const completed = session.sets.filter((s: SetRecord) => s.completed);
     const finalSession: WorkoutSession = {
       ...session,
-      duration: workoutTime,
       completed: true,
       endTime: new Date().toISOString(),
       duration: workoutTime,
