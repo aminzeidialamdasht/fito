@@ -6,15 +6,15 @@ export interface SetRecord {
   setNumber: number;
   targetReps: string;
   completed: boolean;
-  actualReps?: number;
-  weight?: number;
+  actualReps: number; // همیشه عدد است
+  weight: number;     // همیشه عدد است
 }
 
 export interface ActiveSession {
   programId: string;
   dayId: string;
   startTime: number;
-  setsLog?: SetRecord[]; // تغییر به آرایه برای هماهنگی با ترکر
+  setsLog?: SetRecord[];
 }
 
 const STORAGE_KEY = 'coachino_active_session';

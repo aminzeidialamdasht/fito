@@ -100,7 +100,7 @@ export default function WorkoutTracker() {
     
     updateSet(index, {
       completed: true,
-      actualReps: current?.actualReps || parseInt(String(current?.targetReps) || '10'),
+      actualReps: Number(current?.actualReps) || parseInt(String(current?.targetReps) || '10'),
     });
     
     const ex = selectedDay?.exercises?.find((e: any) => (e.id || e.name) === current?.exerciseId);
