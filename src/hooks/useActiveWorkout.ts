@@ -4,7 +4,7 @@ export interface SetRecord {
   exerciseId: string;
   exerciseName: string;
   setNumber: number;
-  targetReps: string | number;
+  targetReps: string;
   completed: boolean;
   actualReps?: number;
   weight?: number;
