@@ -72,14 +72,24 @@ export interface WorkoutProgram {
   duration: string;
   createdAt: string;
   startDate?: string;
+  trainingDays?: number;
+  restDays?: string[];
+  weeklyVolumeSummary?: Record<string, string>;
+  sessionDurationSummary?: Record<string, string>;
+  adjustmentRules?: string;
   days: WorkoutDay[];
 }
 
 export interface WorkoutDay {
   id?: string;
+  weekday?: string;
+  order?: number;
   day: string;
   muscleGroups: string[];
   muscle_groups?: string[];
+  warmUp?: string;
+  coreWork?: string;
+  cardio?: string;
   exercises: Exercise[];
 }
 
@@ -90,6 +100,12 @@ export interface Exercise {
   reps: string;
   rest: number;
   tempo?: string;
+  rir?: string | number;
+  loadMethod?: string;
+  targetMuscle?: string;
+  substitute?: string;
+  stoppingCriterion?: string;
+  progression?: string;
   notes?: string;
 }
 

@@ -16,6 +16,31 @@ import {
 } from 'lucide-react';
 import { toPersianNumber, getProgramTimelineDetails } from '../utils/jalali';
 
+const PERSIAN_WEEKDAYS = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
+
+const SAMPLE_TRAINING_WEEKDAYS: Record<number, string[]> = {
+  1: ['شنبه'],
+  2: ['شنبه', 'چهارشنبه'],
+  3: ['شنبه', 'دوشنبه', 'چهارشنبه'],
+  4: ['شنبه', 'یکشنبه', 'چهارشنبه', 'پنجشنبه'],
+  5: ['شنبه', 'دوشنبه', 'سه‌شنبه', 'پنجشنبه', 'جمعه'],
+  6: ['شنبه', 'یکشنبه', 'دوشنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'],
+  7: ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'],
+};
+
+function getSafeTrainingDays(days: number): number {
+  return Math.min(7, Math.max(1, Number(days) || 4));
+}
+
+function getSampleTrainingWeekdays(days: number): string[] {
+  const safeDays = getSafeTrainingDays(days);
+  return SAMPLE_TRAINING_WEEKDAYS[safeDays] || PERSIAN_WEEKDAYS.slice(0, safeDays);
+}
+
+function getRestDaysFromTraining(trainingWeekdays: string[]): string[] {
+  return PERSIAN_WEEKDAYS.filter((weekday) => !trainingWeekdays.includes(weekday));
+}
+
 export default function ProgramImport() {
   const {
     activeProfile,
@@ -53,28 +78,67 @@ export default function ProgramImport() {
   const handleImport = () => {
     if (!validationResult?.valid || !validationResult.data || !activeProfile) return;
 
+    const data = validationResult.data;
+    const days = Array.isArray(data.days) ? data.days : [];
+
+    const restDays = Array.isArray(data.rest_days)
+      ? data.rest_days.filter((x: any) => typeof x === 'string')
+      : undefined;
+
+    const weeklyVolumeSummary =
+      data.weekly_volume_summary && typeof data.weekly_volume_summary === 'object'
+        ? (data.weekly_volume_summary as Record<string, string>)
+        : undefined;
+
+    const sessionDurationSummary =
+      data.session_duration_summary && typeof data.session_duration_summary === 'object'
+        ? (data.session_duration_summary as Record<string, string>)
+        : undefined;
+
     const programId = uuidv4();
 
     const program: WorkoutProgram = {
       id: programId,
       profileId: activeProfile.id,
-      name: validationResult.data.program_name,
-      duration: validationResult.data.duration,
+      name: typeof data.program_name === 'string' ? data.program_name : 'برنامه بدون نام',
+      duration: typeof data.duration === 'string' ? data.duration : '۱ ماه',
       startDate: startDate || new Date().toISOString().split('T')[0],
       createdAt: new Date().toISOString(),
-      days: validationResult.data.days.map((day: any) => ({
+      trainingDays: Number(data.training_days) || activeProfile.trainingDays || days.length,
+      restDays,
+      weeklyVolumeSummary,
+      sessionDurationSummary,
+      adjustmentRules: typeof data.adjustment_rules === 'string' ? data.adjustment_rules : undefined,
+      days: days.map((day: any, index: number) => ({
         id: uuidv4(),
-        day: day.day,
-        muscleGroups: day.muscle_groups || [],
-        exercises: (day.exercises || []).map((ex: any) => ({
-          id: uuidv4(),
-          name: ex.name,
-          sets: Number(ex.sets) || 4,
-          reps: ex.reps || '',
-          rest: Number(ex.rest) || 90,
-          tempo: ex.tempo || '',
-          notes: ex.notes || '',
-        })),
+        weekday: typeof day.weekday === 'string' ? day.weekday : undefined,
+        order: Number(day.order) || index + 1,
+        day: typeof day.day === 'string' ? day.day : `روز ${index + 1}`,
+        muscleGroups: Array.isArray(day.muscle_groups) ? day.muscle_groups : [],
+        warmUp: typeof day.warm_up === 'string' ? day.warm_up : undefined,
+        coreWork: typeof day.core_work === 'string' ? day.core_work : undefined,
+        cardio: typeof day.cardio === 'string' ? day.cardio : undefined,
+        exercises: Array.isArray(day.exercises)
+          ? day.exercises.map((ex: any) => ({
+              id: uuidv4(),
+              name: typeof ex.name === 'string' ? ex.name : 'حرکت بدون نام',
+              sets: Number(ex.sets) || 4,
+              reps: typeof ex.reps === 'string' ? ex.reps : String(ex.reps || ''),
+              rest: Number(ex.rest) || 90,
+              tempo: typeof ex.tempo === 'string' ? ex.tempo : '',
+              rir:
+                typeof ex.rir === 'string' || typeof ex.rir === 'number'
+                  ? ex.rir
+                  : undefined,
+              loadMethod: typeof ex.load_method === 'string' ? ex.load_method : '',
+              targetMuscle: typeof ex.target_muscle === 'string' ? ex.target_muscle : '',
+              substitute: typeof ex.substitute === 'string' ? ex.substitute : '',
+              stoppingCriterion:
+                typeof ex.stopping_criterion === 'string' ? ex.stopping_criterion : '',
+              progression: typeof ex.progression === 'string' ? ex.progression : '',
+              notes: typeof ex.notes === 'string' ? ex.notes : '',
+            }))
+          : [],
       })),
     };
 
@@ -89,15 +153,43 @@ export default function ProgramImport() {
   };
 
   const makeSampleJSON = (days: number) => {
-    const safeDays = Math.min(7, Math.max(1, Number(days) || 4));
+    const safeDays = getSafeTrainingDays(days);
+    const trainingWeekdays = getSampleTrainingWeekdays(safeDays);
+    const orderedTrainingWeekdays = PERSIAN_WEEKDAYS.filter((weekday) =>
+      trainingWeekdays.includes(weekday)
+    );
+    const restDays = getRestDaysFromTraining(orderedTrainingWeekdays);
+
+    const sessionDurationSummary: Record<string, string> = {};
+    orderedTrainingWeekdays.forEach((_, index) => {
+      sessionDurationSummary[`Day ${index + 1}`] = 'XX دقیقه';
+    });
 
     const sample = {
       program_name: `برنامه نمونه ${toPersianNumber(safeDays)} روزه`,
       duration: '۱ ماه',
-      days: Array.from({ length: safeDays }, (_, index) => ({
-        day: `روز ${toPersianNumber(index + 1)} - نمونه`,
+      training_days: safeDays,
+      rest_days: restDays,
+      weekly_volume_summary: {
+        Chest: 'X sets direct, Y sets indirect',
+        Back: 'X sets direct, Y sets indirect',
+        Quadriceps: 'X sets direct, Y sets indirect',
+        Hamstrings: 'X sets direct, Y sets indirect',
+        Shoulders: 'X sets direct, Y sets indirect',
+        Biceps: 'X sets direct, Y sets indirect',
+        Triceps: 'X sets direct, Y sets indirect',
+        Calves: 'X sets direct, Y sets indirect',
+        Abs: 'X sets direct',
+      },
+      session_duration_summary: sessionDurationSummary,
+      adjustment_rules:
+        'اگر خواب ضعیف بود، استرس بالا بود یا درد مفصلی حس شد، شدت تمرین را کاهش بده و در صورت نیاز یک روز استراحت اضافه کن.',
+      days: orderedTrainingWeekdays.map((weekday, index) => ({
+        weekday,
+        order: index + 1,
+        day: `${weekday} - روز ${toPersianNumber(index + 1)} نمونه`,
         muscle_groups: ['نمونه'],
-        warm_up: 'گرم‌کردن عمومی ۵ دقیقه‌ای',
+        warm_up: 'گرم‌کردن عمومی ۵ دقیقه‌ای + ۲ ست آماده‌سازی سبک',
         exercises: [
           {
             name: 'حرکت نمونه',
@@ -183,7 +275,7 @@ export default function ProgramImport() {
           }`}
           rows={10}
           dir="ltr"
-          placeholder='{"program_name": "...", "duration": "...", "days": [...]}'
+          placeholder='{"program_name": "...", "duration": "...", "rest_days": [...], "days": [...]}'
         />
 
         <div className="flex gap-3 mt-4">
@@ -291,12 +383,28 @@ export default function ProgramImport() {
               </span>
             </div>
 
+            {Array.isArray(validationResult.data.rest_days) && validationResult.data.rest_days.length > 0 && (
+              <div className="flex items-center gap-4 text-sm">
+                <span className={isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}>روزهای استراحت:</span>
+                <span className={isDark ? 'text-white' : 'text-[#134e4a]'}>
+                  {(validationResult.data.rest_days as string[]).join('، ')}
+                </span>
+              </div>
+            )}
+
             <div className={`border-t pt-4 mt-4 ${isDark ? 'border-gray-700' : 'border-[#14b8a6]/20'}`}>
               {validationResult.data.days.map((day: any, i: number) => (
                 <div key={i} className={`mb-4 rounded-xl p-4 ${
                   isDark ? 'bg-[#0d0d1a]' : 'bg-[#f0fdfa]'
                 }`}>
-                  <h4 className={'font-bold mb-2 ' + (isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]')}>
+                  <h4 className={'font-bold mb-2 flex items-center gap-2 ' + (isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]')}>
+                    {day.weekday ? (
+                      <span className={`px-2 py-0.5 rounded-lg text-xs ${
+                        isDark ? 'bg-[#14b8a6]/20 text-[#14b8a6]' : 'bg-[#14b8a6]/15 text-[#0d9488]'
+                      }`}>
+                        {day.weekday}
+                      </span>
+                    ) : null}
                     {day.day}
                   </h4>
 
@@ -370,6 +478,9 @@ export default function ProgramImport() {
                           مدت: <strong>{program.duration}</strong> ({toPersianNumber(timeline.totalDays)} روز)
                         </span>
                         <span>• {toPersianNumber(program.days.length)} روز تمرین</span>
+                        {program.restDays && program.restDays.length > 0 && (
+                          <span>• استراحت: {program.restDays.join('، ')}</span>
+                        )}
                         <span>
                           • {toPersianNumber(program.days.reduce((acc, d) => acc + d.exercises.length, 0))} حرکت
                         </span>
