@@ -1,41 +1,41 @@
-import { AthleteProfile, GOAL_LABELS, EXPERIENCE_LABELS, getGoalLabel } from '../types';
+import { AthleteProfile } from '../types';
 
 const GOAL_TRANSLATIONS: Record<string, string> = {
-  'hypertrophy': 'Hypertrophy (Muscle Building)',
-  'strength': 'Strength Gain',
-  'fat_loss': 'Fat Loss',
-  'recomposition': 'Body Recomposition',
-  'competition': 'Competition Prep',
-  'general_fitness': 'General Fitness',
+  hypertrophy: 'Hypertrophy / Muscle Building',
+  strength: 'Strength',
+  fat_loss: 'Fat Loss',
+  recomposition: 'Body Recomposition',
+  competition: 'Competition Preparation',
+  general_fitness: 'General Fitness',
 };
 
 const EXPERIENCE_TRANSLATIONS: Record<string, string> = {
-  'beginner': 'Beginner',
-  'intermediate': 'Intermediate',
-  'advanced': 'Advanced',
-  'professional': 'Professional',
+  beginner: 'Beginner',
+  intermediate: 'Intermediate',
+  advanced: 'Advanced',
+  professional: 'Professional',
 };
 
 const LOCATION_TRANSLATIONS: Record<string, string> = {
-  'gym': 'Commercial Gym',
-  'home': 'Home Gym',
-  'both': 'Both Gym and Home',
-  'park': 'Outdoor/Park',
+  gym: 'Commercial Gym',
+  home: 'Home',
+  both: 'Gym and Home',
+  park: 'Park / Outdoor',
 };
 
 const PROGRAM_TYPE_TRANSLATIONS: Record<string, string> = {
-  'full_body': 'Full Body',
-  'split': 'Body Part Split',
-  'push_pull_legs': 'Push/Pull/Legs',
-  'upper_lower': 'Upper/Lower',
-  'ai_suggested': 'AI Suggested (based on athlete profile)',
+  full_body: 'Full Body',
+  split: 'Body Part Split',
+  push_pull_legs: 'Push/Pull/Legs',
+  upper_lower: 'Upper/Lower',
+  ai_suggested: 'AI Suggested (based on athlete profile)',
 };
 
 const EQUIPMENT_TYPE_TRANSLATIONS: Record<string, string> = {
-  'full_gym': 'Full Commercial Gym',
-  'home': 'Home Gym',
-  'park': 'Outdoor / Park',
-  'custom': 'Custom Equipment List',
+  full_gym: 'Commercial Gym',
+  home: 'Home Gym',
+  park: 'Park / Outdoor',
+  custom: 'Custom Equipment',
 };
 
 const MUSCLE_TRANSLATIONS: Record<string, string> = {
@@ -44,44 +44,61 @@ const MUSCLE_TRANSLATIONS: Record<string, string> = {
   'سرشانه': 'Shoulders',
   'جلوبازو': 'Biceps',
   'پشت‌بازو': 'Triceps',
+  'پشت بازو': 'Triceps',
   'چهارسر ران': 'Quadriceps',
+  'چهارسر': 'Quadriceps',
   'همسترینگ': 'Hamstrings',
   'باسن': 'Glutes',
+  'سرینی': 'Glutes',
   'ساق پا': 'Calves',
   'شکم': 'Abs',
-  'کول': 'Traps',
+  'کول': 'Lower Back',
   'ساعد': 'Forearms',
+  'زیربغل': 'Lats / Upper Back',
+  'پشت سرشانه': 'Rear Delts',
+  'پشت‌سرشانه': 'Rear Delts',
 };
 
-function translateGoal(goal: string): string {
+function translateGoal(goal?: string): string {
+  if (!goal) return 'General Fitness';
   return GOAL_TRANSLATIONS[goal] || goal;
 }
 
-function translateExperience(exp: string): string {
+function translateExperience(exp?: string): string {
+  if (!exp) return 'Intermediate';
   return EXPERIENCE_TRANSLATIONS[exp] || exp;
 }
 
-function translateLocation(loc: string): string {
+function translateLocation(loc?: string): string {
+  if (!loc) return 'Commercial Gym';
   return LOCATION_TRANSLATIONS[loc] || loc;
 }
 
-function translateProgramType(type: string): string {
+function translateProgramType(type?: string): string {
+  if (!type) return 'AI Suggested (based on athlete profile)';
   return PROGRAM_TYPE_TRANSLATIONS[type] || type;
 }
 
-function translateMuscle(muscle: string): string {
+function translateMuscle(muscle?: string): string {
+  if (!muscle) return '';
   return MUSCLE_TRANSLATIONS[muscle] || muscle;
 }
 
-/** Strip markdown fences and extract outermost JSON object */
-function cleanJsonInput(json: string): string {
-  let clean = (json || '').trim();
-  clean = clean.replace(/^```json\s*/i, '').replace(/^```\s*/, '').replace(/\s*```$/, '');
-  const firstBrace = clean.indexOf('{');
-  const lastBrace = clean.lastIndexOf('}');
-  if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
-    clean = clean.substring(firstBrace, lastBrace + 1);
+export function cleanJsonInput(input: string): string {
+  let clean = String(input || '').trim();
+
+  clean = clean
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/\s*```$/i, '')
+    .trim();
+
+  const first = clean.indexOf('{');
+  const last = clean.lastIndexOf('}');
+
+  if (first !== -1 && last !== -1 && last > first) {
+    clean = clean.slice(first, last + 1);
   }
+
   return clean;
 }
 
@@ -89,68 +106,102 @@ export function generateSupersetPrompt(profile: AthleteProfile, durationMinutes:
   const goalEn = translateGoal(profile.primaryGoal);
   const experienceEn = translateExperience(profile.experience);
   const locationEn = translateLocation(profile.location);
+  const equipmentStr = (profile.equipment || []).join(', ');
+  const customEquipmentStr = (profile.customEquipment || []).join(', ');
+  const injuriesStr = (profile.injuries || []).join(', ') || 'None';
+  const avoidedExercisesStr = (profile.avoidedExercises || []).join(', ') || 'None';
+  const limitationsStr = (profile.limitations || []).join(', ') || 'None';
+  const targetMusclesEn = (profile.targetMuscles || [])
+    .map((m) => translateMuscle(m))
+    .filter(Boolean)
+    .join(', ');
 
-  const prompt = `You are a high-intensity strength & conditioning specialist (CSCS, METCON expert) specializing in time-efficient, high-density workout protocols (Supersets, Antagonistic Supersets, Tri-sets, and Giant Sets).
+  const prompt = `You are an expert strength and conditioning coach. Create a FAST, INTENSE, SUPERSET-DRIVEN WORKOUT for an athlete who has limited time or motivation for a long routine.
 
-## Session Objective
-The athlete needs a **FAST, INTENSE, SUPERSET-DRIVEN WORKOUT** for days when they lack time or motivation for a long routine. The workout MUST be completed within **${durationMinutes} minutes** maximum with minimal rest and maximum metabolic stress & metabolic conditioning.
+## HARD TIME CONSTRAINT
+The entire session MUST be completed within **${durationMinutes} minutes maximum**, including warm-up, work, and rest.
+Use short rest periods, supersets, giant sets, circuit-style blocks, or density training when appropriate.
+Do not create a long traditional bodybuilding session.
 
-## Athlete Profile
+## ATHLETE PROFILE
 - **Name**: ${profile.name}
 - **Age**: ${profile.age} years old
 - **Gender**: ${profile.gender === 'male' ? 'Male' : 'Female'}
-- **Height**: ${profile.height} cm | **Current Weight**: ${profile.weight} kg
-- **Experience Level**: ${experienceEn}
+- **Height**: ${profile.height} cm
+- **Current Weight**: ${profile.weight} kg
 - **Primary Goal**: ${goalEn}
-- **Training Location**: ${locationEn}
-- **Time Available**: STRICTLY ${durationMinutes} MINUTES MAXIMUM
+- **Experience Level**: ${experienceEn}
+- **Location**: ${locationEn}
+- **Available Equipment**: ${equipmentStr || 'Standard gym equipment'}
+- **Custom Equipment**: ${customEquipmentStr || 'None'}
+- **Priority Muscle Groups**: ${targetMusclesEn || 'None'}
+- **Injuries**: ${injuriesStr}
+- **Limitations**: ${limitationsStr}
+- **Avoided Exercises**: ${avoidedExercisesStr}
 
-## Available Equipment
-${(profile.equipment || []).length > 0 ? profile.equipment.join(', ') : 'Standard gym equipment'}
+## SESSION REQUIREMENTS
+1. General warm-up: 3-5 minutes maximum.
+2. Main work must be superset-driven or circuit-driven.
+3. Keep rest short but safe: usually 30-75 seconds.
+4. Prioritize compound movements and metabolic efficiency.
+5. Include a brief cool-down/stretch if time allows.
+6. Every exercise must include:
+   - name
+   - sets
+   - reps or work time
+   - rest
+   - tempo or cadence
+   - target muscle
+   - substitute exercise
+   - stopping criterion
+   - safety note
 
-## Health & Safety Rules
-${(profile.injuries || []).length > 0 ? `- **Injuries**: ${profile.injuries.join(', ')}` : '- No reported injuries'}
-${(profile.avoidedExercises || []).length > 0 ? `- **Avoid Exercises**: ${profile.avoidedExercises.join(', ')}` : ''}
+## SAFETY RULES
+Stop immediately if there is:
+- sharp pain
+- radiating pain
+- numbness or tingling
+- weakness or loss of motor control
+- sustained worsening of symptoms
 
-## Superset Programming Rules
-1. Structure exercises as **Antagonistic Supersets** (e.g. Chest/Back, Biceps/Triceps, Quads/Hamstrings) or **Non-competing Supersets** (Upper/Lower).
-2. Keep rest between superset exercises to 0–15 seconds, and 60 seconds rest between completed superset rounds.
-3. Keep the entire workout dense: 2–3 superset pairs (total 4–6 exercises max) with high intensity.
-4. Clear Iranian/Persian names for each exercise and superset description in notes.
+For spine-sensitive movements, provide safer alternatives.
 
-## Output Requirements
+## OUTPUT FORMAT
 You MUST respond with ONLY valid JSON. No markdown, no explanations outside JSON.
 
 {
-  "program_name": "جلسه فشرده سوپرست (تمرین سریع ${durationMinutes} دقیقه‌ای)",
+  "program_name": "جلسه فشرده سوپرست (${durationMinutes} دقیقه‌ای)",
   "duration": "${durationMinutes} دقیقه",
   "days": [
     {
-      "day": "تمرین فشرده سوپرست - امروز",
-      "muscle_groups": ["عضلات کل بدن / سوپرست"],
+      "day": "جلسه فشرده سوپرست",
+      "muscle_groups": ["گروه‌های عضلانی درگیر به فارسی"],
+      "warm_up": "گرم‌کردن سریع و مشخص به فارسی",
       "exercises": [
         {
-          "name": "نام حرکت (سوپرست A1)",
-          "sets": 3,
-          "reps": "10-12 (بلافاصله با حرکت بعدی)",
-          "rest": 0,
-          "tempo": "2-0-1-0",
-          "notes": "سوپرست با حرکت بعدی - بدون استراحت بین دو حرکت"
-        },
-        {
-          "name": "نام حرکت (سوپرست A2)",
-          "sets": 3,
-          "reps": "10-12",
-          "rest": 60,
-          "tempo": "2-0-1-0",
-          "notes": "پایان سوپرست A - 60 ثانیه استراحت بعد از این حرکت"
+          "name": "نام تمرین به فارسی",
+          "sets": "تعداد ست یا rounds",
+          "reps": "تکرار یا زمان کار",
+          "rest": "استراحت به ثانیه",
+          "tempo": "تمپو یا cadence",
+          "target_muscle": "عضله هدف به فارسی",
+          "substitute": "حرکت جایگزین به فارسی",
+          "stopping_criterion": "معیار توقف ایمن",
+          "safety_note": "نکته ایمنی به فارسی"
         }
-      ]
+      ],
+      "core_work": "هسته/شکم در صورت زمان مناسب به فارسی",
+      "cardio": "هوازی فشرده در صورت مناسب بودن به فارسی",
+      "cool_down": "سرد کردن کوتاه به فارسی"
     }
   ]
 }
 
-Important: All text values in JSON must be in Persian (Farsi).
+Important:
+- All text values in JSON must be in Persian (Farsi), except common exercise names may include English.
+- The session must truly fit inside ${durationMinutes} minutes.
+- Do not add unnecessary exercises.
+- Make it intense, efficient, and practical.
 `;
 
   return prompt;
@@ -163,7 +214,7 @@ export function generateWorkoutPrompt(profile: AthleteProfile): string {
   const locationEn = translateLocation(profile.location);
   const equipmentTypeEn = EQUIPMENT_TYPE_TRANSLATIONS[profile.equipmentType] || profile.equipmentType || 'Commercial Gym';
   const programTypeEn = translateProgramType(profile.programType || 'ai_suggested');
-  
+
   const targetMusclesEn = (profile.targetMuscles || [])
     .map((m, i) => `${i + 1}. ${translateMuscle(m)}`)
     .join(', ');
@@ -171,64 +222,136 @@ export function generateWorkoutPrompt(profile: AthleteProfile): string {
   const bodyMeasEntries = profile.bodyMeasurements
     ? Object.entries(profile.bodyMeasurements).filter(([, val]) => val != null && Number(val) > 0)
     : [];
+
   const bodyMeasStr = bodyMeasEntries.length > 0
     ? bodyMeasEntries.map(([k, v]) => `${k}: ${v} cm`).join(', ')
-    : '';
+    : 'Not specified';
 
-  const preferredExercisesStr = (profile.preferredExercises || []).filter(Boolean).join(', ');
+  const preferredExercisesStr = (profile.preferredExercises || []).filter(Boolean).join(', ') || 'None';
+  const equipmentStr = (profile.equipment || []).join(', ') || 'Standard gym equipment';
+  const customEquipmentStr = (profile.customEquipment || []).join(', ') || 'None';
+  const avoidedExercisesStr = (profile.avoidedExercises || []).join(', ') || 'None';
+  const limitationsStr = (profile.limitations || []).join(', ') || 'None';
+  const injuriesStr = (profile.injuries || []).join(', ') || 'None';
 
-  // --- DYNAMIC STRICT RULES BASED ON PROGRAM TYPE ---
-  let programSpecificRules = "";
+  const strengthRecordsEntries = profile.strengthRecords
+    ? Object.entries(profile.strengthRecords).filter(([, val]) => Boolean(val))
+    : [];
+
+  const strengthRecordsStr = strengthRecordsEntries.length > 0
+    ? strengthRecordsEntries.map(([k, v]) => `${k}: ${v}`).join(', ')
+    : 'None';
+
+  const requestedTrainingDays = Number(profile.trainingDays);
+  const trainingDays = Number.isFinite(requestedTrainingDays) && requestedTrainingDays > 0
+    ? Math.min(7, Math.round(requestedTrainingDays))
+    : 4;
+
+  const timeline = (profile.timeline || '').trim() || '۱ ماه';
+  const safeTimeline = timeline.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  const sessionDuration = Number(profile.sessionDuration) || 60;
+
   const pt = (profile.programType || '').toLowerCase();
+  let programSpecificRules = '';
+
   if (pt === 'split') {
-    programSpecificRules = `- **STRICT MUSCLE SPLIT MANDATE**: You MUST cover ALL major muscle groups across the week: Chest, Back, Quadriceps, Hamstrings/Glutes, Shoulders, Biceps, Triceps, Calves, and Abs. It is STRICTLY FORBIDDEN to omit any major muscle group. Do not schedule the same muscle group on consecutive days (minimum 48-72 hours recovery required).`;
+    programSpecificRules = `- **STRICT MUSCLE SPLIT MANDATE**: Cover ALL major muscle groups across the week: Chest, Back, Quadriceps, Hamstrings/Glutes, Shoulders, Biceps, Triceps, Calves, and Abs. It is STRICTLY FORBIDDEN to omit any major muscle group. Do not schedule the same muscle group on consecutive days for heavy compounds unless recovery is explicitly managed. Adapt the split to exactly ${trainingDays} training days.`;
   } else if (pt === 'push_pull_legs') {
-    programSpecificRules = `- **STRICT PPL MANDATE**: Ensure a strict Push / Pull / Legs rotation. Legs day MUST include both Quadriceps (knee-dominant) and Hamstrings/Glutes (hip-dominant) movements. Do not turn Legs day into just a Quad day.`;
+    if (trainingDays === 3) {
+      programSpecificRules = `- **STRICT PPL MANDATE**: Use a 3-day Push / Pull / Legs rotation. Legs day MUST include both Quadriceps (knee-dominant) and Hamstrings/Glutes (hip-dominant) movements.`;
+    } else if (trainingDays === 6) {
+      programSpecificRules = `- **STRICT PPL MANDATE**: Use a 6-day Push / Pull / Legs / Push / Pull / Legs rotation. Legs days MUST include both Quadriceps and Hamstrings/Glutes movements.`;
+    } else {
+      programSpecificRules = `- **ADAPTIVE PPL MANDATE**: The athlete requested ${trainingDays} days. Do NOT force a pure 3-day PPL if it violates the requested frequency. Use a hybrid such as PPL + Upper/Lower, PPL + Full Body, or PPL with repeated priority days, while preserving Push/Pull/Legs movement patterns and producing exactly ${trainingDays} sessions.`;
+    }
   } else if (pt === 'upper_lower') {
-    programSpecificRules = `- **STRICT UPPER/LOWER MANDATE**: Ensure balanced volume between Upper and Lower body days. Every Lower body day must include both knee-dominant and hip-dominant movements.`;
+    programSpecificRules = `- **STRICT UPPER/LOWER MANDATE**: Balance volume between Upper and Lower days. Every Lower day must include knee-dominant and hip-dominant movements. Adapt the Upper/Lower sequence to exactly ${trainingDays} sessions with intelligent recovery.`;
   } else if (pt === 'full_body') {
-    programSpecificRules = `- **STRICT FULL BODY MANDATE**: Every single session must include at least one compound movement for Lower Body (Squat/Hinge pattern) and one for Upper Body (Push/Pull pattern).`;
+    programSpecificRules = `- **STRICT FULL BODY MANDATE**: Every session must include at least one lower-body compound (squat/hinge) and one upper-body push/pull pattern. Generate exactly ${trainingDays} full-body sessions with undulating emphasis to manage fatigue.`;
+  } else {
+    programSpecificRules = `- **AI-SELECTED SPLIT MANDATE**: Choose the most evidence-based split for ${trainingDays} days/week, goal, experience, equipment, and recovery. The split must produce exactly ${trainingDays} sessions and cover all major muscle groups weekly.`;
   }
 
-  // --- PRIORITY MUSCLE RULE ---
-  let priorityRule = "";
+  let priorityRule = '';
   if (targetMusclesEn) {
-    priorityRule = `- **PRIORITY MUSCLE RULE**: The muscles listed in "Priority Muscle Groups" must be placed on high-energy days (e.g., beginning of the week) and receive optimal volume (typically 2x/week). HOWEVER, you are STRICTLY FORBIDDEN from ignoring non-priority muscles. All other major muscle groups must still be trained at least once per week with maintenance volume (MEV or slightly above).`;
+    priorityRule = `- **PRIORITY MUSCLE RULE**: Priority muscles must receive optimal frequency/volume (usually 2x/week when possible) without omitting non-priority muscles. Non-priority muscles need at least maintenance volume once per week. Fit this inside exactly ${trainingDays} sessions.`;
   }
 
-  // --- SECONDARY GOAL RULE ---
-  let secondaryGoalRule = "";
+  let secondaryGoalRule = '';
   if (secondaryGoalEn) {
-    secondaryGoalRule = `- **SECONDARY GOAL INTEGRATION**: You MUST explicitly include specific exercises, techniques, or protocols that directly address the Secondary Goal (${secondaryGoalEn}) without compromising the Primary Goal.`;
+    secondaryGoalRule = `- **SECONDARY GOAL INTEGRATION**: Explicitly include exercises/protocols for Secondary Goal (${secondaryGoalEn}) without compromising Primary Goal or the ${trainingDays}-day frequency mandate.`;
   }
+
+  const sessionDurationSummaryExample = Array.from({ length: trainingDays }, (_, i) =>
+    `      "Day ${i + 1}": "XX minutes"`
+  ).join(',\n');
 
   const prompt = `You are an expert strength and conditioning coach, certified by NSCA and ACSM, with 20+ years of experience designing evidence-based training programs. You specialize in ${goalEn.toLowerCase()} and use the latest scientific research from Schoenfeld, Helms, and Israetel.
 
+## CRITICAL TRAINING DAYS MANDATE
+The athlete requested exactly ${trainingDays} training days per week.
+The JSON "days" array MUST contain exactly ${trainingDays} objects.
+Do not generate fewer or more days.
+If injuries, equipment, or recovery require changes, substitute safer exercises or redistribute volume, but keep exactly ${trainingDays} sessions.
+
 ## CRITICAL DURATION MANDATE
-The athlete explicitly requested a program timeframe / duration of: **"${profile.timeline || '1 ماه'}"**.
-You MUST set the JSON "duration" field strictly to match this exact requested timeframe in Persian (e.g., if requested is "1 ماه", JSON "duration" MUST be "۱ ماه"). DO NOT DEFAULT TO 8 OR 12 WEEKS!
+The athlete explicitly requested a program timeframe / duration of: "${timeline}".
+You MUST set the JSON "duration" field strictly to match this exact requested timeframe in Persian.
+DO NOT DEFAULT TO 4, 8, OR 12 WEEKS.
+Design a weekly template that can be progressed over this requested timeframe.
+
+## ATHLETE PROFILE
+- **Name**: ${profile.name}
+- **Age**: ${profile.age} years old
+- **Gender**: ${profile.gender === 'male' ? 'Male' : 'Female'}
+- **Height**: ${profile.height} cm
+- **Current Weight**: ${profile.weight} kg
+- **Target Weight**: ${profile.targetWeight ? profile.targetWeight + ' kg' : 'Not specified'}
+- **Primary Goal**: ${goalEn}
+- **Secondary Goal**: ${secondaryGoalEn || 'Not specified'}
+- **Experience Level**: ${experienceEn}
+- **Program Type Requested**: ${programTypeEn}
+- **Training Days Per Week**: ${trainingDays} (HARD CONSTRAINT)
+- **Session Duration Target**: ${sessionDuration} minutes (max 90 minutes)
+- **Location**: ${locationEn}
+- **Equipment Type**: ${equipmentTypeEn}
+- **Available Equipment**: ${equipmentStr}
+- **Custom Equipment**: ${customEquipmentStr}
+- **Preferred Exercises**: ${preferredExercisesStr}
+- **Exercise Preferences**: ${profile.exercisePreferences || 'None'}
+- **Avoided Exercises**: ${avoidedExercisesStr}
+- **Limitations**: ${limitationsStr}
+- **Target Muscles / Priority**: ${targetMusclesEn || 'None'}
+- **Body Measurements**: ${bodyMeasStr}
+- **Strength Records**: ${strengthRecordsStr}
+- **Sleep Quality**: ${profile.sleepHours || 'Not specified'} hours/night
+- **Job Stress**: ${profile.jobStress || 'Not specified'}
+- **Work Shift**: ${profile.workShift || 'Not specified'}
+- **Activity Level**: ${profile.activityLevel || 'Moderately Active'}
+- **Recovery Quality**: ${profile.recoveryQuality || 'Not specified'}
+- **Injuries**: ${injuriesStr}
+- **Injury Details**: ${profile.injuryDetails || 'None'}
+- **Hormone / Medication Notes**: ${profile.hormoneMedNotes || 'None'}
+- **Competition Date / Deadline**: ${profile.competitionDate || 'None'}
 
 ## PRE-PROGRAMMING ANALYSIS (MANDATORY)
-Before selecting exercises, you MUST analyze:
-1. **Primary Goal**: ${goalEn}
-2. **Experience Level**: ${experienceEn} (DO NOT assume high training history = high recovery capacity)
-3. **Age**: ${profile.age} years old
-4. **Sleep Quality**: ${profile.sleepHours || 'Not specified'} hours/night
-5. **Job Stress**: ${profile.jobStress || 'Not specified'}
-6. **Activity Level**: ${profile.activityLevel || 'Moderately Active'}
-7. **Target Weight**: ${profile.targetWeight ? profile.targetWeight + ' kg' : 'Not specified'}
-8. **Recovery Quality**: ${profile.recoveryQuality || 'Not specified'}
-9. **Injuries**: ${(profile.injuries || []).join(', ') || 'None'}
-
-## MESOCYCLE STRUCTURE (4 WEEKS)
-Generate a precise 4-week mesocycle. Each week should show progressive overload while maintaining RIR targets.
+Before selecting exercises, analyze:
+1. Primary Goal
+2. Experience Level vs recovery capacity
+3. Age
+4. Sleep Quality
+5. Job Stress
+6. Activity Level
+7. Target Weight
+8. Recovery Quality
+9. Injuries/Limitations
+10. Exactly ${trainingDays} available training days per week
 
 ## VOLUME CALCULATION (MANDATORY)
-For each muscle group, calculate:
-- **Direct Volume**: Sets performed directly targeting the muscle
-- **Indirect Volume**: Sets from compound movements that also engage the muscle
-- **Weekly Frequency**: Priority muscles = 2x/week, Non-priority = 1x/week (minimum MEV)
-- **Starting Volume**: Begin at MEV (Minimum Effective Volume) and only increase if recovery is adequate
+For each muscle group, calculate direct and indirect weekly volume across exactly ${trainingDays} sessions.
+- Priority muscles: usually 2x/week when compatible with ${trainingDays} days.
+- Non-priority muscles: at least 1x/week with maintenance volume.
+- Start near MEV and progress only with adequate recovery.
 
 ## RIR/RPE PRESCRIPTION (MANDATORY)
 For EVERY exercise, specify RIR (Reps In Reserve):
@@ -253,14 +376,15 @@ For each exercise, you MUST provide:
 Use double progression: When the athlete completes all sets at the TOP of the rep range while maintaining the prescribed RIR, increase the load by 2-5% in the next session.
 
 ## SESSION STRUCTURE (MANDATORY)
-Each session MUST include:
+Each of the ${trainingDays} sessions MUST include:
 1. **General Warm-up**: 5-10 minutes (light cardio, mobility)
 2. **Preparation Sets**: 2-3 warm-up sets for first compound movement
 3. **Main Exercises**: Compound movements first
 4. **Accessory Exercises**: Isolation and machine work
 5. **Core Work**: If appropriate for goal
 6. **Low-Intensity Cardio**: If compatible with goal (e.g., fat loss)
-**Total Session Time**: MUST NOT exceed 90 minutes (including warm-up and rest)
+
+**Total Session Time**: MUST fit within ${sessionDuration} minutes and MUST NOT exceed 90 minutes (including warm-up and rest).
 
 ## SAFETY & INJURY PROTOCOL (MANDATORY)
 If any of these occur, STOP the exercise and substitute:
@@ -279,26 +403,26 @@ For EVERY spine-sensitive exercise (e.g., Barbell Squat, Deadlift, Bent-Over Row
 ## SCIENTIFIC FRAMEWORK
 Apply these evidence-based principles:
 1. **Volume Landmarks**: Follow RP MEV, MAV, MRV for each muscle based on experience level
-2. **Frequency**: Minimum 2x/week per muscle group for Intermediate+
-3. **Progressive Overload**: Double progression model (see above)
+2. **Frequency**: Distribute frequency intelligently across exactly ${trainingDays} sessions
+3. **Progressive Overload**: Double progression model
 4. **Exercise Selection**: Biomechanically appropriate with proper movement patterns
 5. **Rest Periods**: 2-5min for heavy compounds, 1-2min for isolation
 6. **Tempo**: Include tempo prescriptions for key exercises
 7. **Periodization**: Weekly undulation if appropriate
 
-## ⚠️ STRICT PROGRAMMING RULES (MANDATORY - VIOLATION WILL RESULT IN REJECTION)
+## STRICT PROGRAMMING RULES (MANDATORY - VIOLATION WILL RESULT IN REJECTION)
 ${programSpecificRules}
 ${priorityRule}
 ${secondaryGoalRule}
-- **Recovery Rule**: Never schedule heavy compound movements for the same muscle group on consecutive days.
+- **Recovery Rule**: Never schedule heavy compound movements for the same muscle group on consecutive days unless the chosen split explicitly requires it and volume is managed.
 
 ## OUTPUT REQUIREMENTS
 You MUST respond with ONLY valid JSON. No markdown, no explanations outside JSON.
 
-The JSON must follow this EXACT structure:
+The JSON must follow this EXACT structure. The "days" array MUST contain exactly ${trainingDays} day objects.
 {
   "program_name": "نام برنامه به فارسی",
-  "duration": "مدت برنامه به فارسی (دقیقاً مطابق درخواست کاربر)",
+  "duration": "${safeTimeline}",
   "weekly_volume_summary": {
     "Chest": "X sets direct, Y sets indirect",
     "Back": "X sets direct, Y sets indirect",
@@ -311,14 +435,12 @@ The JSON must follow this EXACT structure:
     "Abs": "X sets direct"
   },
   "session_duration_summary": {
-    "Day 1": "XX minutes",
-    "Day 2": "XX minutes",
-    "Day 3": "XX minutes"
+${sessionDurationSummaryExample}
   },
   "adjustment_rules": "قوانین تعدیل برنامه بر اساس خواب، استرس، درد و افت عملکرد به فارسی",
   "days": [
     {
-      "day": "نام روز به فارسی (مثلاً: روز اول: پوش - سینه، سرشانه، پشت بازو)",
+      "day": "نام روز به فارسی (مثلاً: روز ۱: ...)",
       "muscle_groups": ["گروه عضلانی به فارسی"],
       "warm_up": "توضیح گرم‌کردن عمومی و ست‌های آماده‌سازی به فارسی",
       "exercises": [
@@ -329,12 +451,12 @@ The JSON must follow this EXACT structure:
           "rest": "زمان استراحت به ثانیه (عدد)",
           "tempo": "تمپو (مثلاً: 3-1-1-0)",
           "rir": "RIR (مثلاً: 2-3)",
-          "load_method": "روش انتخاب بار (مثلاً: RPE-based)",
+          "load_method": "روش انتخاب بار",
           "target_muscle": "عضله هدف به فارسی",
           "substitute": "حرکت جایگزین به فارسی",
-          "stopping_criterion": "معیار توقف (مثلاً: RIR 2 reached)",
-          "progression": "روش پیشرفت (مثلاً: Double progression)",
-          "notes": "نکات مهم به فارسی (مثل نوع انقباض یا زاویه)"
+          "stopping_criterion": "معیار توقف",
+          "progression": "روش پیشرفت",
+          "notes": "نکات مهم به فارسی"
         }
       ],
       "core_work": "تمرین مرکزی (در صورت وجود) به فارسی",
@@ -344,13 +466,14 @@ The JSON must follow this EXACT structure:
 }
 
 Important:
-- All text values in JSON must be in Persian (Farsi)
-- **duration** in JSON MUST be strictly set to Persian string matching requested timeframe: "${profile.timeline || '۱ ماه'}"
-- Ensure total session time fits within ${profile.sessionDuration} minutes (max 90 minutes)
-- Respect injuries, limitations, and avoided exercises strictly
-- Prioritize muscle groups in the order given, BUT DO NOT OMIT OTHER MAJOR MUSCLE GROUPS
-- EVERY exercise must have RIR, substitute, stopping criterion, and progression method
-- Include weekly volume summary and adjustment rules at the end
+- All text values in JSON must be in Persian (Farsi), except exercise names may include English if common.
+- "days" MUST have exactly ${trainingDays} elements.
+- "session_duration_summary" MUST have keys Day 1 through Day ${trainingDays}.
+- "duration" MUST be exactly "${safeTimeline}".
+- Ensure total session time fits within ${sessionDuration} minutes (max 90 minutes).
+- Respect injuries, limitations, and avoided exercises strictly.
+- EVERY exercise must have RIR, substitute, stopping criterion, and progression method.
+- Include weekly volume summary and adjustment rules.
 `;
 
   return prompt;
@@ -358,91 +481,115 @@ Important:
 
 export function generateNutritionPrompt(profile: AthleteProfile): string {
   const goalEn = translateGoal(profile.dietaryGoal || profile.primaryGoal);
+  const timeline = (profile.timeline || '').trim() || '۱ ماه';
+  const safeTimeline = timeline.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  const mealsPerDay = Number(profile.mealsPerDay) || 3;
 
-  const prompt = `You are a registered sports dietitian (RD) with a PhD in sports nutrition and 15+ years of experience creating evidence-based meal plans for athletes.
+  const favoriteFoodsStr = (profile.favoriteFoods || []).join(', ') || 'None';
+  const dislikedFoodsStr = (profile.dislikedFoods || []).join(', ') || 'None';
+  const allergiesStr = (profile.foodAllergies || []).join(', ') || 'None';
+  const healthConditionsStr = (profile.healthConditions || []).join(', ') || 'None';
+  const injuriesStr = (profile.injuries || []).join(', ') || 'None';
 
-## Athlete Profile
+  const cookingSkillText =
+    profile.cookingSkill === 'none'
+      ? 'No cooking skills - needs very simple recipes'
+      : profile.cookingSkill === 'basic'
+      ? 'Basic - can prepare simple meals'
+      : profile.cookingSkill === 'intermediate'
+      ? 'Intermediate - can prepare diverse meals'
+      : 'Advanced - can prepare complex meals';
+
+  const prompt = `You are an expert sports nutritionist and dietitian. Create a practical, culturally appropriate, evidence-based nutrition plan for this athlete.
+
+## CRITICAL DURATION MANDATE
+The athlete requested a program timeframe / duration of: "${timeline}".
+You MUST set the JSON "duration" field strictly to match this exact requested timeframe in Persian.
+DO NOT DEFAULT TO 4, 8, OR 12 WEEKS.
+
+## ATHLETE PROFILE
 - **Name**: ${profile.name}
 - **Age**: ${profile.age} years old
 - **Gender**: ${profile.gender === 'male' ? 'Male' : 'Female'}
 - **Height**: ${profile.height} cm
-- **Current Weight**: ${profile.weight} kg${profile.targetWeight ? `\n- **Target Weight**: ${profile.targetWeight} kg` : ''}
-- **Activity Level**: ${profile.activityLevel || 'Moderately Active'}
-${profile.bodyFatPercent != null ? `- **Body Fat**: ~${profile.bodyFatPercent}%` : ''}
-${profile.bodyComposition ? `- **Body Composition**: ${profile.bodyComposition}` : ''}
-${profile.sleepHours != null ? `- **Sleep**: ${profile.sleepHours} hours/night` : ''}
-${profile.jobStress ? `- **Job Stress**: ${profile.jobStress}` : ''}
-
-## Nutrition Parameters
+- **Current Weight**: ${profile.weight} kg
+- **Target Weight**: ${profile.targetWeight ? profile.targetWeight + ' kg' : 'Not specified'}
+- **Body Fat Percent**: ${profile.bodyFatPercent != null ? profile.bodyFatPercent + '%' : 'Not specified'}
+- **Body Composition**: ${profile.bodyComposition || 'Not specified'}
 - **Primary Goal**: ${goalEn}
-${profile.dietType ? `- **Diet Type**: ${profile.dietType}` : ''}
-- **Meals per Day**: ${profile.mealsPerDay || 3}
-${profile.calorieTarget ? `- **Calorie Target**: ${profile.calorieTarget} kcal/day` : ''}
-${(profile.favoriteFoods || []).length > 0 ? `- **Favorite Foods**: ${profile.favoriteFoods.join(', ')}` : ''}
-${(profile.dislikedFoods || []).length > 0 ? `- **Disliked Foods**: ${profile.dislikedFoods.join(', ')}` : ''}
-${(profile.foodAllergies || []).length > 0 ? `- **Food Allergies**: ${profile.foodAllergies.join(', ')}` : ''}
+- **Dietary Goal**: ${profile.dietaryGoal || goalEn}
+- **Activity Level**: ${profile.activityLevel || 'Moderately Active'}
+- **Training Days Per Week**: ${profile.trainingDays || 4}
+- **Sleep**: ${profile.sleepHours != null ? profile.sleepHours + ' hours/night' : 'Not specified'}
+- **Job Stress**: ${profile.jobStress || 'Not specified'}
+- **Diet Type**: ${profile.dietType || 'Balanced'}
+- **Meals Per Day**: ${mealsPerDay}
+- **Calorie Target**: ${profile.calorieTarget ? profile.calorieTarget + ' kcal/day' : 'You must calculate appropriately'}
+- **Favorite Foods**: ${favoriteFoodsStr}
+- **Disliked Foods**: ${dislikedFoodsStr}
+- **Food Allergies**: ${allergiesStr}
+- **Health Conditions**: ${healthConditionsStr}
+- **Injuries**: ${injuriesStr}
+- **Cooking Skill**: ${cookingSkillText}
+- **Hormone / Medication Notes**: ${profile.hormoneMedNotes || 'None'}
 
-## Cooking Ability
-${profile.cookingSkill === 'none' ? 'No cooking skills - needs very simple recipes' :
-  profile.cookingSkill === 'basic' ? 'Basic - can prepare simple meals' :
-  profile.cookingSkill === 'intermediate' ? 'Intermediate - can prepare diverse meals' :
-  'Advanced - can prepare complex meals'}
+## NUTRITION REQUIREMENTS
+1. Create a 7-day repeatable meal plan with exactly ${mealsPerDay} meals per day.
+2. Prioritize protein intake appropriate for the goal and body weight.
+3. Use Iranian/Middle Eastern foods where appropriate.
+4. Respect allergies, disliked foods, health conditions, and cooking skill.
+5. Provide realistic portions in household measures and grams when possible.
+6. Include hydration guidance.
+7. Include supplement notes only if evidence-based and appropriate.
+8. Do not promote extreme or unsafe diets.
+9. If calorie target is provided, respect it unless medically unsafe.
+10. All text values in JSON must be in Persian (Farsi), except common food names may include English.
 
-## Health
-${(profile.healthConditions || []).length > 0 ? `- **Health Conditions**: ${profile.healthConditions.join(', ')}` : '- No specific health conditions'}
-${(profile.injuries || []).length > 0 ? `- **Injuries**: ${profile.injuries.join(', ')}` : ''}
-
-## Requirements
-1. Create a 7-day meal plan with ${profile.mealsPerDay || 3} meals per day
-2. Calculate appropriate calories and macros for the goal
-3. Use culturally appropriate Iranian foods when possible
-4. Include meal times and portions
-5. Provide preparation notes
-6. Respect food allergies and dislikes
-
-## Output Requirements
+## OUTPUT FORMAT
 You MUST respond with ONLY valid JSON. No markdown, no explanations outside JSON.
 
 {
-  "plan_name": "نام برنامه به فارسی",
-  "duration": "مدت برنامه",
-  "daily_calories": "کالری روزانه (عدد)",
+  "plan_name": "نام برنامه تغذیه به فارسی",
+  "duration": "${safeTimeline}",
+  "daily_calories": 0,
   "macros": {
-    "protein": "پروتئین به گرم (عدد)",
-    "carbs": "کربوهیدرات به گرم (عدد)",
-    "fats": "چربی به گرم (عدد)"
+    "protein": 0,
+    "carbs": 0,
+    "fats": 0
   },
   "days": [
     {
-      "day": "نام روز به فارسی",
+      "day": "روز ۱",
       "meals": [
         {
-          "meal_name": "نام وعده",
-          "time": "ساعت",
+          "meal_name": "نام وعده به فارسی",
+          "time": "HH:MM",
           "foods": [
             {
-              "name": "نام غذا",
-              "portion": "مقدار",
-              "calories": "کالری (عدد)",
-              "protein": "پروتئین (عدد)",
-              "carbs": "کربوهیدرات (عدد)",
-              "fats": "چربی (عدد)"
+              "name": "نام غذا به فارسی",
+              "portion": "مقدار مصرف",
+              "calories": 0,
+              "protein": 0,
+              "carbs": 0,
+              "fats": 0
             }
           ],
-          "preparation": "نحوه آماده‌سازی"
+          "preparation": "نحوه تهیه ساده به فارسی"
         }
       ],
-      "total_calories": "مجموع کالری روز (عدد)",
-      "notes": "نکات"
+      "total_calories": 0,
+      "notes": "نکات روز به فارسی"
     }
   ],
-  "hydration": "توصیه آب",
-  "supplements": "توصیه‌های مکمل به فارسی (در صورت نیاز)"
+  "hydration": "راهنمای نوشیدن آب به فارسی",
+  "supplements": "توصیه مکمل غذایی در صورت نیاز به فارسی"
 }
 
 Important:
-- All text in Persian
-- Respect all allergies and dislikes
+- "days" MUST contain exactly 7 day objects.
+- Each day MUST contain exactly ${mealsPerDay} meals.
+- Macros must roughly match daily_calories: protein 4 kcal/g, carbs 4 kcal/g, fats 9 kcal/g.
+- Keep the plan practical and sustainable.
 `;
 
   return prompt;
@@ -450,72 +597,125 @@ Important:
 
 export function generateSupplementPrompt(profile: AthleteProfile): string {
   const goalEn = translateGoal(profile.supplementGoal || profile.primaryGoal);
+  const currentSupplementsStr = (profile.currentSupplements || []).join(', ') || 'None';
+  const healthConditionsStr = (profile.healthConditions || []).join(', ') || 'None';
+  const injuriesStr = (profile.injuries || []).join(', ') || 'None';
 
-  const prompt = `You are a sports nutrition PhD and certified supplement specialist (ISSN) with expertise in evidence-based supplementation. You provide personalized supplement recommendations based on scientific research.
+  const prompt = `You are an evidence-based sports nutrition and supplementation advisor.
 
-## Athlete Profile
+## TASK
+Create a safe, prioritized, budget-aware supplement recommendation for this athlete.
+
+## ATHLETE PROFILE
 - **Name**: ${profile.name}
 - **Age**: ${profile.age} years old
 - **Gender**: ${profile.gender === 'male' ? 'Male' : 'Female'}
 - **Weight**: ${profile.weight} kg
 - **Experience Level**: ${translateExperience(profile.experience)}
-${profile.supplementGoal ? `- **Supplement Goal**: ${profile.supplementGoal}` : ''}
-${(profile.currentSupplements || []).length > 0 ? `- **Current Supplements**: ${profile.currentSupplements.join(', ')}` : '- Not currently taking any supplements'}
-${profile.supplementBudget ? `- **Monthly Budget**: ${profile.supplementBudget}` : ''}
+- **Primary Goal**: ${goalEn}
+- **Supplement Goal**: ${profile.supplementGoal || goalEn}
+- **Current Supplements**: ${currentSupplementsStr}
+- **Monthly Budget**: ${profile.supplementBudget || 'Not specified'}
+- **Health Conditions**: ${healthConditionsStr}
+- **Injuries**: ${injuriesStr}
+- **Injury Details**: ${profile.injuryDetails || 'None'}
+- **Hormone / Medication Notes**: ${profile.hormoneMedNotes || 'None'}
+- **Sleep**: ${profile.sleepHours != null ? profile.sleepHours + ' hours/night' : 'Not specified'}
+- **Recovery Quality**: ${profile.recoveryQuality || 'Not specified'}
 
-## Health
-${(profile.healthConditions || []).length > 0 ? `- **Health Conditions**: ${profile.healthConditions.join(', ')}` : '- No specific health conditions'}
-${(profile.injuries || []).length > 0 ? `- **Injuries**: ${profile.injuries.join(', ')}` : ''}
-${profile.injuryDetails ? `- **Injury Details**: ${profile.injuryDetails}` : ''}
-${profile.hormoneMedNotes ? `- **Medication / Hormone Notes**: ${profile.hormoneMedNotes}` : ''}
-${(profile.foodAllergies || []).length > 0 ? `- **Food Allergies**: ${profile.foodAllergies.join(', ')}` : ''}
-${profile.sleepHours != null ? `- **Sleep**: ${profile.sleepHours} hours/night` : ''}
-${profile.recoveryQuality ? `- **Recovery Quality**: ${profile.recoveryQuality}` : ''}
+## RULES
+1. Only recommend supplements with reasonable evidence for the stated goal.
+2. Prioritize basics before exotic supplements.
+3. Respect health conditions, medications, and hormone-related notes.
+4. Do not recommend unsafe, banned, or medical treatments.
+5. Include dosage, timing, benefits, side effects, cost estimate, and notes.
+6. Make clear that supplements do not replace food, training, sleep, or medical care.
+7. All text values in JSON must be in Persian (Farsi), except English supplement names may be included.
 
-## Requirements
-1. Recommend evidence-based supplements only
-2. Prioritize supplements with strong scientific backing (Level A evidence)
-3. Consider potential interactions with current supplements
-4. Respect health conditions and allergies
-5. Stay within budget if specified
-
-## Output Requirements
+## OUTPUT FORMAT
 You MUST respond with ONLY valid JSON. No markdown, no explanations outside JSON.
 
 {
-  "recommendation_title": "عنوان توصیه به فارسی",
-  "summary": "خلاصه کوتاه به فارسی",
+  "recommendation_title": "عنوان توصیه مکمل به فارسی",
+  "summary": "خلاصه کوتاه و علمی به فارسی",
   "supplements": [
     {
       "name": "نام مکمل به فارسی",
       "english_name": "English name",
-      "priority": "بالا",
-      "dosage": "دوز مصرف",
+      "priority": "بالا / متوسط / پایین",
+      "dosage": "دوز پیشنهادی",
       "timing": "زمان مصرف",
-      "benefits": "فواید",
-      "side_effects": "عوارض احتمالی",
-      "estimated_cost": "هزینه تقریبی ماهانه",
-      "recommended_brands": "برندهای پیشنهادی",
-      "notes": "نکات"
+      "benefits": "فواید احتمالی به فارسی",
+      "side_effects": "عوارض احتمالی به فارسی",
+      "estimated_cost": "برآورد هزینه به فارسی",
+      "recommended_brands": "برندهای معتبر یا معیار کیفیت",
+      "notes": "نکات مهم به فارسی"
     }
   ],
-  "total_estimated_cost": "هزینه کل ماهانه",
-  "important_notes": "نکات مهم",
-  "warnings": "هشدارها"
+  "total_estimated_cost": "برآورد هزینه کلی به فارسی",
+  "important_notes": "نکات مهم به فارسی",
+  "warnings": "هشدارهای ایمنی به فارسی"
 }
 
-Important: All text in Persian. Safety first. Use recommendation_title and supplements (not plan_name / daily_supplements).
+Important:
+- "supplements" must be a non-empty array.
+- Keep recommendations conservative and evidence-based.
+- If medication or hormone notes exist, advise consulting a physician before use.
 `;
 
   return prompt;
 }
 
-export function validateWorkoutJSON(json: string): { valid: boolean; data?: any; error?: string } {
+export function validateWorkoutJSON(json: string, expectedDays?: number): { valid: boolean; data?: any; error?: string } {
   try {
     const data = JSON.parse(cleanJsonInput(json));
-    if (!data.program_name || !data.days || !Array.isArray(data.days)) {
-      return { valid: false, error: 'ساختار JSON ناقص است (program_name یا days وجود ندارد)' };
+
+    if (!data.program_name || typeof data.program_name !== 'string') {
+      return { valid: false, error: 'فیلد program_name یک رشته معتبر نیست' };
     }
+
+    if (!data.duration || typeof data.duration !== 'string') {
+      return { valid: false, error: 'فیلد duration یک رشته معتبر نیست' };
+    }
+
+    if (!data.days || !Array.isArray(data.days)) {
+      return { valid: false, error: 'ساختار JSON ناقص است (days وجود ندارد یا آرایه نیست)' };
+    }
+
+    if (data.days.length === 0) {
+      return { valid: false, error: 'آرایه days خالی است' };
+    }
+
+    if (typeof expectedDays === 'number' && Number.isFinite(expectedDays) && expectedDays > 0) {
+      const normalizedExpected = Math.min(7, Math.round(expectedDays));
+      if (data.days.length !== normalizedExpected) {
+        return {
+          valid: false,
+          error: `تعداد روزهای برنامه (${data.days.length}) با تعداد روزهای درخواستی پروفایل (${normalizedExpected}) مطابقت ندارد.`,
+        };
+      }
+    }
+
+    for (let i = 0; i < data.days.length; i++) {
+      const day = data.days[i];
+
+      if (!day || typeof day !== 'object') {
+        return { valid: false, error: `عنصر شماره ${i + 1} در days یک آبجکت نیست` };
+      }
+
+      if (!day.day || typeof day.day !== 'string') {
+        return { valid: false, error: `فیلد day در روز ${i + 1} معتبر نیست` };
+      }
+
+      if (!Array.isArray(day.exercises)) {
+        return { valid: false, error: `فیلد exercises در روز ${i + 1} آرایه نیست` };
+      }
+
+      if (day.exercises.length === 0) {
+        return { valid: false, error: `روز ${i + 1} هیچ حرکتی ندارد` };
+      }
+    }
+
     return { valid: true, data };
   } catch (e) {
     return { valid: false, error: 'فرمت JSON نامعتبر است: ' + (e as Error).message };
@@ -525,9 +725,43 @@ export function validateWorkoutJSON(json: string): { valid: boolean; data?: any;
 export function validateNutritionJSON(json: string): { valid: boolean; data?: any; error?: string } {
   try {
     const data = JSON.parse(cleanJsonInput(json));
-    if (!data.plan_name || !data.days || !Array.isArray(data.days)) {
-      return { valid: false, error: 'ساختار JSON ناقص است (plan_name یا days وجود ندارد)' };
+
+    if (!data.plan_name || typeof data.plan_name !== 'string') {
+      return { valid: false, error: 'فیلد plan_name یک رشته معتبر نیست' };
     }
+
+    if (!data.duration || typeof data.duration !== 'string') {
+      return { valid: false, error: 'فیلد duration یک رشته معتبر نیست' };
+    }
+
+    if (!data.days || !Array.isArray(data.days)) {
+      return { valid: false, error: 'ساختار JSON ناقص است (days وجود ندارد یا آرایه نیست)' };
+    }
+
+    if (data.days.length === 0) {
+      return { valid: false, error: 'آرایه days خالی است' };
+    }
+
+    for (let i = 0; i < data.days.length; i++) {
+      const day = data.days[i];
+
+      if (!day || typeof day !== 'object') {
+        return { valid: false, error: `عنصر شماره ${i + 1} در days یک آبجکت نیست` };
+      }
+
+      if (!day.day || typeof day.day !== 'string') {
+        return { valid: false, error: `فیلد day در روز ${i + 1} معتبر نیست` };
+      }
+
+      if (!Array.isArray(day.meals)) {
+        return { valid: false, error: `فیلد meals در روز ${i + 1} آرایه نیست` };
+      }
+
+      if (day.meals.length === 0) {
+        return { valid: false, error: `روز ${i + 1} هیچ وعده غذایی ندارد` };
+      }
+    }
+
     return { valid: true, data };
   } catch (e) {
     return { valid: false, error: 'فرمت JSON نامعتبر است: ' + (e as Error).message };
@@ -537,58 +771,38 @@ export function validateNutritionJSON(json: string): { valid: boolean; data?: an
 export function validateSupplementJSON(json: string): { valid: boolean; data?: any; error?: string } {
   try {
     const raw = JSON.parse(cleanJsonInput(json));
+
     if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
       return { valid: false, error: 'JSON باید یک آبجکت باشد' };
     }
 
-    const title =
-      (typeof raw.recommendation_title === 'string' && raw.recommendation_title) ||
-      (typeof raw.plan_name === 'string' && raw.plan_name) ||
-      '';
+    const title = raw.recommendation_title || raw.plan_name;
 
-    let list: any[] = [];
-    if (Array.isArray(raw.supplements)) list = raw.supplements;
-    else if (Array.isArray(raw.daily_supplements)) list = raw.daily_supplements;
-
-    if (!title) {
+    if (!title || typeof title !== 'string') {
       return { valid: false, error: 'فیلد recommendation_title (یا plan_name) الزامی است' };
     }
-    if (!list.length) {
-      return { valid: false, error: 'فیلد supplements باید آرایه‌ای غیرخالی از مکمل‌ها باشد' };
+
+    if (!raw.supplements || !Array.isArray(raw.supplements)) {
+      return { valid: false, error: 'فیلد supplements باید آرایه‌ای از مکمل‌ها باشد' };
     }
 
-    const supplements = list.map((s: any, i: number) => {
-      if (!s || typeof s !== 'object') {
-        throw new Error(`مکمل ${i + 1} نامعتبر است`);
-      }
-      const name = s.name || s.supplement_name || '';
-      if (!name) {
-        throw new Error(`مکمل ${i + 1}: فیلد name الزامی است`);
-      }
-      return {
-        name: String(name),
-        english_name: s.english_name ? String(s.english_name) : '',
-        priority: s.priority ? String(s.priority) : 'متوسط',
-        dosage: s.dosage ? String(s.dosage) : '',
-        timing: s.timing ? String(s.timing) : '',
-        benefits: s.benefits ? String(s.benefits) : '',
-        side_effects: s.side_effects ? String(s.side_effects) : '',
-        estimated_cost: s.estimated_cost ? String(s.estimated_cost) : '',
-        recommended_brands: s.recommended_brands ? String(s.recommended_brands) : '',
-        notes: s.notes ? String(s.notes) : '',
-      };
-    });
+    if (raw.supplements.length === 0) {
+      return { valid: false, error: 'فیلد supplements نباید خالی باشد' };
+    }
 
-    const data = {
-      recommendation_title: title,
-      summary: raw.summary ? String(raw.summary) : '',
-      supplements,
-      total_estimated_cost: raw.total_estimated_cost ? String(raw.total_estimated_cost) : '',
-      important_notes: raw.important_notes ? String(raw.important_notes) : '',
-      warnings: raw.warnings ? String(raw.warnings) : '',
-    };
+    for (let i = 0; i < raw.supplements.length; i++) {
+      const supplement = raw.supplements[i];
 
-    return { valid: true, data };
+      if (!supplement || typeof supplement !== 'object') {
+        return { valid: false, error: `مکمل شماره ${i + 1} یک آبجکت نیست` };
+      }
+
+      if (!supplement.name || typeof supplement.name !== 'string') {
+        return { valid: false, error: `فیلد name برای مکمل شماره ${i + 1} الزامی است` };
+      }
+    }
+
+    return { valid: true, data: raw };
   } catch (e) {
     return { valid: false, error: 'فرمت JSON نامعتبر است: ' + (e as Error).message };
   }

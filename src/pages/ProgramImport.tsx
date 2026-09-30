@@ -4,22 +4,47 @@ import { useTheme } from '../context/ThemeContext';
 import { validateWorkoutJSON } from '../utils/promptGenerator';
 import { WorkoutProgram } from '../types';
 import { v4 as uuidv4 } from 'uuid';
-import { Import as ImportIcon, Check, AlertCircle, Trash2, Save, Eye, Calendar as CalendarIcon, Clock } from 'lucide-react';
-import { toPersianNumber, formatDateJalali, getProgramTimelineDetails } from '../utils/jalali';
+import {
+  Import as ImportIcon,
+  Check,
+  AlertCircle,
+  Trash2,
+  Save,
+  Eye,
+  Calendar as CalendarIcon,
+  Clock,
+} from 'lucide-react';
+import { toPersianNumber, getProgramTimelineDetails } from '../utils/jalali';
 
 export default function ProgramImport() {
-  const { activeProfile, programs, addProgram, updateProgram, removeProgram, setActiveProgram, state } = useAppContext();
+  const {
+    activeProfile,
+    programs,
+    addProgram,
+    updateProgram,
+    removeProgram,
+    setActiveProgram,
+    state,
+  } = useAppContext();
+
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+
   const [jsonInput, setJsonInput] = useState('');
   const [startDate, setStartDate] = useState(() => new Date().toISOString().split('T')[0]);
-  const [validationResult, setValidationResult] = useState<{ valid: boolean; data?: any; error?: string } | null>(null);
+  const [validationResult, setValidationResult] = useState<{
+    valid: boolean;
+    data?: any;
+    error?: string;
+  } | null>(null);
   const [showPreview, setShowPreview] = useState(false);
   const [imported, setImported] = useState(false);
 
   const handleValidate = () => {
-    const result = validateWorkoutJSON(jsonInput);
+    const expectedDays = activeProfile ? Number(activeProfile.trainingDays) : undefined;
+    const result = validateWorkoutJSON(jsonInput, expectedDays);
     setValidationResult(result);
+
     if (result.valid) {
       setShowPreview(true);
     }
@@ -29,6 +54,7 @@ export default function ProgramImport() {
     if (!validationResult?.valid || !validationResult.data || !activeProfile) return;
 
     const programId = uuidv4();
+
     const program: WorkoutProgram = {
       id: programId,
       profileId: activeProfile.id,
@@ -40,12 +66,12 @@ export default function ProgramImport() {
         id: uuidv4(),
         day: day.day,
         muscleGroups: day.muscle_groups || [],
-        exercises: day.exercises.map((ex: any) => ({
+        exercises: (day.exercises || []).map((ex: any) => ({
           id: uuidv4(),
           name: ex.name,
-          sets: parseInt(ex.sets) || 4,
-          reps: ex.reps,
-          rest: parseInt(ex.rest) || 90,
+          sets: Number(ex.sets) || 4,
+          reps: ex.reps || '',
+          rest: Number(ex.rest) || 90,
           tempo: ex.tempo || '',
           notes: ex.notes || '',
         })),
@@ -58,37 +84,43 @@ export default function ProgramImport() {
     setJsonInput('');
     setValidationResult(null);
     setShowPreview(false);
+
     setTimeout(() => setImported(false), 3000);
   };
 
-  const sampleJSON = JSON.stringify({
-    "program_name": "برنامه عضله‌سازی ۴ روزه",
-    "duration": "۸ هفته",
-    "days": [
-      {
-        "day": "روز اول - سینه و پشت‌بازو",
-        "muscle_groups": ["سینه", "پشت‌بازو"],
-        "exercises": [
+  const makeSampleJSON = (days: number) => {
+    const safeDays = Math.min(7, Math.max(1, Number(days) || 4));
+
+    const sample = {
+      program_name: `برنامه نمونه ${toPersianNumber(safeDays)} روزه`,
+      duration: '۱ ماه',
+      days: Array.from({ length: safeDays }, (_, index) => ({
+        day: `روز ${toPersianNumber(index + 1)} - نمونه`,
+        muscle_groups: ['نمونه'],
+        warm_up: 'گرم‌کردن عمومی ۵ دقیقه‌ای',
+        exercises: [
           {
-            "name": "پرس سینه هالتر",
-            "sets": "4",
-            "reps": "8-10",
-            "rest": "120",
-            "tempo": "3-1-1-0",
-            "notes": "کنترل کامل در فاز منفی"
+            name: 'حرکت نمونه',
+            sets: '3',
+            reps: '8-12',
+            rest: '90',
+            tempo: '2-1-1-0',
+            rir: '2',
+            load_method: 'RPE-based',
+            target_muscle: 'عضله نمونه',
+            substitute: 'حرکت جایگزین نمونه',
+            stopping_criterion: 'RIR 2 reached',
+            progression: 'Double progression',
+            notes: 'این فقط یک نمونه ساختاری است.',
           },
-          {
-            "name": "پرس بالا سینه دمبل",
-            "sets": "3",
-            "reps": "10-12",
-            "rest": "90",
-            "tempo": "2-1-1-0",
-            "notes": "انقباض در بالا"
-          }
-        ]
-      }
-    ]
-  }, null, 2);
+        ],
+        core_work: 'در صورت نیاز',
+        cardio: 'در صورت نیاز',
+      })),
+    };
+
+    return JSON.stringify(sample, null, 2);
+  };
 
   if (!activeProfile) {
     return (
@@ -131,12 +163,19 @@ export default function ProgramImport() {
         <h3 className={'font-bold mb-3 ' + (isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]')}>
           JSON برنامه تمرینی
         </h3>
+
         <p className={'text-sm mb-3 ' + (isDark ? 'text-gray-400' : 'text-[#0f766e]/70')}>
-          خروجی هوش مصنوعی را در قالب JSON وارد کنید:
+          خروجی هوش مصنوعی را در قالب JSON وارد کنید.
+          سیستم بررسی می‌کند که تعداد روزهای برنامه دقیقاً با پروفایل کاربر مطابقت داشته باشد.
         </p>
+
         <textarea
           value={jsonInput}
-          onChange={e => { setJsonInput(e.target.value); setValidationResult(null); setShowPreview(false); }}
+          onChange={e => {
+            setJsonInput(e.target.value);
+            setValidationResult(null);
+            setShowPreview(false);
+          }}
           className={`w-full border rounded-xl px-4 py-3 text-sm font-mono focus:outline-none resize-none ${
             isDark
               ? 'bg-[#0d0d1a] border-gray-700 text-white focus:border-[#14b8a6]'
@@ -144,7 +183,7 @@ export default function ProgramImport() {
           }`}
           rows={10}
           dir="ltr"
-          placeholder='{"program_name": "...", "days": [...]}'
+          placeholder='{"program_name": "...", "duration": "...", "days": [...]}'
         />
 
         <div className="flex gap-3 mt-4">
@@ -160,8 +199,9 @@ export default function ProgramImport() {
             <Eye size={16} />
             اعتبارسنجی و پیش‌نمایش
           </button>
+
           <button
-            onClick={() => setJsonInput(sampleJSON)}
+            onClick={() => setJsonInput(makeSampleJSON(activeProfile.trainingDays))}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm transition-all ${
               isDark
                 ? 'bg-gray-700 text-white hover:bg-gray-600'
@@ -196,6 +236,7 @@ export default function ProgramImport() {
               <Check size={18} />
               پیش‌نمایش برنامه
             </h3>
+
             <button
               onClick={handleImport}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm transition-all ${
@@ -216,12 +257,14 @@ export default function ProgramImport() {
                 {validationResult.data.program_name}
               </span>
             </div>
+
             <div className="flex items-center gap-4 text-sm">
               <span className={isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}>مدت:</span>
               <span className={isDark ? 'text-white' : 'text-[#134e4a]'}>
                 {validationResult.data.duration}
               </span>
             </div>
+
             <div className="flex items-center gap-4 text-sm">
               <span className={isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}>تاریخ شروع برنامه:</span>
               <input
@@ -233,8 +276,16 @@ export default function ProgramImport() {
                 }`}
               />
             </div>
+
             <div className="flex items-center gap-4 text-sm">
-              <span className={isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}>تعداد روزها:</span>
+              <span className={isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}>تعداد روزهای پروفایل:</span>
+              <span className={isDark ? 'text-white' : 'text-[#134e4a]'}>
+                {toPersianNumber(activeProfile.trainingDays)} روز
+              </span>
+            </div>
+
+            <div className="flex items-center gap-4 text-sm">
+              <span className={isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}>تعداد روزهای JSON:</span>
               <span className={isDark ? 'text-white' : 'text-[#134e4a]'}>
                 {toPersianNumber(validationResult.data.days.length)} روز
               </span>
@@ -248,11 +299,17 @@ export default function ProgramImport() {
                   <h4 className={'font-bold mb-2 ' + (isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]')}>
                     {day.day}
                   </h4>
+
                   <div className="flex flex-wrap gap-1 mb-3">
                     {(day.muscle_groups || []).map((mg: string, j: number) => (
-                      <span key={j} className={`px-2 py-0.5 rounded text-xs ${isDark ? 'bg-[#4a90d9]/20 text-[#4a90d9]' : 'bg-[#14b8a6]/15 text-[#0d9488]'}`}>{mg}</span>
+                      <span key={j} className={`px-2 py-0.5 rounded text-xs ${
+                        isDark ? 'bg-[#4a90d9]/20 text-[#4a90d9]' : 'bg-[#14b8a6]/15 text-[#0d9488]'
+                      }`}>
+                        {mg}
+                      </span>
                     ))}
                   </div>
+
                   <div className="space-y-2">
                     {(day.exercises || []).map((ex: any, k: number) => (
                       <div key={k} className={`flex items-center justify-between text-sm border-b pb-2 ${
@@ -279,6 +336,7 @@ export default function ProgramImport() {
         <h3 className={'font-bold mb-4 ' + (isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]')}>
           برنامه‌های ذخیره شده ({activeProfile.name})
         </h3>
+
         {programs.length === 0 ? (
           <p className={'text-sm text-center py-4 ' + (isDark ? 'text-gray-500' : 'text-[#0f766e]/50')}>
             هنوز برنامه تمرینی برای این پروفایل وارد نشده است
@@ -287,6 +345,7 @@ export default function ProgramImport() {
           <div className="space-y-3">
             {programs.map(program => {
               const timeline = getProgramTimelineDetails(program.startDate, program.duration, program.createdAt);
+
               return (
                 <div
                   key={program.id}
@@ -305,10 +364,15 @@ export default function ProgramImport() {
                       <h4 className={'font-bold ' + (isDark ? 'text-white' : 'text-[#134e4a]')}>
                         {program.name}
                       </h4>
+
                       <p className={'text-xs mt-1 flex flex-wrap items-center gap-2 ' + (isDark ? 'text-gray-400' : 'text-[#0f766e]/70')}>
-                        <span>مدت: <strong>{program.duration}</strong> ({toPersianNumber(timeline.totalDays)} روز)</span>
+                        <span>
+                          مدت: <strong>{program.duration}</strong> ({toPersianNumber(timeline.totalDays)} روز)
+                        </span>
                         <span>• {toPersianNumber(program.days.length)} روز تمرین</span>
-                        <span>• {toPersianNumber(program.days.reduce((acc, d) => acc + d.exercises.length, 0))} حرکت</span>
+                        <span>
+                          • {toPersianNumber(program.days.reduce((acc, d) => acc + d.exercises.length, 0))} حرکت
+                        </span>
                       </p>
 
                       <div className="flex items-center gap-2 mt-2 text-xs">
@@ -316,6 +380,7 @@ export default function ProgramImport() {
                         <span className={isDark ? 'text-gray-300' : 'text-[#134e4a]'}>
                           شروع: <strong>{timeline.startDateJalali}</strong> | پایان: <strong>{timeline.endDateJalali}</strong>
                         </span>
+
                         <input
                           type="date"
                           value={program.startDate ? program.startDate.split('T')[0] : timeline.startDateIso}
@@ -330,7 +395,10 @@ export default function ProgramImport() {
                       </div>
 
                       <div className="mt-2 flex items-center gap-2 text-xs">
-                        <Clock size={14} className={timeline.isAlarmRequired ? 'text-amber-500 animate-pulse' : (isDark ? 'text-gray-400' : 'text-[#0f766e]/70')} />
+                        <Clock
+                          size={14}
+                          className={timeline.isAlarmRequired ? 'text-amber-500 animate-pulse' : (isDark ? 'text-gray-400' : 'text-[#0f766e]/70')}
+                        />
                         <span className={timeline.isAlarmRequired ? 'text-amber-500 font-bold' : (isDark ? 'text-gray-400' : 'text-[#0f766e]/70')}>
                           {timeline.daysRemaining > 0
                             ? `${toPersianNumber(timeline.daysRemaining)} روز باقی مانده`
@@ -360,6 +428,7 @@ export default function ProgramImport() {
                           فعال‌سازی
                         </button>
                       )}
+
                       <button
                         onClick={() => {
                           if (confirm('آیا مطمئن هستید؟')) removeProgram(program.id);
