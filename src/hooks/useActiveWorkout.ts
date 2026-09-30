@@ -1,11 +1,20 @@
 import { useState, useEffect, useCallback } from 'react';
 
+export interface SetRecord {
+  exerciseId: string;
+  exerciseName: string;
+  setNumber: number;
+  targetReps: string | number;
+  completed: boolean;
+  actualReps?: number;
+  weight?: number;
+}
+
 export interface ActiveSession {
   programId: string;
   dayId: string;
   startTime: number;
-  completedExercises: string[];
-  setsLog: Record<string, any[]>;
+  setsLog?: SetRecord[]; // تغییر به آرایه برای هماهنگی با ترکر
 }
 
 const STORAGE_KEY = 'coachino_active_session';
@@ -13,7 +22,6 @@ const STORAGE_KEY = 'coachino_active_session';
 export function useActiveWorkout() {
   const [session, setSession] = useState<ActiveSession | null>(null);
 
-  // بارگذاری از حافظه هنگام شروع برنامه
   useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
@@ -25,7 +33,6 @@ export function useActiveWorkout() {
     }
   }, []);
 
-  // ذخیره خودکار در حافظه هر بار که وضعیت تغییر کند
   useEffect(() => {
     if (session) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
@@ -39,8 +46,7 @@ export function useActiveWorkout() {
       programId,
       dayId,
       startTime: Date.now(),
-      completedExercises: [],
-      setsLog: {},
+      setsLog: [],
     });
   }, []);
 
@@ -48,11 +54,16 @@ export function useActiveWorkout() {
     setSession(null);
   }, []);
 
+  const updateSession = useCallback((updates: Partial<ActiveSession>) => {
+    setSession(prev => prev ? { ...prev, ...updates } : null);
+  }, []);
+
   return {
     session,
     isActive: !!session,
     startSession,
     endSession,
+    updateSession,
     setSession,
   };
 }
