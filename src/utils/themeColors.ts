@@ -5,11 +5,11 @@
 
 export const themeColors = {
   primary: {
-    dark: '#b8f542',
+    dark: '#14b8a6',
     light: '#0d9488',
   },
   primaryLight: {
-    dark: '#d9ff5c',
+    dark: '#2dd4bf',
     light: '#14b8a6',
   },
   textPrimary: {
@@ -33,11 +33,11 @@ export const themeColors = {
     light: 'from-white to-[#f0fdfa]',
   },
   border: {
-    dark: 'border-[#b8f542]/10',
+    dark: 'border-[#14b8a6]/10',
     light: 'border-[#14b8a6]/15',
   },
   borderStrong: {
-    dark: 'border-[#b8f542]/30',
+    dark: 'border-[#14b8a6]/30',
     light: 'border-[#14b8a6]/30',
   },
   bgSubtle: {
@@ -75,9 +75,9 @@ export function getThemeClasses(isDark: boolean) {
     textPrimary: isDark ? 'text-white' : 'text-[#134e4a]',
     textSecondary: isDark ? 'text-gray-400' : 'text-[#0f766e]/70',
     textMuted: isDark ? 'text-gray-500' : 'text-[#0f766e]/50',
-    textAccent: isDark ? 'text-[#b8f542]' : 'text-[#0d9488]',
+    textAccent: isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]',
     card: isDark
-      ? 'bg-[#161616] border-[#b8f542]/10'
+      ? 'bg-[#161616] border-[#14b8a6]/10'
       : 'bg-white border-[#14b8a6]/15',
     cardGradient: isDark
       ? 'bg-gradient-to-b from-[#161616] to-[#1a1a1a]'
@@ -86,16 +86,16 @@ export function getThemeClasses(isDark: boolean) {
       ? 'bg-gradient-to-l from-[#161616] to-[#1a1a1a]'
       : 'bg-gradient-to-l from-white to-[#f0fdfa]',
     input: isDark
-      ? 'bg-[#0c0c0c] border-gray-700 text-white focus:border-[#b8f542]'
+      ? 'bg-[#0c0c0c] border-gray-700 text-white focus:border-[#14b8a6]'
       : 'bg-gray-50 border-gray-300 text-gray-900 focus:border-[#14b8a6]',
     buttonPrimary: isDark
-      ? 'bg-gradient-to-l from-[#b8f542] to-[#d9ff5c] text-[#0c0c0c]'
+      ? 'bg-gradient-to-l from-[#14b8a6] to-[#2dd4bf] text-[#0c0c0c]'
       : 'bg-gradient-to-l from-[#14b8a6] to-[#0d9488] text-white',
     buttonSecondary: isDark
       ? 'bg-gray-700 text-white hover:bg-gray-600'
       : 'bg-gray-200 text-gray-900 hover:bg-gray-300',
-    border: isDark ? 'border-[#b8f542]/10' : 'border-[#14b8a6]/15',
-    borderStrong: isDark ? 'border-[#b8f542]/30' : 'border-[#14b8a6]/30',
+    border: isDark ? 'border-[#14b8a6]/10' : 'border-[#14b8a6]/15',
+    borderStrong: isDark ? 'border-[#14b8a6]/30' : 'border-[#14b8a6]/30',
     badge: isDark
       ? 'bg-[#4a90d9]/20 text-[#6bb5ff]'
       : 'bg-[#14b8a6]/15 text-[#0d9488]',

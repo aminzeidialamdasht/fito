@@ -31,6 +31,7 @@ export default function Dashboard() {
   const dayOfWeek = (today.getDay() + 1) % 7;
   const todayWorkout = activeProgram?.days[dayOfWeek % (activeProgram?.days.length || 1)];
 
+  // بررسی هوشمند برای دکمه ادامه جلسه
   const isTodaySessionActive = isActive && session?.dayId === String(dayOfWeek % (activeProgram?.days.length || 1));
 
   const activeNutrition = nutritionPrograms.find(p => p.id === state.activeNutritionProgram) || nutritionPrograms[0];
@@ -66,6 +67,7 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-5">
+      {/* Profile Selector */}
       {profiles.length > 1 && (
         <div className={`rounded-2xl p-3 border theme-transition ${
           isDark ? 'bg-[#1a1a2e]/50 border-[#d4af37]/10' : 'bg-white/70 border-[#14b8a6]/20'
@@ -95,6 +97,7 @@ export default function Dashboard() {
         </div>
       )}
 
+      {/* Quick Actions */}
       <div className="flex gap-2">
         <button
           onClick={() => navigate('/prompt')}
@@ -120,6 +123,7 @@ export default function Dashboard() {
         </button>
       </div>
 
+      {/* Today's Workout Card */}
       {todayWorkout && (
         <div className={`relative rounded-3xl p-6 overflow-hidden theme-transition ${
           isDark
@@ -193,7 +197,7 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* بقیه کدها بدون تغییر */}
+      {/* Nutrition & Supplements Sections (unchanged logic) */}
       {activeNutrition && todayNutritionDay && (
         <div className={`rounded-2xl p-5 border theme-transition ${
           isDark ? 'bg-gradient-to-l from-[#22c55e]/5 to-transparent border-[#22c55e]/20' : 'bg-gradient-to-l from-[#ecfdf5] to-white border-[#10b981]/20'
@@ -258,6 +262,7 @@ export default function Dashboard() {
         </div>
       )}
 
+      {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <StatCard icon={<Activity size={18} />} label="جلسات" value={toPersianNumber(totalSessions)} subtext="تکمیل شده" color={isDark ? 'text-[#4a90d9]' : 'text-[#0d9488]'} bgColor={isDark ? 'bg-[#4a90d9]/10' : 'bg-[#14b8a6]/10'} borderColor={isDark ? 'border-[#4a90d9]/20' : 'border-[#14b8a6]/20'} isDark={isDark} />
         <StatCard icon={<TrendingUp size={18} />} label="حجم کل" value={toPersianNumber(totalVolume.toLocaleString())} subtext="کیلوگرم" color={isDark ? 'text-[#22c55e]' : 'text-[#059669]'} bgColor={isDark ? 'bg-[#22c55e]/10' : 'bg-[#10b981]/10'} borderColor={isDark ? 'border-[#22c55e]/20' : 'border-[#10b981]/20'} isDark={isDark} />
@@ -265,6 +270,7 @@ export default function Dashboard() {
         <StatCard icon={<Target size={18} />} label="هدف هفتگی" value={`${toPersianNumber(weeklyCompleted)}/${toPersianNumber(weeklyGoal)}`} subtext="جلسه" color={isDark ? 'text-[#d4af37]' : 'text-[#0d9488]'} bgColor={isDark ? 'bg-[#d4af37]/10' : 'bg-[#14b8a6]/10'} borderColor={isDark ? 'border-[#d4af37]/20' : 'border-[#14b8a6]/20'} isDark={isDark} progress={weeklyProgress} />
       </div>
 
+      {/* Weekly Progress Chart */}
       <div className={`rounded-2xl p-5 border theme-transition ${isDark ? 'bg-[#1a1a2e] border-[#d4af37]/10' : 'bg-white border-[#14b8a6]/15'}`}>
         <div className="flex items-center justify-between mb-3">
           <h3 className={`font-bold flex items-center gap-2 ${isDark ? 'text-[#d4af37]' : 'text-[#0d9488]'}`}><Calendar size={16} />پیشرفت هفتگی</h3>
@@ -290,6 +296,7 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* Last Session Summary */}
       {lastSession && (
         <div className={`rounded-2xl p-5 border theme-transition ${isDark ? 'bg-gradient-to-l from-[#22c55e]/5 to-transparent border-[#22c55e]/20' : 'bg-gradient-to-l from-[#ecfdf5] to-white border-[#10b981]/20'}`}>
           <div className="flex items-center justify-between mb-4">
@@ -324,6 +331,7 @@ export default function Dashboard() {
         </div>
       )}
 
+      {/* Profile Info */}
       {profile && (
         <div className={`rounded-2xl p-5 border theme-transition ${isDark ? 'bg-[#1a1a2e] border-[#d4af37]/10' : 'bg-white border-[#14b8a6]/15'}`}>
           <div className="flex items-center justify-between mb-4">
@@ -339,6 +347,7 @@ export default function Dashboard() {
         </div>
       )}
 
+      {/* Weight Trend Chart */}
       {weightData.length > 1 && (
         <div className={`rounded-2xl p-5 border theme-transition ${isDark ? 'bg-[#1a1a2e] border-[#d4af37]/10' : 'bg-white border-[#14b8a6]/15'}`}>
           <h3 className={`font-bold mb-4 flex items-center gap-2 ${isDark ? 'text-[#d4af37]' : 'text-[#0d9488]'}`}><TrendingUp size={16} />روند وزن</h3>
@@ -360,6 +369,7 @@ export default function Dashboard() {
         </div>
       )}
 
+      {/* Empty State */}
       {!profile && (
         <div className={`rounded-2xl p-6 border theme-transition ${isDark ? 'bg-gradient-to-l from-[#d4af37]/10 to-transparent border-[#d4af37]/30' : 'bg-gradient-to-l from-[#f0fdfa] to-white border-[#14b8a6]/30'}`}>
           <div className="flex items-center gap-3">

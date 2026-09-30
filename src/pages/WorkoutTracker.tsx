@@ -36,7 +36,6 @@ export default function WorkoutTracker() {
   const selectedDay = activeProgram?.days[selectedDayIndex];
   const isCurrentDayActive = isActive && session?.dayId === String(selectedDayIndex);
 
-  // مدیریت ست‌ها در State موقت اما سینک شده با هوک
   const [localSets, setLocalSets] = useState<any[]>([]);
 
   useEffect(() => {

@@ -4,21 +4,72 @@ import { useTheme } from '../context/ThemeContext';
 import { validateWorkoutJSON } from '../utils/promptGenerator';
 import { WorkoutProgram } from '../types';
 import { v4 as uuidv4 } from 'uuid';
-import { Import as ImportIcon, Check, AlertCircle, Trash2, Save, Eye } from 'lucide-react';
-import { toPersianNumber } from '../utils/jalali';
+import {
+  Import as ImportIcon,
+  Check,
+  AlertCircle,
+  Trash2,
+  Save,
+  Eye,
+  Calendar as CalendarIcon,
+  Clock,
+} from 'lucide-react';
+import { toPersianNumber, getProgramTimelineDetails } from '../utils/jalali';
+
+const PERSIAN_WEEKDAYS = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
+
+const SAMPLE_TRAINING_WEEKDAYS: Record<number, string[]> = {
+  1: ['شنبه'],
+  2: ['شنبه', 'چهارشنبه'],
+  3: ['شنبه', 'دوشنبه', 'چهارشنبه'],
+  4: ['شنبه', 'یکشنبه', 'چهارشنبه', 'پنجشنبه'],
+  5: ['شنبه', 'دوشنبه', 'سه‌شنبه', 'پنجشنبه', 'جمعه'],
+  6: ['شنبه', 'یکشنبه', 'دوشنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'],
+  7: ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'],
+};
+
+function getSafeTrainingDays(days: number): number {
+  return Math.min(7, Math.max(1, Number(days) || 4));
+}
+
+function getSampleTrainingWeekdays(days: number): string[] {
+  const safeDays = getSafeTrainingDays(days);
+  return SAMPLE_TRAINING_WEEKDAYS[safeDays] || PERSIAN_WEEKDAYS.slice(0, safeDays);
+}
+
+function getRestDaysFromTraining(trainingWeekdays: string[]): string[] {
+  return PERSIAN_WEEKDAYS.filter((weekday) => !trainingWeekdays.includes(weekday));
+}
 
 export default function ProgramImport() {
-  const { activeProfile, programs, addProgram, removeProgram, setActiveProgram, state } = useAppContext();
+  const {
+    activeProfile,
+    programs,
+    addProgram,
+    updateProgram,
+    removeProgram,
+    setActiveProgram,
+    state,
+  } = useAppContext();
+
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+
   const [jsonInput, setJsonInput] = useState('');
-  const [validationResult, setValidationResult] = useState<{ valid: boolean; data?: any; error?: string } | null>(null);
+  const [startDate, setStartDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [validationResult, setValidationResult] = useState<{
+    valid: boolean;
+    data?: any;
+    error?: string;
+  } | null>(null);
   const [showPreview, setShowPreview] = useState(false);
   const [imported, setImported] = useState(false);
 
   const handleValidate = () => {
-    const result = validateWorkoutJSON(jsonInput);
+    const expectedDays = activeProfile ? Number(activeProfile.trainingDays) : undefined;
+    const result = validateWorkoutJSON(jsonInput, expectedDays);
     setValidationResult(result);
+
     if (result.valid) {
       setShowPreview(true);
     }
@@ -27,26 +78,67 @@ export default function ProgramImport() {
   const handleImport = () => {
     if (!validationResult?.valid || !validationResult.data || !activeProfile) return;
 
+    const data = validationResult.data;
+    const days = Array.isArray(data.days) ? data.days : [];
+
+    const restDays = Array.isArray(data.rest_days)
+      ? data.rest_days.filter((x: any) => typeof x === 'string')
+      : undefined;
+
+    const weeklyVolumeSummary =
+      data.weekly_volume_summary && typeof data.weekly_volume_summary === 'object'
+        ? (data.weekly_volume_summary as Record<string, string>)
+        : undefined;
+
+    const sessionDurationSummary =
+      data.session_duration_summary && typeof data.session_duration_summary === 'object'
+        ? (data.session_duration_summary as Record<string, string>)
+        : undefined;
+
     const programId = uuidv4();
+
     const program: WorkoutProgram = {
       id: programId,
       profileId: activeProfile.id,
-      name: validationResult.data.program_name,
-      duration: validationResult.data.duration,
+      name: typeof data.program_name === 'string' ? data.program_name : 'برنامه بدون نام',
+      duration: typeof data.duration === 'string' ? data.duration : '۱ ماه',
+      startDate: startDate || new Date().toISOString().split('T')[0],
       createdAt: new Date().toISOString(),
-      days: validationResult.data.days.map((day: any) => ({
+      trainingDays: Number(data.training_days) || activeProfile.trainingDays || days.length,
+      restDays,
+      weeklyVolumeSummary,
+      sessionDurationSummary,
+      adjustmentRules: typeof data.adjustment_rules === 'string' ? data.adjustment_rules : undefined,
+      days: days.map((day: any, index: number) => ({
         id: uuidv4(),
-        day: day.day,
-        muscleGroups: day.muscle_groups || [],
-        exercises: day.exercises.map((ex: any) => ({
-          id: uuidv4(),
-          name: ex.name,
-          sets: parseInt(ex.sets) || 4,
-          reps: ex.reps,
-          rest: parseInt(ex.rest) || 90,
-          tempo: ex.tempo || '',
-          notes: ex.notes || '',
-        })),
+        weekday: typeof day.weekday === 'string' ? day.weekday : undefined,
+        order: Number(day.order) || index + 1,
+        day: typeof day.day === 'string' ? day.day : `روز ${index + 1}`,
+        muscleGroups: Array.isArray(day.muscle_groups) ? day.muscle_groups : [],
+        warmUp: typeof day.warm_up === 'string' ? day.warm_up : undefined,
+        coreWork: typeof day.core_work === 'string' ? day.core_work : undefined,
+        cardio: typeof day.cardio === 'string' ? day.cardio : undefined,
+        exercises: Array.isArray(day.exercises)
+          ? day.exercises.map((ex: any) => ({
+              id: uuidv4(),
+              name: typeof ex.name === 'string' ? ex.name : 'حرکت بدون نام',
+              sets: Number(ex.sets) || 4,
+              reps: typeof ex.reps === 'string' ? ex.reps : String(ex.reps || ''),
+              rest: Number(ex.rest) || 90,
+              tempo: typeof ex.tempo === 'string' ? ex.tempo : '',
+              rir:
+                typeof ex.rir === 'string' || typeof ex.rir === 'number'
+                  ? ex.rir
+                  : undefined,
+              loadMethod: typeof ex.load_method === 'string' ? ex.load_method : '',
+              targetMuscle: typeof ex.target_muscle === 'string' ? ex.target_muscle : '',
+              substitute: typeof ex.substitute === 'string' ? ex.substitute : '',
+              stoppingCriterion:
+                typeof ex.stopping_criterion === 'string' ? ex.stopping_criterion : '',
+              progression: typeof ex.progression === 'string' ? ex.progression : '',
+              notes: typeof ex.notes === 'string' ? ex.notes : '',
+            }))
+          : [],
       })),
     };
 
@@ -56,37 +148,71 @@ export default function ProgramImport() {
     setJsonInput('');
     setValidationResult(null);
     setShowPreview(false);
+
     setTimeout(() => setImported(false), 3000);
   };
 
-  const sampleJSON = JSON.stringify({
-    "program_name": "برنامه عضله‌سازی ۴ روزه",
-    "duration": "۸ هفته",
-    "days": [
-      {
-        "day": "روز اول - سینه و پشت‌بازو",
-        "muscle_groups": ["سینه", "پشت‌بازو"],
-        "exercises": [
+  const makeSampleJSON = (days: number) => {
+    const safeDays = getSafeTrainingDays(days);
+    const trainingWeekdays = getSampleTrainingWeekdays(safeDays);
+    const orderedTrainingWeekdays = PERSIAN_WEEKDAYS.filter((weekday) =>
+      trainingWeekdays.includes(weekday)
+    );
+    const restDays = getRestDaysFromTraining(orderedTrainingWeekdays);
+
+    const sessionDurationSummary: Record<string, string> = {};
+    orderedTrainingWeekdays.forEach((_, index) => {
+      sessionDurationSummary[`Day ${index + 1}`] = 'XX دقیقه';
+    });
+
+    const sample = {
+      program_name: `برنامه نمونه ${toPersianNumber(safeDays)} روزه`,
+      duration: '۱ ماه',
+      training_days: safeDays,
+      rest_days: restDays,
+      weekly_volume_summary: {
+        Chest: 'X sets direct, Y sets indirect',
+        Back: 'X sets direct, Y sets indirect',
+        Quadriceps: 'X sets direct, Y sets indirect',
+        Hamstrings: 'X sets direct, Y sets indirect',
+        Shoulders: 'X sets direct, Y sets indirect',
+        Biceps: 'X sets direct, Y sets indirect',
+        Triceps: 'X sets direct, Y sets indirect',
+        Calves: 'X sets direct, Y sets indirect',
+        Abs: 'X sets direct',
+      },
+      session_duration_summary: sessionDurationSummary,
+      adjustment_rules:
+        'اگر خواب ضعیف بود، استرس بالا بود یا درد مفصلی حس شد، شدت تمرین را کاهش بده و در صورت نیاز یک روز استراحت اضافه کن.',
+      days: orderedTrainingWeekdays.map((weekday, index) => ({
+        weekday,
+        order: index + 1,
+        day: `${weekday} - روز ${toPersianNumber(index + 1)} نمونه`,
+        muscle_groups: ['نمونه'],
+        warm_up: 'گرم‌کردن عمومی ۵ دقیقه‌ای + ۲ ست آماده‌سازی سبک',
+        exercises: [
           {
-            "name": "پرس سینه هالتر",
-            "sets": "4",
-            "reps": "8-10",
-            "rest": "120",
-            "tempo": "3-1-1-0",
-            "notes": "کنترل کامل در فاز منفی"
+            name: 'حرکت نمونه',
+            sets: '3',
+            reps: '8-12',
+            rest: '90',
+            tempo: '2-1-1-0',
+            rir: '2',
+            load_method: 'RPE-based',
+            target_muscle: 'عضله نمونه',
+            substitute: 'حرکت جایگزین نمونه',
+            stopping_criterion: 'RIR 2 reached',
+            progression: 'Double progression',
+            notes: 'این فقط یک نمونه ساختاری است.',
           },
-          {
-            "name": "پرس بالا سینه دمبل",
-            "sets": "3",
-            "reps": "10-12",
-            "rest": "90",
-            "tempo": "2-1-1-0",
-            "notes": "انقباض در بالا"
-          }
-        ]
-      }
-    ]
-  }, null, 2);
+        ],
+        core_work: 'در صورت نیاز',
+        cardio: 'در صورت نیاز',
+      })),
+    };
+
+    return JSON.stringify(sample, null, 2);
+  };
 
   if (!activeProfile) {
     return (
@@ -124,25 +250,32 @@ export default function ProgramImport() {
       )}
 
       <div className={`rounded-2xl p-5 border theme-transition ${
-        isDark ? 'bg-[#1a1a2e] border-[#d4af37]/10' : 'bg-white border-[#14b8a6]/15'
+        isDark ? 'bg-[#1a1a2e] border-[#14b8a6]/10' : 'bg-white border-[#14b8a6]/15'
       }`}>
-        <h3 className={'font-bold mb-3 ' + (isDark ? 'text-[#d4af37]' : 'text-[#0d9488]')}>
+        <h3 className={'font-bold mb-3 ' + (isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]')}>
           JSON برنامه تمرینی
         </h3>
+
         <p className={'text-sm mb-3 ' + (isDark ? 'text-gray-400' : 'text-[#0f766e]/70')}>
-          خروجی هوش مصنوعی را در قالب JSON وارد کنید:
+          خروجی هوش مصنوعی را در قالب JSON وارد کنید.
+          سیستم بررسی می‌کند که تعداد روزهای برنامه دقیقاً با پروفایل کاربر مطابقت داشته باشد.
         </p>
+
         <textarea
           value={jsonInput}
-          onChange={e => { setJsonInput(e.target.value); setValidationResult(null); setShowPreview(false); }}
+          onChange={e => {
+            setJsonInput(e.target.value);
+            setValidationResult(null);
+            setShowPreview(false);
+          }}
           className={`w-full border rounded-xl px-4 py-3 text-sm font-mono focus:outline-none resize-none ${
             isDark
-              ? 'bg-[#0d0d1a] border-gray-700 text-white focus:border-[#d4af37]'
+              ? 'bg-[#0d0d1a] border-gray-700 text-white focus:border-[#14b8a6]'
               : 'bg-[#f0fdfa] border-[#14b8a6]/30 text-[#134e4a] focus:border-[#14b8a6]'
           }`}
           rows={10}
           dir="ltr"
-          placeholder='{"program_name": "...", "days": [...]}'
+          placeholder='{"program_name": "...", "duration": "...", "rest_days": [...], "days": [...]}'
         />
 
         <div className="flex gap-3 mt-4">
@@ -158,8 +291,9 @@ export default function ProgramImport() {
             <Eye size={16} />
             اعتبارسنجی و پیش‌نمایش
           </button>
+
           <button
-            onClick={() => setJsonInput(sampleJSON)}
+            onClick={() => setJsonInput(makeSampleJSON(activeProfile.trainingDays))}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm transition-all ${
               isDark
                 ? 'bg-gray-700 text-white hover:bg-gray-600'
@@ -194,6 +328,7 @@ export default function ProgramImport() {
               <Check size={18} />
               پیش‌نمایش برنامه
             </h3>
+
             <button
               onClick={handleImport}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm transition-all ${
@@ -214,32 +349,75 @@ export default function ProgramImport() {
                 {validationResult.data.program_name}
               </span>
             </div>
+
             <div className="flex items-center gap-4 text-sm">
               <span className={isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}>مدت:</span>
               <span className={isDark ? 'text-white' : 'text-[#134e4a]'}>
                 {validationResult.data.duration}
               </span>
             </div>
+
             <div className="flex items-center gap-4 text-sm">
-              <span className={isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}>تعداد روزها:</span>
+              <span className={isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}>تاریخ شروع برنامه:</span>
+              <input
+                type="date"
+                value={startDate}
+                onChange={e => setStartDate(e.target.value)}
+                className={`rounded-lg px-3 py-1.5 text-xs font-bold border focus:outline-none ${
+                  isDark ? 'bg-[#0d0d1a] border-gray-700 text-white' : 'bg-[#f0fdfa] border-[#14b8a6]/30 text-[#134e4a]'
+                }`}
+              />
+            </div>
+
+            <div className="flex items-center gap-4 text-sm">
+              <span className={isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}>تعداد روزهای پروفایل:</span>
+              <span className={isDark ? 'text-white' : 'text-[#134e4a]'}>
+                {toPersianNumber(activeProfile.trainingDays)} روز
+              </span>
+            </div>
+
+            <div className="flex items-center gap-4 text-sm">
+              <span className={isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}>تعداد روزهای JSON:</span>
               <span className={isDark ? 'text-white' : 'text-[#134e4a]'}>
                 {toPersianNumber(validationResult.data.days.length)} روز
               </span>
             </div>
+
+            {Array.isArray(validationResult.data.rest_days) && validationResult.data.rest_days.length > 0 && (
+              <div className="flex items-center gap-4 text-sm">
+                <span className={isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}>روزهای استراحت:</span>
+                <span className={isDark ? 'text-white' : 'text-[#134e4a]'}>
+                  {(validationResult.data.rest_days as string[]).join('، ')}
+                </span>
+              </div>
+            )}
 
             <div className={`border-t pt-4 mt-4 ${isDark ? 'border-gray-700' : 'border-[#14b8a6]/20'}`}>
               {validationResult.data.days.map((day: any, i: number) => (
                 <div key={i} className={`mb-4 rounded-xl p-4 ${
                   isDark ? 'bg-[#0d0d1a]' : 'bg-[#f0fdfa]'
                 }`}>
-                  <h4 className={'font-bold mb-2 ' + (isDark ? 'text-[#d4af37]' : 'text-[#0d9488]')}>
+                  <h4 className={'font-bold mb-2 flex items-center gap-2 ' + (isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]')}>
+                    {day.weekday ? (
+                      <span className={`px-2 py-0.5 rounded-lg text-xs ${
+                        isDark ? 'bg-[#14b8a6]/20 text-[#14b8a6]' : 'bg-[#14b8a6]/15 text-[#0d9488]'
+                      }`}>
+                        {day.weekday}
+                      </span>
+                    ) : null}
                     {day.day}
                   </h4>
+
                   <div className="flex flex-wrap gap-1 mb-3">
                     {(day.muscle_groups || []).map((mg: string, j: number) => (
-                      <span key={j} className={`px-2 py-0.5 rounded text-xs ${isDark ? 'bg-[#4a90d9]/20 text-[#4a90d9]' : 'bg-[#14b8a6]/15 text-[#0d9488]'}`}>{mg}</span>
+                      <span key={j} className={`px-2 py-0.5 rounded text-xs ${
+                        isDark ? 'bg-[#4a90d9]/20 text-[#4a90d9]' : 'bg-[#14b8a6]/15 text-[#0d9488]'
+                      }`}>
+                        {mg}
+                      </span>
                     ))}
                   </div>
+
                   <div className="space-y-2">
                     {(day.exercises || []).map((ex: any, k: number) => (
                       <div key={k} className={`flex items-center justify-between text-sm border-b pb-2 ${
@@ -261,70 +439,121 @@ export default function ProgramImport() {
 
       {/* Saved Programs — only for active profile */}
       <div className={`rounded-2xl p-5 border theme-transition ${
-        isDark ? 'bg-[#1a1a2e] border-[#d4af37]/10' : 'bg-white border-[#14b8a6]/15'
+        isDark ? 'bg-[#1a1a2e] border-[#14b8a6]/10' : 'bg-white border-[#14b8a6]/15'
       }`}>
-        <h3 className={'font-bold mb-4 ' + (isDark ? 'text-[#d4af37]' : 'text-[#0d9488]')}>
+        <h3 className={'font-bold mb-4 ' + (isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]')}>
           برنامه‌های ذخیره شده ({activeProfile.name})
         </h3>
+
         {programs.length === 0 ? (
           <p className={'text-sm text-center py-4 ' + (isDark ? 'text-gray-500' : 'text-[#0f766e]/50')}>
             هنوز برنامه تمرینی برای این پروفایل وارد نشده است
           </p>
         ) : (
           <div className="space-y-3">
-            {programs.map(program => (
-              <div
-                key={program.id}
-                className={`rounded-xl p-4 border ${
-                  state.activeProgram === program.id
-                    ? isDark
-                      ? 'bg-[#0d0d1a] border-[#22c55e]/50'
-                      : 'bg-[#f0fdfa] border-[#10b981]/40'
-                    : isDark
-                      ? 'bg-[#0d0d1a] border-gray-800'
-                      : 'bg-[#f0fdfa] border-[#14b8a6]/20'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className={'font-bold ' + (isDark ? 'text-white' : 'text-[#134e4a]')}>
-                      {program.name}
-                    </h4>
-                    <p className={'text-sm mt-1 ' + (isDark ? 'text-gray-400' : 'text-[#0f766e]/70')}>
-                      {program.duration} • {toPersianNumber(program.days.length)} روز • {toPersianNumber(program.days.reduce((acc, d) => acc + d.exercises.length, 0))} تمرین
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {state.activeProgram === program.id ? (
-                      <span className={`text-xs px-2 py-1 rounded-full ${
-                        isDark ? 'bg-[#22c55e]/20 text-[#22c55e]' : 'bg-[#10b981]/15 text-[#059669]'
-                      }`}>
-                        فعال
-                      </span>
-                    ) : (
+            {programs.map(program => {
+              const timeline = getProgramTimelineDetails(program.startDate, program.duration, program.createdAt);
+
+              return (
+                <div
+                  key={program.id}
+                  className={`rounded-xl p-4 border ${
+                    state.activeProgram === program.id
+                      ? isDark
+                        ? 'bg-[#0d0d1a] border-[#22c55e]/50'
+                        : 'bg-[#f0fdfa] border-[#10b981]/40'
+                      : isDark
+                        ? 'bg-[#0d0d1a] border-gray-800'
+                        : 'bg-[#f0fdfa] border-[#14b8a6]/20'
+                  }`}
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                      <h4 className={'font-bold ' + (isDark ? 'text-white' : 'text-[#134e4a]')}>
+                        {program.name}
+                      </h4>
+
+                      <p className={'text-xs mt-1 flex flex-wrap items-center gap-2 ' + (isDark ? 'text-gray-400' : 'text-[#0f766e]/70')}>
+                        <span>
+                          مدت: <strong>{program.duration}</strong> ({toPersianNumber(timeline.totalDays)} روز)
+                        </span>
+                        <span>• {toPersianNumber(program.days.length)} روز تمرین</span>
+                        {program.restDays && program.restDays.length > 0 && (
+                          <span>• استراحت: {program.restDays.join('، ')}</span>
+                        )}
+                        <span>
+                          • {toPersianNumber(program.days.reduce((acc, d) => acc + d.exercises.length, 0))} حرکت
+                        </span>
+                      </p>
+
+                      <div className="flex items-center gap-2 mt-2 text-xs">
+                        <CalendarIcon size={14} className={isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'} />
+                        <span className={isDark ? 'text-gray-300' : 'text-[#134e4a]'}>
+                          شروع: <strong>{timeline.startDateJalali}</strong> | پایان: <strong>{timeline.endDateJalali}</strong>
+                        </span>
+
+                        <input
+                          type="date"
+                          value={program.startDate ? program.startDate.split('T')[0] : timeline.startDateIso}
+                          onChange={e => {
+                            updateProgram({ ...program, startDate: e.target.value });
+                          }}
+                          className={`mr-2 px-2 py-0.5 text-[11px] rounded border ${
+                            isDark ? 'bg-gray-800 border-gray-700 text-gray-200' : 'bg-white border-gray-300 text-gray-800'
+                          }`}
+                          title="تغییر تاریخ شروع"
+                        />
+                      </div>
+
+                      <div className="mt-2 flex items-center gap-2 text-xs">
+                        <Clock
+                          size={14}
+                          className={timeline.isAlarmRequired ? 'text-amber-500 animate-pulse' : (isDark ? 'text-gray-400' : 'text-[#0f766e]/70')}
+                        />
+                        <span className={timeline.isAlarmRequired ? 'text-amber-500 font-bold' : (isDark ? 'text-gray-400' : 'text-[#0f766e]/70')}>
+                          {timeline.daysRemaining > 0
+                            ? `${toPersianNumber(timeline.daysRemaining)} روز باقی مانده`
+                            : timeline.daysRemaining === 0
+                            ? 'امروز آخرین روز برنامه است!'
+                            : `برنامه ${toPersianNumber(Math.abs(timeline.daysRemaining))} روز پیش پایان یافته`}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      {state.activeProgram === program.id ? (
+                        <span className={`text-xs px-2.5 py-1 rounded-full font-bold ${
+                          isDark ? 'bg-[#22c55e]/20 text-[#22c55e]' : 'bg-[#10b981]/15 text-[#059669]'
+                        }`}>
+                          فعال
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => setActiveProgram(program.id)}
+                          className={`text-xs px-3 py-1.5 rounded-full font-bold transition-all ${
+                            isDark
+                              ? 'bg-[#4a90d9]/20 text-[#4a90d9] hover:bg-[#4a90d9]/30'
+                              : 'bg-[#14b8a6]/15 text-[#0d9488] hover:bg-[#14b8a6]/25'
+                          }`}
+                        >
+                          فعال‌سازی
+                        </button>
+                      )}
+
                       <button
-                        onClick={() => setActiveProgram(program.id)}
-                        className={`text-xs px-3 py-1 rounded-full transition-all ${
-                          isDark
-                            ? 'bg-[#4a90d9]/20 text-[#4a90d9] hover:bg-[#4a90d9]/30'
-                            : 'bg-[#14b8a6]/15 text-[#0d9488] hover:bg-[#14b8a6]/25'
-                        }`}
+                        onClick={() => {
+                          if (confirm('آیا مطمئن هستید؟')) removeProgram(program.id);
+                        }}
+                        className="text-[#ef4444] p-1.5 hover:bg-[#ef4444]/10 rounded-lg transition-all"
+                        title="حذف برنامه"
                       >
-                        فعال‌سازی
+                        <Trash2 size={16} />
                       </button>
-                    )}
-                    <button
-                      onClick={() => {
-                        if (confirm('آیا مطمئن هستید؟')) removeProgram(program.id);
-                      }}
-                      className="text-[#ef4444] p-1 hover:bg-[#ef4444]/10 rounded"
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

@@ -1,8 +1,11 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
+// خواندن متغیر محیطی (پیش‌فرض: bazaar)
+const flavor = process.env.VITE_APP_FLAVOR || 'bazaar';
+
 const config: CapacitorConfig = {
-  appId: 'com.aifitness.coach',
-  appName: 'AI Fitness Coach',
+  appId: flavor === 'personal' ? 'com.amin.aifitness.personal' : 'com.aifitness.coach',
+  appName: flavor === 'personal' ? 'AI Fitness Personal' : 'AI Fitness Coach',
   webDir: 'dist',
   bundledWebRuntime: false,
   server: {

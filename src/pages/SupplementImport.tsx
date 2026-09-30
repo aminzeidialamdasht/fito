@@ -107,7 +107,7 @@ export default function SupplementImport() {
   return (
     <div className="space-y-6">
       <h2 className={'text-2xl font-bold flex items-center gap-2 ' + (isDark ? 'text-white' : 'text-[#134e4a]')}>
-        <Pill size={24} className={isDark ? 'text-[#d4af37]' : 'text-[#0d9488]'} />
+        <Pill size={24} className={isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'} />
         ورود برنامه مکمل
       </h2>
 
@@ -120,8 +120,8 @@ export default function SupplementImport() {
         </div>
       )}
 
-      <div className={'rounded-2xl p-5 border theme-transition ' + (isDark ? 'bg-[#1a1a2e] border-[#d4af37]/10' : 'bg-white border-[#14b8a6]/15')}>
-        <h3 className={'font-bold mb-3 ' + (isDark ? 'text-[#d4af37]' : 'text-[#0d9488]')}>
+      <div className={'rounded-2xl p-5 border theme-transition ' + (isDark ? 'bg-[#1a1a2e] border-[#14b8a6]/10' : 'bg-white border-[#14b8a6]/15')}>
+        <h3 className={'font-bold mb-3 ' + (isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]')}>
           JSON برنامه مکمل
         </h3>
         <p className={'text-sm mb-3 ' + (isDark ? 'text-gray-400' : 'text-[#0f766e]/70')}>
@@ -132,7 +132,7 @@ export default function SupplementImport() {
           onChange={e => { setJsonInput(e.target.value); setValidationResult(null); setShowPreview(false); }}
           className={'w-full border rounded-xl px-4 py-3 text-sm font-mono focus:outline-none resize-none ' + (
             isDark
-              ? 'bg-[#0d0d1a] border-gray-700 text-white focus:border-[#d4af37]'
+              ? 'bg-[#0d0d1a] border-gray-700 text-white focus:border-[#14b8a6]'
               : 'bg-[#f0fdfa] border-[#14b8a6]/30 text-[#134e4a] focus:border-[#14b8a6]'
           )}
           rows={10}
@@ -215,7 +215,7 @@ export default function SupplementImport() {
             )}
             <div className="flex items-center gap-4 text-sm">
               <span className={isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}>تعداد مکمل:</span>
-              <span className={'font-bold ' + (isDark ? 'text-[#d4af37]' : 'text-[#0d9488]')}>
+              <span className={'font-bold ' + (isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]')}>
                 {toPersianNumber(previewSupplements.length)} مورد
               </span>
             </div>
@@ -229,7 +229,7 @@ export default function SupplementImport() {
             )}
 
             <div className={'border-t pt-4 mt-4 ' + (isDark ? 'border-gray-700' : 'border-[#14b8a6]/20')}>
-              <h4 className={'font-bold mb-3 ' + (isDark ? 'text-[#d4af37]' : 'text-[#0d9488]')}>
+              <h4 className={'font-bold mb-3 ' + (isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]')}>
                 مکمل‌های پیشنهادی
               </h4>
               <div className="space-y-3">

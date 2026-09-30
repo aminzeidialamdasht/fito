@@ -52,16 +52,16 @@ export default function CalendarPage() {
     <div className="space-y-6">
       {/* Header */}
       <h2 className="text-xl font-bold text-white flex items-center gap-2">
-        <CalIcon size={22} className="text-[#d4af37]" />
+        <CalIcon size={22} className="text-[#14b8a6]" />
         تقویم تمرینی
       </h2>
 
       {/* Calendar */}
-      <div className="bg-[#1a1a2e] rounded-2xl p-5 border border-[#d4af37]/10">
+      <div className="bg-[#1a1a2e] rounded-2xl p-5 border border-[#14b8a6]/10">
         {/* Month Navigation */}
         <div className="flex items-center justify-between mb-6">
           <button onClick={prevMonth} className="p-2 hover:bg-white/5 rounded-lg transition-all">
-            <ChevronRight size={20} className="text-[#d4af37]" />
+            <ChevronRight size={20} className="text-[#14b8a6]" />
           </button>
           <div className="text-center">
             <h3 className="text-white font-bold text-lg">
@@ -72,7 +72,7 @@ export default function CalendarPage() {
             </button>
           </div>
           <button onClick={nextMonth} className="p-2 hover:bg-white/5 rounded-lg transition-all">
-            <ChevronLeft size={20} className="text-[#d4af37]" />
+            <ChevronLeft size={20} className="text-[#14b8a6]" />
           </button>
         </div>
 
@@ -101,7 +101,7 @@ export default function CalendarPage() {
               <div
                 key={index}
                 className={`aspect-square flex flex-col items-center justify-center rounded-lg text-sm relative transition-all cursor-pointer
-                  ${isToday ? 'bg-[#d4af37] text-[#0d0d1a] font-bold' : 'hover:bg-white/5'}
+                  ${isToday ? 'bg-[#14b8a6] text-[#0d0d1a] font-bold' : 'hover:bg-white/5'}
                   ${hasSession && !isToday ? 'border border-[#4a90d9]/30' : ''}
                 `}
               >
@@ -119,8 +119,8 @@ export default function CalendarPage() {
       </div>
 
       {/* Upcoming Sessions */}
-      <div className="bg-[#1a1a2e] rounded-2xl p-5 border border-[#d4af37]/10">
-        <h3 className="text-[#d4af37] font-bold mb-4">جلسات اخیر</h3>
+      <div className="bg-[#1a1a2e] rounded-2xl p-5 border border-[#14b8a6]/10">
+        <h3 className="text-[#14b8a6] font-bold mb-4">جلسات اخیر</h3>
         {state.sessions.filter(s => s.completed).length === 0 ? (
           <p className="text-gray-500 text-sm text-center py-4">هنوز جلسه تکمیل شده‌ای ثبت نشده</p>
         ) : (
@@ -143,7 +143,7 @@ export default function CalendarPage() {
                   </div>
                 </div>
                 <div className="text-left">
-                  <p className="text-[#d4af37] text-sm font-bold">{toPersianNumber(session.totalVolume)} kg</p>
+                  <p className="text-[#14b8a6] text-sm font-bold">{toPersianNumber(session.totalVolume)} kg</p>
                   <p className="text-gray-500 text-xs">حجم کل</p>
                 </div>
               </div>
@@ -154,8 +154,8 @@ export default function CalendarPage() {
 
       {/* Training Schedule */}
       {state.activeProgram && (
-        <div className="bg-[#1a1a2e] rounded-2xl p-5 border border-[#d4af37]/10">
-          <h3 className="text-[#d4af37] font-bold mb-4">برنامه هفتگی</h3>
+        <div className="bg-[#1a1a2e] rounded-2xl p-5 border border-[#14b8a6]/10">
+          <h3 className="text-[#14b8a6] font-bold mb-4">برنامه هفتگی</h3>
           <div className="space-y-2">
             {state.programs.find(p => p.id === state.activeProgram)?.days.map((day, i) => (
               <div key={day.id} className="flex items-center gap-3 bg-[#0d0d1a] rounded-xl p-3">

@@ -117,7 +117,7 @@ export default function NutritionImport() {
   return (
     <div className="space-y-6">
       <h2 className={`text-2xl font-bold flex items-center gap-2 ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>
-        <Apple size={24} className={isDark ? 'text-[#d4af37]' : 'text-[#0d9488]'} />
+        <Apple size={24} className={isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'} />
         ورود برنامه غذایی
       </h2>
 
@@ -133,9 +133,9 @@ export default function NutritionImport() {
       )}
 
       <div className={`rounded-2xl p-5 border theme-transition ${
-        isDark ? 'bg-[#1a1a2e] border-[#d4af37]/10' : 'bg-white border-[#14b8a6]/15'
+        isDark ? 'bg-[#1a1a2e] border-[#14b8a6]/10' : 'bg-white border-[#14b8a6]/15'
       }`}>
-        <h3 className={`font-bold mb-3 ${isDark ? 'text-[#d4af37]' : 'text-[#0d9488]'}`}>
+        <h3 className={`font-bold mb-3 ${isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'}`}>
           JSON برنامه غذایی
         </h3>
         <p className={`text-sm mb-3 ${isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}`}>
@@ -146,7 +146,7 @@ export default function NutritionImport() {
           onChange={e => { setJsonInput(e.target.value); setValidationResult(null); setShowPreview(false); }}
           className={`w-full border rounded-xl px-4 py-3 text-sm font-mono focus:outline-none resize-none ${
             isDark 
-              ? 'bg-[#0d0d1a] border-gray-700 text-white focus:border-[#d4af37]' 
+              ? 'bg-[#0d0d1a] border-gray-700 text-white focus:border-[#14b8a6]' 
               : 'bg-[#f0fdfa] border-[#14b8a6]/30 text-[#134e4a] focus:border-[#14b8a6]'
           }`}
           rows={10}
@@ -231,7 +231,7 @@ export default function NutritionImport() {
             </div>
             <div className="flex items-center gap-4 text-sm">
               <span className={isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}>کالری روزانه:</span>
-              <span className={`font-bold ${isDark ? 'text-[#d4af37]' : 'text-[#0d9488]'}`}>
+              <span className={`font-bold ${isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'}`}>
                 {toPersianNumber(validationResult.data.daily_calories)} کالری
               </span>
             </div>
@@ -247,7 +247,7 @@ export default function NutritionImport() {
                 <div key={i} className={`mb-4 rounded-xl p-4 ${
                   isDark ? 'bg-[#0d0d1a]' : 'bg-[#f0fdfa]'
                 }`}>
-                  <h4 className={`font-bold mb-2 ${isDark ? 'text-[#d4af37]' : 'text-[#0d9488]'}`}>
+                  <h4 className={`font-bold mb-2 ${isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'}`}>
                     {day.day}
                   </h4>
                   <div className="space-y-2">

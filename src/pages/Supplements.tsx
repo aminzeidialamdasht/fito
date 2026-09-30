@@ -3,20 +3,24 @@ import { useTheme } from '../context/ThemeContext';
 import { Pill, AlertTriangle, Plus, Trash2, Clock, DollarSign, Shield } from 'lucide-react';
 import { toPersianNumber } from '../utils/jalali';
 import { useNavigate } from 'react-router-dom';
+import { useSubscription } from '../subscription/SubscriptionContext';
+import { DEFAULT_SUPPLEMENT_PLAN, SAMPLE_PROFILE } from '../data/defaultPlans';
 
 export default function Supplements() {
   const { state, activeProfile, supplementPrograms, removeSupplementProgram, setActiveSupplementProgram } = useAppContext();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const navigate = useNavigate();
+  const { isPremium } = useSubscription();
+  const profile = activeProfile ?? (!isPremium ? SAMPLE_PROFILE : null);
 
-  if (!activeProfile) {
+  if (!profile) { // Bypass for non-premium to show sample data
     return (
       <div className="flex flex-col items-center justify-center py-20">
         <div className={`w-24 h-24 rounded-full flex items-center justify-center mb-6 ${
-          isDark ? 'bg-[#d4af37]/10' : 'bg-[#14b8a6]/10'
+          isDark ? 'bg-[#14b8a6]/10' : 'bg-[#14b8a6]/10'
         }`}>
-          <Pill size={48} className={isDark ? 'text-[#d4af37]' : 'text-[#0d9488]'} />
+          <Pill size={48} className={isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'} />
         </div>
         <h2 className={`text-2xl font-bold mb-3 ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>
           پروفایل انتخاب نشده
@@ -28,12 +32,12 @@ export default function Supplements() {
     );
   }
 
-  const activeProgram = supplementPrograms.find(p => p.id === state.activeSupplementProgram) || supplementPrograms[0];
+  const activeProgram = supplementPrograms.find(p => p.id === state.activeSupplementProgram) || supplementPrograms[0] || (!isPremium ? DEFAULT_SUPPLEMENT_PLAN : null);
 
   return (
     <div className="space-y-6">
       <h2 className={`text-2xl font-bold flex items-center gap-2 ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>
-        <Pill size={24} className={isDark ? 'text-[#d4af37]' : 'text-[#0d9488]'} />
+        <Pill size={24} className={isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'} />
         مکمل‌های ورزشی
       </h2>
 
@@ -41,14 +45,14 @@ export default function Supplements() {
       {activeProgram && activeProgram.supplements && activeProgram.supplements.length > 0 && (
         <div className={`rounded-2xl p-5 border theme-transition ${
           isDark 
-            ? 'bg-gradient-to-l from-[#1a1a2e] to-[#16213e] border-[#d4af37]/20' 
+            ? 'bg-gradient-to-l from-[#1a1a2e] to-[#16213e] border-[#14b8a6]/20' 
             : 'bg-gradient-to-l from-white to-[#f0fdfa] border-[#14b8a6]/30'
         }`}>
           <div className="flex items-center gap-3 mb-4">
             <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${
-              isDark ? 'bg-[#d4af37]/20' : 'bg-[#14b8a6]/15'
+              isDark ? 'bg-[#14b8a6]/20' : 'bg-[#14b8a6]/15'
             }`}>
-              <Pill size={20} className={isDark ? 'text-[#d4af37]' : 'text-[#0d9488]'} />
+              <Pill size={20} className={isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'} />
             </div>
             <div>
               <h3 className={`font-bold ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>
@@ -120,8 +124,8 @@ export default function Supplements() {
             <div className={`flex items-center gap-2 mt-4 pt-3 border-t ${
               isDark ? 'border-gray-700' : 'border-[#14b8a6]/20'
             }`}>
-              <DollarSign size={14} className={isDark ? 'text-[#d4af37]' : 'text-[#0d9488]'} />
-              <span className={`text-xs font-bold ${isDark ? 'text-[#d4af37]' : 'text-[#0d9488]'}`}>
+              <DollarSign size={14} className={isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'} />
+              <span className={`text-xs font-bold ${isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'}`}>
                 هزینه ماهانه: {activeProgram.total_estimated_cost}
               </span>
             </div>
@@ -153,9 +157,9 @@ export default function Supplements() {
       {/* Detailed Supplement Cards */}
       {activeProgram && activeProgram.supplements && activeProgram.supplements.length > 0 && (
         <div className={`rounded-2xl p-5 border theme-transition ${
-          isDark ? 'bg-[#1a1a2e] border-[#d4af37]/10' : 'bg-white border-[#14b8a6]/15'
+          isDark ? 'bg-[#1a1a2e] border-[#14b8a6]/10' : 'bg-white border-[#14b8a6]/15'
         }`}>
-          <h3 className={`font-bold mb-4 flex items-center gap-2 ${isDark ? 'text-[#d4af37]' : 'text-[#0d9488]'}`}>
+          <h3 className={`font-bold mb-4 flex items-center gap-2 ${isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'}`}>
             <Pill size={18} />
             جزئیات مکمل‌ها
           </h3>
@@ -231,36 +235,36 @@ export default function Supplements() {
       {/* Supplement Info from Profile */}
       <div className={`rounded-2xl p-6 border theme-transition ${
         isDark 
-          ? 'bg-gradient-to-l from-[#1a1a2e] to-[#16213e] border-[#d4af37]/20' 
+          ? 'bg-gradient-to-l from-[#1a1a2e] to-[#16213e] border-[#14b8a6]/20' 
           : 'bg-gradient-to-l from-white to-[#f0fdfa] border-[#14b8a6]/30'
       }`}>
         <div className="flex items-center gap-3 mb-4">
           <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-            isDark ? 'bg-[#d4af37]/20' : 'bg-[#14b8a6]/15'
+            isDark ? 'bg-[#14b8a6]/20' : 'bg-[#14b8a6]/15'
           }`}>
-            <Pill size={24} className={isDark ? 'text-[#d4af37]' : 'text-[#0d9488]'} />
+            <Pill size={24} className={isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'} />
           </div>
           <div>
             <h3 className={`font-bold text-lg ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>
               اطلاعات مکمل پروفایل
             </h3>
             <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}`}>
-              {activeProfile.name}
+              {profile.name}
             </p>
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          {activeProfile.supplementGoal && (
-            <InfoCard label="هدف مصرف" value={activeProfile.supplementGoal} isDark={isDark} />
+          {profile.supplementGoal && (
+            <InfoCard label="هدف مصرف" value={profile.supplementGoal} isDark={isDark} />
           )}
-          {activeProfile.supplementBudget && (
-            <InfoCard label="بودجه ماهانه" value={activeProfile.supplementBudget} isDark={isDark} />
+          {profile.supplementBudget && (
+            <InfoCard label="بودجه ماهانه" value={profile.supplementBudget} isDark={isDark} />
           )}
           <InfoCard 
             label="مکمل‌های فعلی" 
-            value={activeProfile.currentSupplements.length > 0 
-              ? `${toPersianNumber(activeProfile.currentSupplements.length)} مورد` 
+            value={profile.currentSupplements.length > 0 
+              ? `${toPersianNumber(profile.currentSupplements.length)} مورد` 
               : 'هیچ'} 
             isDark={isDark} 
           />
@@ -268,15 +272,15 @@ export default function Supplements() {
       </div>
 
       {/* Current Supplements */}
-      {activeProfile.currentSupplements.length > 0 && (
+      {profile.currentSupplements.length > 0 && (
         <div className={`rounded-2xl p-5 border theme-transition ${
-          isDark ? 'bg-[#1a1a2e] border-[#d4af37]/10' : 'bg-white border-[#14b8a6]/15'
+          isDark ? 'bg-[#1a1a2e] border-[#14b8a6]/10' : 'bg-white border-[#14b8a6]/15'
         }`}>
-          <h3 className={`font-bold mb-3 flex items-center gap-2 ${isDark ? 'text-[#d4af37]' : 'text-[#0d9488]'}`}>
+          <h3 className={`font-bold mb-3 flex items-center gap-2 ${isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'}`}>
             مکمل‌های فعلی
           </h3>
           <div className="flex flex-wrap gap-2">
-            {activeProfile.currentSupplements.map((supp, idx) => (
+            {profile.currentSupplements.map((supp: string, idx: number) => (
               <span key={idx} className={`px-3 py-1.5 rounded-lg text-sm ${
                 isDark ? 'bg-[#4a90d9]/20 text-[#6bb5ff]' : 'bg-[#14b8a6]/15 text-[#0d9488]'
               }`}>
@@ -288,7 +292,7 @@ export default function Supplements() {
       )}
 
       {/* Health Conditions */}
-      {activeProfile.healthConditions.length > 0 && (
+      {profile.healthConditions.length > 0 && (
         <div className={`rounded-2xl p-5 border theme-transition ${
           isDark ? 'bg-[#1a1a2e] border-[#ef4444]/20' : 'bg-white border-red-200'
         }`}>
@@ -297,7 +301,7 @@ export default function Supplements() {
             شرایط پزشکی
           </h3>
           <div className="flex flex-wrap gap-2">
-            {activeProfile.healthConditions.map((condition, idx) => (
+            {profile.healthConditions.map((condition: string, idx: number) => (
               <span key={idx} className={`px-3 py-1.5 rounded-lg text-sm font-bold ${
                 isDark ? 'bg-[#ef4444]/20 text-[#ef4444]' : 'bg-red-50 text-red-700'
               }`}>
@@ -310,10 +314,10 @@ export default function Supplements() {
 
       {/* Supplement Programs List */}
       <div className={`rounded-2xl p-5 border theme-transition ${
-        isDark ? 'bg-[#1a1a2e] border-[#d4af37]/10' : 'bg-white border-[#14b8a6]/15'
+        isDark ? 'bg-[#1a1a2e] border-[#14b8a6]/10' : 'bg-white border-[#14b8a6]/15'
       }`}>
         <div className="flex items-center justify-between mb-4">
-          <h3 className={`font-bold flex items-center gap-2 ${isDark ? 'text-[#d4af37]' : 'text-[#0d9488]'}`}>
+          <h3 className={`font-bold flex items-center gap-2 ${isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'}`}>
             <Pill size={18} />
             برنامه‌های مکمل
           </h3>
@@ -321,7 +325,7 @@ export default function Supplements() {
             onClick={() => navigate('/supplement-import')}
             className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-bold transition-all ${
               isDark
-                ? 'bg-[#d4af37]/20 text-[#d4af37] hover:bg-[#d4af37]/30'
+                ? 'bg-[#14b8a6]/20 text-[#14b8a6] hover:bg-[#14b8a6]/30'
                 : 'bg-[#14b8a6]/15 text-[#0d9488] hover:bg-[#14b8a6]/25'
             }`}
           >
@@ -343,7 +347,7 @@ export default function Supplements() {
                 className={`rounded-xl p-4 border cursor-pointer transition-all ${
                   program.id === (state.activeSupplementProgram || supplementPrograms[0]?.id)
                     ? isDark
-                      ? 'bg-[#d4af37]/10 border-[#d4af37]/40'
+                      ? 'bg-[#14b8a6]/10 border-[#14b8a6]/40'
                       : 'bg-[#14b8a6]/10 border-[#14b8a6]/40'
                     : isDark
                       ? 'bg-[#0d0d1a] border-gray-800 hover:border-gray-600'
@@ -355,7 +359,7 @@ export default function Supplements() {
                     {program.recommendation_title}
                     {program.id === (state.activeSupplementProgram || supplementPrograms[0]?.id) && (
                       <span className={`mr-2 text-[10px] px-2 py-0.5 rounded-full ${
-                        isDark ? 'bg-[#d4af37]/30 text-[#d4af37]' : 'bg-[#14b8a6]/20 text-[#0d9488]'
+                        isDark ? 'bg-[#14b8a6]/30 text-[#14b8a6]' : 'bg-[#14b8a6]/20 text-[#0d9488]'
                       }`}>
                         فعال
                       </span>

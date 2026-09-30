@@ -3,6 +3,8 @@ import { useTheme } from '../context/ThemeContext';
 import { Apple, AlertTriangle, Target, Utensils, Plus, Trash2, Droplets, Clock } from 'lucide-react';
 import { toPersianNumber, getWeekdayName } from '../utils/jalali';
 import { useNavigate } from 'react-router-dom';
+import { useSubscription } from '../subscription/SubscriptionContext';
+import { DEFAULT_NUTRITION_PLAN, SAMPLE_PROFILE } from '../data/defaultPlans';
 
 const WEEKDAY_NAMES = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
 
@@ -11,14 +13,16 @@ export default function Nutrition() {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const navigate = useNavigate();
+  const { isPremium } = useSubscription();
+  const profile = activeProfile ?? (!isPremium ? SAMPLE_PROFILE : null);
 
-  if (!activeProfile) {
+  if (!profile) { // Bypass for non-premium to show sample data
     return (
       <div className="flex flex-col items-center justify-center py-20">
         <div className={`w-24 h-24 rounded-full flex items-center justify-center mb-6 ${
-          isDark ? 'bg-[#d4af37]/10' : 'bg-[#14b8a6]/10'
+          isDark ? 'bg-[#14b8a6]/10' : 'bg-[#14b8a6]/10'
         }`}>
-          <Apple size={48} className={isDark ? 'text-[#d4af37]' : 'text-[#0d9488]'} />
+          <Apple size={48} className={isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'} />
         </div>
         <h2 className={`text-2xl font-bold mb-3 ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>
           پروفایل انتخاب نشده
@@ -30,8 +34,8 @@ export default function Nutrition() {
     );
   }
 
-  const hasNutritionInfo = activeProfile.dietaryGoal || activeProfile.dietType || activeProfile.favoriteFoods.length > 0;
-  const activeProgram = nutritionPrograms.find(p => p.id === state.activeNutritionProgram) || nutritionPrograms[0];
+  const hasNutritionInfo = profile.dietaryGoal || profile.dietType || profile.favoriteFoods.length > 0;
+  const activeProgram = nutritionPrograms.find(p => p.id === state.activeNutritionProgram) || nutritionPrograms[0] || (!isPremium ? DEFAULT_NUTRITION_PLAN : null);
 
   // Today's day name in Persian
   const today = new Date();
@@ -44,7 +48,7 @@ export default function Nutrition() {
   return (
     <div className="space-y-6">
       <h2 className={`text-2xl font-bold flex items-center gap-2 ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>
-        <Apple size={24} className={isDark ? 'text-[#d4af37]' : 'text-[#0d9488]'} />
+        <Apple size={24} className={isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'} />
         تغذیه و رژیم غذایی
       </h2>
 
@@ -52,15 +56,15 @@ export default function Nutrition() {
       {activeProgram && todayMeals && (
         <div className={`rounded-2xl p-5 border theme-transition ${
           isDark 
-            ? 'bg-gradient-to-l from-[#1a1a2e] to-[#16213e] border-[#d4af37]/20' 
+            ? 'bg-gradient-to-l from-[#1a1a2e] to-[#16213e] border-[#14b8a6]/20' 
             : 'bg-gradient-to-l from-white to-[#f0fdfa] border-[#14b8a6]/30'
         }`}>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${
-                isDark ? 'bg-[#d4af37]/20' : 'bg-[#14b8a6]/15'
+                isDark ? 'bg-[#14b8a6]/20' : 'bg-[#14b8a6]/15'
               }`}>
-                <Utensils size={20} className={isDark ? 'text-[#d4af37]' : 'text-[#0d9488]'} />
+                <Utensils size={20} className={isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'} />
               </div>
               <div>
                 <h3 className={`font-bold ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>
@@ -72,7 +76,7 @@ export default function Nutrition() {
               </div>
             </div>
             <div className={`px-3 py-1 rounded-full text-xs font-bold ${
-              isDark ? 'bg-[#d4af37]/20 text-[#d4af37]' : 'bg-[#14b8a6]/15 text-[#0d9488]'
+              isDark ? 'bg-[#14b8a6]/20 text-[#14b8a6]' : 'bg-[#14b8a6]/15 text-[#0d9488]'
             }`}>
               {toPersianNumber(todayMeals.total_calories)} کالری
             </div>
@@ -84,7 +88,7 @@ export default function Nutrition() {
                 isDark ? 'bg-[#0d0d1a]/70' : 'bg-white/80'
               }`}>
                 <div className="flex items-center justify-between mb-2">
-                  <h4 className={`font-bold text-sm ${isDark ? 'text-[#d4af37]' : 'text-[#0d9488]'}`}>
+                  <h4 className={`font-bold text-sm ${isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'}`}>
                     {meal.meal_name}
                   </h4>
                   {meal.time && (
@@ -100,7 +104,7 @@ export default function Nutrition() {
                       <span className={isDark ? 'text-gray-300' : 'text-[#134e4a]'}>
                         • {food.name} <span className={isDark ? 'text-gray-500' : 'text-[#0f766e]/60'}>({food.portion})</span>
                       </span>
-                      <span className={`font-bold ${isDark ? 'text-[#d4af37]' : 'text-[#0d9488]'}`}>
+                      <span className={`font-bold ${isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'}`}>
                         {toPersianNumber(food.calories)} کال
                       </span>
                     </div>
@@ -137,9 +141,9 @@ export default function Nutrition() {
       {/* Full Program Days */}
       {activeProgram && activeProgram.days && activeProgram.days.length > 0 && (
         <div className={`rounded-2xl p-5 border theme-transition ${
-          isDark ? 'bg-[#1a1a2e] border-[#d4af37]/10' : 'bg-white border-[#14b8a6]/15'
+          isDark ? 'bg-[#1a1a2e] border-[#14b8a6]/10' : 'bg-white border-[#14b8a6]/15'
         }`}>
-          <h3 className={`font-bold mb-4 flex items-center gap-2 ${isDark ? 'text-[#d4af37]' : 'text-[#0d9488]'}`}>
+          <h3 className={`font-bold mb-4 flex items-center gap-2 ${isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'}`}>
             <Utensils size={18} />
             برنامه کامل — {activeProgram.plan_name}
           </h3>
@@ -171,7 +175,7 @@ export default function Nutrition() {
                 isDark ? 'bg-[#0d0d1a] border-gray-800' : 'bg-[#f0fdfa] border-[#14b8a6]/20'
               }`}>
                 <div className="flex items-center justify-between mb-3">
-                  <h4 className={`font-bold ${isDark ? 'text-[#d4af37]' : 'text-[#0d9488]'}`}>
+                  <h4 className={`font-bold ${isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'}`}>
                     {day.day}
                   </h4>
                   <span className={`text-xs font-bold ${isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}`}>
@@ -201,21 +205,21 @@ export default function Nutrition() {
       {/* Nutrition Summary (profile info) */}
       <div className={`rounded-2xl p-6 border theme-transition ${
         isDark 
-          ? 'bg-gradient-to-l from-[#1a1a2e] to-[#16213e] border-[#d4af37]/20' 
+          ? 'bg-gradient-to-l from-[#1a1a2e] to-[#16213e] border-[#14b8a6]/20' 
           : 'bg-gradient-to-l from-white to-[#f0fdfa] border-[#14b8a6]/30'
       }`}>
         <div className="flex items-center gap-3 mb-4">
           <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-            isDark ? 'bg-[#d4af37]/20' : 'bg-[#14b8a6]/15'
+            isDark ? 'bg-[#14b8a6]/20' : 'bg-[#14b8a6]/15'
           }`}>
-            <Target size={24} className={isDark ? 'text-[#d4af37]' : 'text-[#0d9488]'} />
+            <Target size={24} className={isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'} />
           </div>
           <div>
             <h3 className={`font-bold text-lg ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>
               خلاصه تغذیه پروفایل
             </h3>
             <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}`}>
-              {activeProfile.name}
+              {profile.name}
             </p>
           </div>
         </div>
@@ -234,31 +238,31 @@ export default function Nutrition() {
           </div>
         ) : (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            {activeProfile.dietaryGoal && (
-              <InfoCard label="هدف رژیم" value={activeProfile.dietaryGoal} isDark={isDark} />
+            {profile.dietaryGoal && (
+              <InfoCard label="هدف رژیم" value={profile.dietaryGoal} isDark={isDark} />
             )}
-            {activeProfile.dietType && (
-              <InfoCard label="نوع رژیم" value={activeProfile.dietType} isDark={isDark} />
+            {profile.dietType && (
+              <InfoCard label="نوع رژیم" value={profile.dietType} isDark={isDark} />
             )}
-            <InfoCard label="وعده‌های روزانه" value={`${toPersianNumber(activeProfile.mealsPerDay || 3)} وعده`} isDark={isDark} />
-            {activeProfile.calorieTarget && (
-              <InfoCard label="کالری هدف" value={`${toPersianNumber(activeProfile.calorieTarget)} کالری`} isDark={isDark} />
+            <InfoCard label="وعده‌های روزانه" value={`${toPersianNumber(profile.mealsPerDay || 3)} وعده`} isDark={isDark} />
+            {profile.calorieTarget && (
+              <InfoCard label="کالری هدف" value={`${toPersianNumber(profile.calorieTarget)} کالری`} isDark={isDark} />
             )}
           </div>
         )}
       </div>
 
       {/* Favorite / Disliked / Allergies */}
-      {activeProfile.favoriteFoods.length > 0 && (
+      {profile.favoriteFoods.length > 0 && (
         <div className={`rounded-2xl p-5 border theme-transition ${
-          isDark ? 'bg-[#1a1a2e] border-[#d4af37]/10' : 'bg-white border-[#14b8a6]/15'
+          isDark ? 'bg-[#1a1a2e] border-[#14b8a6]/10' : 'bg-white border-[#14b8a6]/15'
         }`}>
-          <h3 className={`font-bold mb-3 flex items-center gap-2 ${isDark ? 'text-[#d4af37]' : 'text-[#0d9488]'}`}>
+          <h3 className={`font-bold mb-3 flex items-center gap-2 ${isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'}`}>
             <Utensils size={18} />
             غذاهای مورد علاقه
           </h3>
           <div className="flex flex-wrap gap-2">
-            {activeProfile.favoriteFoods.map((food, idx) => (
+            {profile.favoriteFoods.map((food: string, idx: number) => (
               <span key={idx} className={`px-3 py-1.5 rounded-lg text-sm ${
                 isDark ? 'bg-[#22c55e]/20 text-[#22c55e]' : 'bg-[#10b981]/15 text-[#059669]'
               }`}>
@@ -269,16 +273,16 @@ export default function Nutrition() {
         </div>
       )}
 
-      {activeProfile.dislikedFoods.length > 0 && (
+      {profile.dislikedFoods.length > 0 && (
         <div className={`rounded-2xl p-5 border theme-transition ${
-          isDark ? 'bg-[#1a1a2e] border-[#d4af37]/10' : 'bg-white border-[#14b8a6]/15'
+          isDark ? 'bg-[#1a1a2e] border-[#14b8a6]/10' : 'bg-white border-[#14b8a6]/15'
         }`}>
           <h3 className={`font-bold mb-3 flex items-center gap-2 ${isDark ? 'text-[#ef4444]' : 'text-[#dc2626]'}`}>
             <AlertTriangle size={18} />
             غذاهای مورد عدم علاقه
           </h3>
           <div className="flex flex-wrap gap-2">
-            {activeProfile.dislikedFoods.map((food, idx) => (
+            {profile.dislikedFoods.map((food: string, idx: number) => (
               <span key={idx} className={`px-3 py-1.5 rounded-lg text-sm ${
                 isDark ? 'bg-[#ef4444]/20 text-[#ef4444]' : 'bg-red-50 text-red-700'
               }`}>
@@ -289,7 +293,7 @@ export default function Nutrition() {
         </div>
       )}
 
-      {activeProfile.foodAllergies.length > 0 && (
+      {profile.foodAllergies.length > 0 && (
         <div className={`rounded-2xl p-5 border theme-transition ${
           isDark ? 'bg-[#1a1a2e] border-[#ef4444]/20' : 'bg-white border-red-200'
         }`}>
@@ -298,7 +302,7 @@ export default function Nutrition() {
             آلرژی‌های غذایی
           </h3>
           <div className="flex flex-wrap gap-2">
-            {activeProfile.foodAllergies.map((allergy, idx) => (
+            {profile.foodAllergies.map((allergy: string, idx: number) => (
               <span key={idx} className={`px-3 py-1.5 rounded-lg text-sm font-bold ${
                 isDark ? 'bg-[#ef4444]/20 text-[#ef4444]' : 'bg-red-50 text-red-700'
               }`}>
@@ -311,10 +315,10 @@ export default function Nutrition() {
 
       {/* Nutrition Programs List */}
       <div className={`rounded-2xl p-5 border theme-transition ${
-        isDark ? 'bg-[#1a1a2e] border-[#d4af37]/10' : 'bg-white border-[#14b8a6]/15'
+        isDark ? 'bg-[#1a1a2e] border-[#14b8a6]/10' : 'bg-white border-[#14b8a6]/15'
       }`}>
         <div className="flex items-center justify-between mb-4">
-          <h3 className={`font-bold flex items-center gap-2 ${isDark ? 'text-[#d4af37]' : 'text-[#0d9488]'}`}>
+          <h3 className={`font-bold flex items-center gap-2 ${isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'}`}>
             <Utensils size={18} />
             برنامه‌های غذایی
           </h3>
@@ -322,7 +326,7 @@ export default function Nutrition() {
             onClick={() => navigate('/nutrition-import')}
             className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-bold transition-all ${
               isDark
-                ? 'bg-[#d4af37]/20 text-[#d4af37] hover:bg-[#d4af37]/30'
+                ? 'bg-[#14b8a6]/20 text-[#14b8a6] hover:bg-[#14b8a6]/30'
                 : 'bg-[#14b8a6]/15 text-[#0d9488] hover:bg-[#14b8a6]/25'
             }`}
           >
@@ -344,7 +348,7 @@ export default function Nutrition() {
                 className={`rounded-xl p-4 border cursor-pointer transition-all ${
                   program.id === (state.activeNutritionProgram || nutritionPrograms[0]?.id)
                     ? isDark
-                      ? 'bg-[#d4af37]/10 border-[#d4af37]/40'
+                      ? 'bg-[#14b8a6]/10 border-[#14b8a6]/40'
                       : 'bg-[#14b8a6]/10 border-[#14b8a6]/40'
                     : isDark
                       ? 'bg-[#0d0d1a] border-gray-800 hover:border-gray-600'
@@ -356,7 +360,7 @@ export default function Nutrition() {
                     {program.plan_name}
                     {program.id === (state.activeNutritionProgram || nutritionPrograms[0]?.id) && (
                       <span className={`mr-2 text-[10px] px-2 py-0.5 rounded-full ${
-                        isDark ? 'bg-[#d4af37]/30 text-[#d4af37]' : 'bg-[#14b8a6]/20 text-[#0d9488]'
+                        isDark ? 'bg-[#14b8a6]/30 text-[#14b8a6]' : 'bg-[#14b8a6]/20 text-[#0d9488]'
                       }`}>
                         فعال
                       </span>
