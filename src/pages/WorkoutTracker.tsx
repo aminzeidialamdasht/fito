@@ -102,20 +102,23 @@ export default function WorkoutTracker() {
     if (ex?.rest) { setRestTimer(Number(ex.rest) || 60); setIsResting(true); }
   };
 
-  // ✅ اصلاح شده: لغو ایمن بدون صفحه سفید
+  // ✅ اصلاح شده: لغو ایمن بدون صفحه سفید و بدون بازگشت سشن پاک‌شده از localStorage
   const confirmCancel = () => {
+    // 1. ابتدا سشن را در همین لحظه و به‌صورت همزمان پاک کن (localStorage + state).
+    //    قبلاً این کار با setTimeout بعد از navigate انجام می‌شد؛ چون هوک useActiveWorkout
+    //    هنگام unmount شدن این کامپوننت cleanup اجرا نمی‌کند، سشن در localStorage باقی
+    //    می‌ماند و با هر ورود مجدد به صفحه تمرین دوباره برمی‌گشت («لغو کار نمی‌کند»).
+    endSession();
+
+    // 2. مودال را ببند تا رندر نهایی این کامپوننت تمیز بماند
     setShowCancelModal(false);
-    // 1. اول تایمرها را متوقف کن
+
+    // 3. تایمرها را متوقف کن
     if (timerRef.current) clearInterval(timerRef.current);
     if (restTimerRef.current) clearInterval(restTimerRef.current);
     
-    // 2. کاربر را به داشبورد بفرست (با replace تا دکمه بازگشت کار نکند)
+    // 4. کاربر را به داشبورد بفرست (با replace تا دکمه بازگشت به صفحه تمرین برنگردد)
     navigate('/dashboard', { replace: true });
-    
-    // 3. با کمی تاخیر سشن را پاک کن تا کامپوننت فرصت داشته باشد قبل از ناپدید شدن رندر شود
-    setTimeout(() => {
-      endSession();
-    }, 200);
   };
 
   // ✅ اصلاح شده: پایان و رفتن به گزارش پیشرفت

@@ -96,6 +96,8 @@ export function getThemeClasses(isDark: boolean) {
       : 'bg-gray-200 text-gray-900 hover:bg-gray-300',
     border: isDark ? 'border-[#14b8a6]/10' : 'border-[#14b8a6]/15',
     borderStrong: isDark ? 'border-[#14b8a6]/30' : 'border-[#14b8a6]/30',
+    hoverBg: isDark ? 'hover:bg-white/5' : 'hover:bg-[#f0fdfa]',
+    bgSubtle: isDark ? 'bg-[#0d0d1a]' : 'bg-gray-50',
     badge: isDark
       ? 'bg-[#4a90d9]/20 text-[#6bb5ff]'
       : 'bg-[#14b8a6]/15 text-[#0d9488]',

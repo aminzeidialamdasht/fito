@@ -44,6 +44,11 @@ export function getMonthStartWeekday(year: number, month: number): number {
   return (day + 1) % 7;
 }
 
+export function toGregorianDateFromJalali(jy: number, jm: number, jd: number): Date {
+  const g = toGregorian(jy, jm, jd);
+  return new Date(g.gy, g.gm - 1, g.gd);
+}
+
 export function getJalaliCalendarDays(year: number, month: number): (number | null)[] {
   const days: (number | null)[] = [];
   const startWeekday = getMonthStartWeekday(year, month);
