@@ -7,31 +7,50 @@ export interface WorkoutSession extends BaseWorkoutSession {
   name?: string;
 }
 
-// گسترش تایپ WorkoutDay برای پشتیبانی از totalSets
 interface ExtendedWorkoutDay extends BaseWorkoutDay {
   totalSets?: number;
 }
 
-// تابع کمکی برای نرمال‌سازی برنامه
-const normalizeProgram = (program: WorkoutProgram | null): WorkoutProgram => {
-  if (!program) return DEFAULT_WORKOUT_PLAN as unknown as WorkoutProgram;
-  
-  if (!program.days || program.days.length === 0) {
-    return DEFAULT_WORKOUT_PLAN as unknown as WorkoutProgram;
-  }
+// نگاشت نام روزهای انگلیسی به فارسی برای سینک کردن برنامه‌های ایمپورت شده
+const DAY_MAP: Record<string, string> = {
+  'Saturday': 'شنبه', 'Sunday': 'یکشنبه', 'Monday': 'دوشنبه',
+  'Tuesday': 'سه‌شنبه', 'Wednesday': 'چهارشنبه', 'Thursday': 'پنجشنبه', 'Friday': 'جمعه',
+  'Sat': 'شنبه', 'Sun': 'یکشنبه', 'Mon': 'دوشنبه', 'Tue': 'سه‌شنبه',
+  'Wed': 'چهارشنبه', 'Thu': 'پنجشنبه', 'Fri': 'جمعه'
+};
 
-  // محاسبه و تزریق totalSets برای هر روز
-  const normalizedDays = program.days.map(day => {
-    const baseDay = day as any; // استفاده از any موقت برای دور زدن محدودیت تایپ
-    const calculatedTotalSets = baseDay.exercises?.reduce((sum: number, ex: any) => sum + (ex.sets || 0), 0) || 0;
+const normalizeDays = (days: any[]) => {
+  if (!days || !Array.isArray(days)) return [];
+  
+  return days.map(day => {
+    // تبدیل نام روز به فارسی استاندارد
+    const persianDay = DAY_MAP[day.day] || day.day;
+    
+    // محاسبه totalSets اگر وجود نداشت
+    const sets = day.exercises?.reduce((sum: number, ex: any) => sum + (Number(ex.sets) || 0), 0) || 0;
     
     return {
-      ...baseDay,
-      totalSets: baseDay.totalSets || calculatedTotalSets
+      ...day,
+      day: persianDay,
+      totalSets: day.totalSets || sets,
+      exercises: day.exercises || []
     } as ExtendedWorkoutDay;
   });
+};
 
-  return { ...program, days: normalizedDays };
+const normalizeProgram = (program: WorkoutProgram | null): WorkoutProgram => {
+  if (!program) return DEFAULT_WORKOUT_PLAN as unknown as WorkoutProgram;
+  if (!program.days || program.days.length === 0) return DEFAULT_WORKOUT_PLAN as unknown as WorkoutProgram;
+
+  const normalizedDays = normalizeDays(program.days as any);
+  
+  // ایجاد یک آبجکت جدید برای تضمین تغییر Reference و آپدیت UI
+  return {
+    ...program,
+    id: program.id,
+    name: program.name,
+    days: normalizedDays
+  };
 };
 
 interface AppContextType {
@@ -76,13 +95,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return state.profiles.find(p => p.id === state.activeProfileId) || null;
   }, [state.profiles, state.activeProfileId]);
 
+  // ✅ نرمال‌سازی عمیق با ایجاد آبجکت جدید برای هر بار تغییر
   const activeProgramData = useMemo(() => {
     let rawProgram: WorkoutProgram | null = null;
     if (state.activeProgram) {
       rawProgram = state.programs.find(p => p.id === state.activeProgram) || null;
     }
-    return normalizeProgram(rawProgram);
-  }, [state.programs, state.activeProgram]);
+    // استفاده از JSON parse/stringify برای اطمینان از Deep Copy و شکستن کش React
+    const normalized = normalizeProgram(rawProgram);
+    return JSON.parse(JSON.stringify(normalized));
+  }, [state.programs, state.activeProgram, state.activeProfileId]);
 
   const programs = useMemo(() =>
     state.programs.filter(p => p.profileId === state.activeProfileId),
