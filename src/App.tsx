@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { HashRouter, Routes, Route } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
 import { ThemeProvider } from './context/ThemeContext';
 import Layout from './components/Layout';
@@ -15,9 +15,10 @@ import Supplements from './pages/Supplements';
 import SupplementImport from './pages/SupplementImport';
 import WorkoutTracker from './pages/WorkoutTracker';
 import SessionPreview from './pages/SessionPreview';
+import Workouts from './pages/Workouts';
+import TodaySession from './pages/TodaySession';
 import CalendarPage from './pages/Calendar';
 import Progress from './pages/Progress';
-import Settings from './pages/Settings';
 import { SubscriptionProvider } from './subscription/SubscriptionContext';
 import PremiumGate from './subscription/PremiumGate';
 
@@ -29,13 +30,16 @@ function AppContent({ showWelcome, onContinue }: { showWelcome: boolean; onConti
   return (
     <div className="flex flex-col min-h-screen">
       <Routes>
-        {/* صفحات دارای نوار پایین و لی‌آوت اصلی */}
+        {/* ریدایرکت مسیر غلط به مسیر صحیح */}
+        <Route path="/workout" element={<Navigate to="/workouts" replace />} />
+        
         <Route path="/" element={<Layout><Dashboard /></Layout>} />
         <Route path="/calendar" element={<Layout><CalendarPage /></Layout>} />
         <Route path="/progress" element={<Layout><Progress /></Layout>} />
-        <Route path="/settings" element={<Layout><Settings /></Layout>} />
+        <Route path="/profile" element={<Layout><Profile /></Layout>} />
+        <Route path="/workouts" element={<Layout><Workouts /></Layout>} />
+        <Route path="/today-session" element={<TodaySession />} />
         
-        {/* صفحات پریمیوم */}
         <Route path="/prompt" element={<Layout><PremiumGate title="تولید پرامپت"><PromptGenerator /></PremiumGate></Layout>} />
         <Route path="/import" element={<Layout><PremiumGate title="ورود برنامه تمرینی"><ProgramImport /></PremiumGate></Layout>} />
         <Route path="/nutrition" element={<Layout><Nutrition /></Layout>} />
@@ -43,12 +47,13 @@ function AppContent({ showWelcome, onContinue }: { showWelcome: boolean; onConti
         <Route path="/supplements" element={<Layout><Supplements /></Layout>} />
         <Route path="/supplement-import" element={<Layout><PremiumGate title="ورود برنامه مکمل"><SupplementImport /></PremiumGate></Layout>} />
 
-        {/* صفحات فول‌اسکرین بدون نوار پایین */}
         <Route path="/session/:id" element={<SessionPreview />} />
         <Route path="/tracker/:id" element={<WorkoutTracker />} />
+        
+        {/* ریدایرکت مسیرهای ناشناخته به داشبورد */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       
-      {/* نوار ناوبری فقط وقتی کاربر وارد اپ شده باشد */}
       <BottomNav />
     </div>
   );
@@ -56,10 +61,7 @@ function AppContent({ showWelcome, onContinue }: { showWelcome: boolean; onConti
 
 function App() {
   const [showWelcome, setShowWelcome] = useState(true);
-
-  const continueToApp = () => {
-    setShowWelcome(false);
-  };
+  const continueToApp = () => setShowWelcome(false);
 
   return (
     <ThemeProvider>

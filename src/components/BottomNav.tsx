@@ -1,13 +1,14 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Calendar, Dumbbell, TrendingUp, Settings } from 'lucide-react';
+import { Home, Calendar, Dumbbell, TrendingUp, User } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
 const NAV_ITEMS = [
   { path: '/', icon: Home, label: 'داشبورد' },
   { path: '/calendar', icon: Calendar, label: 'تقویم' },
-  { path: '/workouts', icon: Dumbbell, label: 'تمرینات' },
+  // بازگشت به مسیر تمرین امروز با نام صحیح
+  { path: '/today-session', icon: Dumbbell, label: 'تمرینات' }, 
   { path: '/progress', icon: TrendingUp, label: 'پیشرفت' },
-  { path: '/settings', icon: Settings, label: 'تنظیمات' },
+  { path: '/profile', icon: User, label: 'پروفایل' },
 ];
 
 export default function BottomNav() {
@@ -21,7 +22,8 @@ export default function BottomNav() {
     }`}>
       <div className="flex justify-around items-center h-16 px-2">
         {NAV_ITEMS.map((item) => {
-          const isActive = location.pathname === item.path;
+          const isActive = location.pathname === item.path || 
+                           (item.path !== '/' && location.pathname.startsWith(item.path));
           const Icon = item.icon;
           
           return (
@@ -35,9 +37,8 @@ export default function BottomNav() {
               }`}
             >
               <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
-              <span className="text-[10px] font-bold">{item.label}</span>
+              <span className="text-[10px] font-bold text-center leading-tight">{item.label}</span>
               
-              {/* خط نشانگر فعال */}
               {isActive && (
                 <div className="absolute top-0 w-12 h-0.5 bg-teal-500 rounded-b-full" />
               )}

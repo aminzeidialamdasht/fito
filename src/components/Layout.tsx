@@ -8,9 +8,10 @@ import { useState } from 'react';
 import { getPersianDate } from '../utils/jalali';
 import { useTheme } from '../context/ThemeContext';
 
-const navItems = [
+// آیتم‌های منوی کناری (سایدبار)
+const sidebarItems = [
   { path: '/', label: 'داشبورد', icon: LayoutDashboard },
-  { path: '/workout', label: 'تمرین', icon: Dumbbell },
+  { path: '/workouts', label: 'تاریخچه تمرینات', icon: Dumbbell }, // تغییر نام و مسیر
   { path: '/profile', label: 'پروفایل', icon: User },
   { path: '/prompt', label: 'پرامپت', icon: Brain },
   { path: '/import', label: 'ورود برنامه', icon: Import },
@@ -20,10 +21,10 @@ const navItems = [
   { path: '/progress', label: 'پیشرفت', icon: Trophy },
 ];
 
-/** نوار پایین موبایل — ۵ آیتم اصلی طبق پیشنهاد UI */
+// آیتم‌های نوار پایین موبایل
 const bottomNavItems = [
-  { path: '/', label: 'خانه', icon: Home },
-  { path: '/workout', label: 'تمرین', icon: Dumbbell },
+  { path: '/', label: 'داشبورد', icon: Home },
+  { path: '/today-session', label: 'تمرینات', icon: Dumbbell }, // تغییر مسیر به today-session
   { path: '/calendar', label: 'تقویم', icon: Calendar },
   { path: '/progress', label: 'پیشرفت', icon: Trophy },
   { path: '/profile', label: 'پروفایل', icon: User },
@@ -42,6 +43,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         ? 'bg-[#080808]'
         : 'bg-gradient-to-br from-[#f0fdfa] via-[#ffffff] to-[#ecfdf5]'
     )}>
+      {/* هدر */}
       <header className={'fixed top-0 left-0 right-0 z-50 backdrop-blur-xl border-b theme-transition ' + (
         isDark
           ? 'bg-[#0c0c0c]/90 border-white/5'
@@ -97,13 +99,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <div className="h-16 lg:h-[68px] flex-shrink-0" />
 
       <div className="flex flex-1">
+        {/* سایدبار دسکتاپ */}
         <aside className={'hidden lg:flex flex-col w-60 border-l p-4 gap-1 sticky top-[68px] h-[calc(100vh-68px)] overflow-y-auto theme-transition ' + (
           isDark ? 'bg-[#0c0c0c] border-white/5' : 'bg-white/50 border-[#14b8a6]/10'
         )}>
           <div className="mb-4 px-3">
             <p className={'text-xs font-bold ' + (isDark ? 'text-gray-500' : 'text-[#0f766e]/70')}>منوی اصلی</p>
           </div>
-          {navItems.map(item => {
+          {sidebarItems.map(item => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
             return (
@@ -123,6 +126,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           })}
         </aside>
 
+        {/* منوی کشویی موبایل */}
         {menuOpen && (
           <div className="lg:hidden fixed inset-0 z-40 bg-black/70 backdrop-blur-sm" onClick={() => setMenuOpen(false)}>
             <aside
@@ -142,7 +146,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   <span className={'text-xs ' + (isDark ? 'text-gray-500' : 'text-[#0f766e]/70')}>Coachino · دستیار هوشمند بدنسازی</span>
                 </div>
               </div>
-              {navItems.map(item => {
+              {sidebarItems.map(item => {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.path;
                 return (
@@ -164,12 +168,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </div>
         )}
 
-        <main className="flex-1 px-4 py-6 lg:px-8 lg:py-8 overflow-auto pb-28 lg:pb-8">
+        {/* محتوای اصلی - افزایش pb به 36 برای جلوگیری از پوشش توسط نوار پایین */}
+        <main className="flex-1 px-4 py-6 lg:px-8 lg:py-8 overflow-auto pb-36 lg:pb-8">
           <div className="max-w-6xl mx-auto">{children}</div>
         </main>
       </div>
 
-      <nav className={'lg:hidden fixed bottom-0 left-0 right-0 z-40 theme-transition ' + (
+      {/* نوار پایین موبایل */}
+      <nav className={'lg:hidden fixed bottom-0 left-0 right-0 z-50 theme-transition ' + (
         isDark
           ? 'bg-[#0c0c0c]/95 backdrop-blur-xl border-t border-white/5'
           : 'bg-white/95 backdrop-blur-xl border-t border-[#14b8a6]/20'
@@ -177,8 +183,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <div className="flex justify-around items-center py-2 px-1">
           {bottomNavItems.map(item => {
             const Icon = item.icon;
+            // تشخیص فعال بودن: مسیر دقیق یا شروع با مسیر (برای صفحات زیرمجموعه مثل tracker)
             const isActive = location.pathname === item.path ||
-              (item.path === '/workout' && location.pathname.startsWith('/workout'));
+              (item.path !== '/' && location.pathname.startsWith(item.path));
+            
             return (
               <button
                 key={item.path}
