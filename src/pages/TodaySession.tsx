@@ -4,6 +4,11 @@ import { useAppContext } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { toPersianNumber } from '../utils/jalali';
 import { useMemo } from 'react';
+import type { WorkoutDay as BaseWorkoutDay } from '../types';
+
+interface ExtendedWorkoutDay extends BaseWorkoutDay {
+  totalSets?: number;
+}
 
 const getDayName = (date: Date) => {
   const days = ['یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه', 'شنبه'];
@@ -12,20 +17,26 @@ const getDayName = (date: Date) => {
 
 export default function TodaySession() {
   const navigate = useNavigate();
-  // دریافت دیتای کاملاً نرمال‌شده از هسته هوشمند
   const { activeProgramData } = useAppContext();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
   const todayName = getDayName(new Date());
 
-  // پیدا کردن برنامه روز جاری از دیتای استاندارد شده
-  const currentDayPlan = useMemo(() => 
-    activeProgramData?.days?.find((d: any) => d.day === todayName),
-    [activeProgramData, todayName]
-  );
+  // ✅ جستجوی انعطاف‌پذیر
+  const currentDayPlan = useMemo(() => {
+    if (!activeProgramData?.days) return undefined;
+    return activeProgramData.days.find((d: any) => {
+      const planDay = String(d.day || '').trim().toLowerCase();
+      const targetDay = todayName.trim().toLowerCase();
+      return planDay === targetDay;
+    }) as ExtendedWorkoutDay | undefined;
+  }, [activeProgramData, todayName]);
 
-  if (!currentDayPlan || currentDayPlan.exercises?.length === 0) {
+  // ✅ شرط هوشمند
+  const hasExercises = currentDayPlan && Array.isArray(currentDayPlan.exercises) && currentDayPlan.exercises.length > 0;
+
+  if (!hasExercises) {
     return (
       <div className={`min-h-screen flex flex-col items-center justify-center p-6 text-center ${isDark ? 'bg-[#0f172a] text-white' : 'bg-[#f8fafc] text-gray-900'}`}>
         <Dumbbell size={48} className="mb-4 opacity-50" />
@@ -36,7 +47,7 @@ export default function TodaySession() {
     );
   }
 
-  const totalSets = currentDayPlan.exercises?.reduce((acc: number, ex: any) => acc + (ex.sets || 3), 0) || 0;
+  const totalSets = currentDayPlan!.exercises?.reduce((acc: number, ex: any) => acc + (ex.sets || 3), 0) || 0;
   const estimatedTime = Math.ceil(totalSets * 1.5);
 
   const handleStart = () => {
@@ -45,7 +56,6 @@ export default function TodaySession() {
 
   return (
     <div className={`min-h-screen pb-44 ${isDark ? 'bg-[#0f172a]' : 'bg-[#f8fafc]'}`}>
-      {/* هدر */}
       <div className={`sticky top-0 z-40 backdrop-blur-md border-b px-4 py-4 flex items-center gap-3 ${isDark ? 'bg-[#0f172a]/90 border-white/10' : 'bg-white/90 border-gray-200'}`}>
         <button onClick={() => navigate(-1)} className="p-2 rounded-full hover:bg-black/5">
           <ChevronLeft size={24} className={isDark ? 'text-white' : 'text-gray-800'} />
@@ -57,7 +67,6 @@ export default function TodaySession() {
       </div>
 
       <div className="p-4 space-y-4 max-w-2xl mx-auto">
-        {/* کارت خلاصه */}
         <div className={`rounded-2xl p-5 border shadow-sm ${isDark ? 'bg-[#1e293b] border-white/5' : 'bg-white border-teal-100'}`}>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
@@ -66,7 +75,7 @@ export default function TodaySession() {
               </div>
               <div>
                 <p className={`text-xs font-bold ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>حجم تمرین</p>
-                <p className={`text-lg font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>{toPersianNumber(currentDayPlan.exercises?.length || 0)} حرکت · {toPersianNumber(totalSets)} ست</p>
+                <p className={`text-lg font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>{toPersianNumber(currentDayPlan!.exercises?.length || 0)} حرکت · {toPersianNumber(totalSets)} ست</p>
               </div>
             </div>
             <div className="text-right">
@@ -76,10 +85,9 @@ export default function TodaySession() {
           </div>
         </div>
 
-        {/* لیست حرکات */}
         <div className="space-y-3">
           <h3 className={`font-bold text-sm px-1 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>حرکات امروز:</h3>
-          {currentDayPlan.exercises?.map((ex: any, idx: number) => (
+          {currentDayPlan!.exercises?.map((ex: any, idx: number) => (
             <div key={idx} className={`flex items-center justify-between p-4 rounded-xl border ${isDark ? 'bg-[#1e293b] border-white/5' : 'bg-white border-gray-100'}`}>
               <div className="flex items-center gap-3">
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold ${isDark ? 'bg-white/5 text-gray-300' : 'bg-gray-100 text-gray-600'}`}>{idx + 1}</div>
@@ -93,7 +101,6 @@ export default function TodaySession() {
         </div>
       </div>
 
-      {/* دکمه شروع شناور - تنظیم شده برای عدم پوشش توسط نوار پایین */}
       <div className={`fixed bottom-[70px] left-0 right-0 p-4 pt-2 border-t backdrop-blur-xl z-30 ${isDark ? 'bg-[#0f172a]/95 border-white/10' : 'bg-white/95 border-gray-200'}`}>
         <div className="max-w-2xl mx-auto">
           <button onClick={handleStart} className="w-full py-4 rounded-2xl font-black text-base text-white shadow-lg shadow-teal-500/20 active:scale-[0.98] transition-transform flex items-center justify-center gap-2" style={{ background: 'linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)' }}>

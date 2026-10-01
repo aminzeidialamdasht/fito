@@ -6,7 +6,6 @@ import { useTheme } from '../context/ThemeContext';
 import { toPersianNumber } from '../utils/jalali';
 import type { WorkoutDay as BaseWorkoutDay } from '../types';
 
-// ✅ تایپ محلی برای پشتیبانی از totalSets بدون دستکاری types.ts
 interface ExtendedWorkoutDay extends BaseWorkoutDay {
   totalSets?: number;
 }
@@ -27,16 +26,23 @@ export default function Calendar() {
   const [activeDay, setActiveDay] = useState<string | null>(null);
   const todayName = getDayName(new Date());
 
-  // کست به تایپ گسترش‌یافته
-  const currentDayPlan = useMemo(() => 
-    activeProgramData?.days?.find((d: any) => d.day === todayName) as ExtendedWorkoutDay | undefined,
-    [activeProgramData, todayName]
-  );
+  // ✅ جستجوی انعطاف‌پذیر با نرمال‌سازی نام روز
+  const currentDayPlan = useMemo(() => {
+    if (!activeProgramData?.days) return undefined;
+    return activeProgramData.days.find((d: any) => {
+      const planDay = String(d.day || '').trim().toLowerCase();
+      const targetDay = todayName.trim().toLowerCase();
+      return planDay === targetDay;
+    }) as ExtendedWorkoutDay | undefined;
+  }, [activeProgramData, todayName]);
 
   const handleStartSession = () => navigate('/today-session');
   const toggleDay = (dayName: string) => setActiveDay(prev => prev === dayName ? null : dayName);
 
   if (!activeProgramData) return null;
+
+  // ✅ شرط هوشمند: اگر روز وجود دارد و exercises دارد (حتی اگر خالی نباشد)
+  const hasExercises = currentDayPlan && Array.isArray(currentDayPlan.exercises) && currentDayPlan.exercises.length > 0;
 
   return (
     <div className={`min-h-screen pb-24 ${isDark ? 'bg-[#0f172a]' : 'bg-[#f8fafc]'}`}>
@@ -55,20 +61,20 @@ export default function Calendar() {
       </div>
 
       <div className="p-4 space-y-4">
-        {currentDayPlan && currentDayPlan.exercises?.length > 0 ? (
+        {hasExercises ? (
           <div className={`rounded-2xl p-5 border shadow-sm relative overflow-hidden ${isDark ? 'bg-[#1e293b] border-teal-500/30' : 'bg-white border-teal-200'}`}>
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <span className={`text-xs font-bold px-2 py-1 rounded-lg ${isDark ? 'bg-teal-500/20 text-teal-400' : 'bg-teal-50 text-teal-700'}`}>امروز</span>
-                  <h2 className={`text-xl font-black mt-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>{currentDayPlan.day}</h2>
+                  <h2 className={`text-xl font-black mt-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>{currentDayPlan!.day}</h2>
                 </div>
                 <button onClick={handleStartSession} className="w-12 h-12 rounded-full bg-teal-500 text-white flex items-center justify-center shadow-lg shadow-teal-500/30 active:scale-95 transition-transform">
                   <Play size={20} fill="currentColor" className="ml-0.5" />
                 </button>
               </div>
               <div className="space-y-2 mt-4 pt-4 border-t border-dashed border-gray-200 dark:border-white/10">
-                {currentDayPlan.exercises.map((ex: any, idx: number) => (
+                {currentDayPlan!.exercises.map((ex: any, idx: number) => (
                   <div key={idx} className={`flex items-center justify-between p-3 rounded-xl ${isDark ? 'bg-white/5' : 'bg-gray-50'}`}>
                     <div className="flex items-center gap-3">
                       <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${isDark ? 'bg-teal-500/20 text-teal-400' : 'bg-teal-100 text-teal-700'}`}>{idx + 1}</span>
@@ -79,23 +85,29 @@ export default function Calendar() {
                 ))}
               </div>
               <div className={`flex items-center gap-4 text-xs font-bold pt-4 mt-2 border-t ${isDark ? 'border-white/10 text-gray-400' : 'border-gray-100 text-gray-500'}`}>
-                <span className="flex items-center gap-1"><Info size={12} />{toPersianNumber(currentDayPlan.exercises.length)} حرکت</span>
-                <span className="flex items-center gap-1"><Dumbbell size={12} />{toPersianNumber(currentDayPlan.totalSets || 0)} ست کل</span>
+                <span className="flex items-center gap-1"><Info size={12} />{toPersianNumber(currentDayPlan!.exercises.length)} حرکت</span>
+                <span className="flex items-center gap-1"><Dumbbell size={12} />{toPersianNumber(currentDayPlan!.totalSets || 0)} ست کل</span>
               </div>
             </div>
           </div>
         ) : (
           <div className={`rounded-2xl p-8 text-center border ${isDark ? 'bg-[#1e293b] border-white/5' : 'bg-white border-gray-200'}`}>
-            <p className="font-bold opacity-70">امروز ({todayName}) روز استراحت است </p>
+            <p className="font-bold opacity-70">امروز ({todayName}) روز استراحت است 🎉</p>
           </div>
         )}
 
         <div className="space-y-3">
           <h3 className={`font-bold text-sm px-1 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>برنامه هفتگی:</h3>
           {WEEK_DAYS.map((dayName, index) => {
-            const dayPlan = activeProgramData?.days?.find((d: any) => d.day === dayName) as ExtendedWorkoutDay | undefined;
+            const dayPlan = activeProgramData.days.find((d: any) => {
+              const planDay = String(d.day || '').trim().toLowerCase();
+              const targetDay = dayName.trim().toLowerCase();
+              return planDay === targetDay;
+            }) as ExtendedWorkoutDay | undefined;
+            
             const isToday = dayName === todayName;
-            const isRest = !dayPlan || dayPlan.exercises?.length === 0;
+            // ✅ شرط هوشمند برای لیست هفتگی
+            const isRest = !dayPlan || !Array.isArray(dayPlan.exercises) || dayPlan.exercises.length === 0;
             const isOpen = activeDay === dayName;
             if (isToday) return null;
 
