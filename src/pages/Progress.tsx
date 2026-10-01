@@ -13,6 +13,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { formatDateJalali, toPersianNumber, getProgramTimelineDetails } from '../utils/jalali';
+import BodyHeatmap from '../components/BodyHeatmap';
 
 type MeasurementKey = 'weight' | 'chest' | 'waist' | 'hips' | 'arms' | 'thighs' | 'calves' | 'shoulders' | 'neck';
 
@@ -241,20 +242,7 @@ export default function Progress() {
             <Info size={14} className={textSub} />
           </div>
           <div className="relative h-64 flex items-center justify-center">
-            <svg viewBox="0 0 200 280" className="h-full w-auto drop-shadow-lg">
-              <path d="M 100 20 C 115 20 125 30 125 45 C 125 55 120 65 115 70 L 135 75 C 150 75 160 85 160 100 L 155 135 C 150 145 140 145 135 135 L 130 110 L 120 180 L 125 260 C 125 270 115 270 110 260 L 105 200 L 95 200 L 90 260 C 85 270 75 270 75 260 L 80 180 L 70 110 L 65 135 C 60 145 50 145 45 135 L 40 100 C 40 85 50 75 65 75 L 85 70 C 80 65 75 55 75 45 C 75 30 85 20 100 20 Z" 
-                fill={isDark ? '#334155' : '#e2e8f0'} opacity="0.3" />
-              {MUSCLE_GROUPS.map(m => {
-                const intensity = (muscleStats[m.id] / maxMuscleVol) || 0;
-                if (intensity === 0) return null;
-                return (
-                  <g key={m.id} className="transition-all duration-500 hover:opacity-80 cursor-pointer">
-                    <path d={m.path} fill={gold} opacity={0.3 + (intensity * 0.7)} stroke={gold} strokeWidth="1" />
-                    <title>{`${m.label}: ${toPersianNumber(muscleStats[m.id])} ست`}</title>
-                  </g>
-                );
-              })}
-            </svg>
+          <BodyHeatmap />
             <div className="absolute bottom-0 right-0 flex flex-col gap-1">
               {MUSCLE_GROUPS.filter(m => muscleStats[m.id] > 0).slice(0, 4).map(m => (
                 <div key={m.id} className="flex items-center gap-2 text-[10px] font-bold bg-black/20 px-2 py-1 rounded-full backdrop-blur-sm">
