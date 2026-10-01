@@ -26,7 +26,6 @@ export default function Calendar() {
   const [activeDay, setActiveDay] = useState<string | null>(null);
   const todayName = getDayName(new Date());
 
-  // ✅ جستجوی انعطاف‌پذیر با نرمال‌سازی نام روز
   const currentDayPlan = useMemo(() => {
     if (!activeProgramData?.days) return undefined;
     return activeProgramData.days.find((d: any) => {
@@ -39,9 +38,18 @@ export default function Calendar() {
   const handleStartSession = () => navigate('/today-session');
   const toggleDay = (dayName: string) => setActiveDay(prev => prev === dayName ? null : dayName);
 
-  if (!activeProgramData) return null;
+  // ✅ اگر برنامه‌ای نیست، پیام مناسب نشان بده
+  if (!activeProgramData) {
+    return (
+      <div className={`min-h-screen flex flex-col items-center justify-center p-6 text-center ${isDark ? 'bg-[#0f172a] text-white' : 'bg-[#f8fafc] text-gray-900'}`}>
+        <CalendarIcon size={48} className="mb-4 opacity-50" />
+        <h2 className="text-xl font-bold mb-2">برنامه تمرینی فعال نیست</h2>
+        <p className="text-sm opacity-70 mb-6">لطفاً ابتدا یک برنامه وارد کنید یا بسازید.</p>
+        <button onClick={() => navigate('/import')} className="px-6 py-2 rounded-xl bg-teal-500 text-white font-bold">ورود برنامه</button>
+      </div>
+    );
+  }
 
-  // ✅ شرط هوشمند: اگر روز وجود دارد و exercises دارد (حتی اگر خالی نباشد)
   const hasExercises = currentDayPlan && Array.isArray(currentDayPlan.exercises) && currentDayPlan.exercises.length > 0;
 
   return (
@@ -106,7 +114,6 @@ export default function Calendar() {
             }) as ExtendedWorkoutDay | undefined;
             
             const isToday = dayName === todayName;
-            // ✅ شرط هوشمند برای لیست هفتگی
             const isRest = !dayPlan || !Array.isArray(dayPlan.exercises) || dayPlan.exercises.length === 0;
             const isOpen = activeDay === dayName;
             if (isToday) return null;

@@ -23,7 +23,6 @@ export default function TodaySession() {
 
   const todayName = getDayName(new Date());
 
-  // ✅ جستجوی انعطاف‌پذیر
   const currentDayPlan = useMemo(() => {
     if (!activeProgramData?.days) return undefined;
     return activeProgramData.days.find((d: any) => {
@@ -33,15 +32,19 @@ export default function TodaySession() {
     }) as ExtendedWorkoutDay | undefined;
   }, [activeProgramData, todayName]);
 
-  // ✅ شرط هوشمند
   const hasExercises = currentDayPlan && Array.isArray(currentDayPlan.exercises) && currentDayPlan.exercises.length > 0;
 
-  if (!hasExercises) {
+  // ✅ اگر برنامه‌ای نیست یا امروز استراحت است
+  if (!activeProgramData || !hasExercises) {
     return (
       <div className={`min-h-screen flex flex-col items-center justify-center p-6 text-center ${isDark ? 'bg-[#0f172a] text-white' : 'bg-[#f8fafc] text-gray-900'}`}>
         <Dumbbell size={48} className="mb-4 opacity-50" />
-        <h2 className="text-xl font-bold mb-2">امروز ({todayName}) روز استراحت است!</h2>
-        <p className="text-sm opacity-70 mb-6">برنامه‌ای برای امروز تعریف نشده است.</p>
+        <h2 className="text-xl font-bold mb-2">
+          {!activeProgramData ? 'برنامه تمرینی فعال نیست' : `امروز (${todayName}) روز استراحت است!`}
+        </h2>
+        <p className="text-sm opacity-70 mb-6">
+          {!activeProgramData ? 'لطفاً ابتدا یک برنامه وارد کنید.' : 'بدن شما برای رشد نیاز به ریکاوری دارد.'}
+        </p>
         <button onClick={() => navigate('/')} className="px-6 py-2 rounded-xl bg-teal-500 text-white font-bold">بازگشت به داشبورد</button>
       </div>
     );

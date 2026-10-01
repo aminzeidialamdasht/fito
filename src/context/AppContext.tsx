@@ -2,10 +2,10 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import { AppState, AthleteProfile, WorkoutProgram, NutritionProgram, SupplementProgram, WorkoutSession as BaseWorkoutSession, ProgressEntry, WorkoutDay } from '../types';
 import { loadState, saveState } from '../utils/storage';
 
-export const APP_VERSION = 'v1.5.0';
+export const APP_VERSION = 'v1.5.1';
 export interface WorkoutSession extends BaseWorkoutSession { name?: string; }
 
-// ✅ تایپ‌های محلی برای حفظ totalSets پس از نرمال‌سازی
+// ✅ تایپ محلی برای حفظ totalSets پس از نرمال‌سازی
 interface NormalizedWorkoutDay extends WorkoutDay {
   totalSets: number;
 }
@@ -50,24 +50,6 @@ const normalizeDays = (days: any[]): NormalizedWorkoutDay[] => {
   });
 };
 
-const createDefaultProgram = (profileId: string): NormalizedWorkoutProgram => ({
-  id: 'default-push-pull-legs',
-  profileId,
-  name: 'برنامه پوش/پول/لگ (رایگان)',
-  duration: '4',
-  startDate: new Date().toISOString(),
-  createdAt: new Date().toISOString(),
-  days: normalizeDays([
-    { day: 'شنبه', muscles: ['سینه', 'سرشانه', 'سه سر'], exercises: [{ name: 'پرس سینه هالتر', sets: 4, reps: 10 }, { name: 'بالا سینه دمبل', sets: 3, reps: 12 }, { name: 'قفسه سینه دستگاه', sets: 3, reps: 15 }, { name: 'نشر جانب دمبل', sets: 4, reps: 15 }, { name: 'پشت بازو سیم‌کش', sets: 4, reps: 12 }] },
-    { day: 'یکشنبه', muscles: ['زیربغل', 'جلوبازو', 'کول'], exercises: [{ name: 'لت از جلو', sets: 4, reps: 12 }, { name: 'زیربغل قایقی', sets: 4, reps: 12 }, { name: 'فیله کمر', sets: 3, reps: 15 }, { name: 'جلوبازو هالتر ایستاده', sets: 4, reps: 10 }, { name: 'جلوبازو دمبل چکشی', sets: 3, reps: 12 }] },
-    { day: 'دوشنبه', muscles: ['چهارسر', 'همسترینگ', 'ساق'], exercises: [{ name: 'اسکوات پا', sets: 4, reps: 10 }, { name: 'پرس پا دستگاه', sets: 4, reps: 12 }, { name: 'جلوران دستگاه', sets: 3, reps: 15 }, { name: 'پشت ران دستگاه', sets: 4, reps: 12 }, { name: 'ساق پا ایستاده', sets: 5, reps: 20 }] },
-    { day: 'سه‌شنبه', muscles: [], exercises: [] },
-    { day: 'چهارشنبه', muscles: ['سرشانه', 'کول', 'شکم'], exercises: [{ name: 'پرس سرشانه دمبل', sets: 4, reps: 10 }, { name: 'نشر خم دمبل', sets: 4, reps: 15 }, { name: 'شراگ دمبل', sets: 4, reps: 15 }, { name: 'کرانچ شکم', sets: 4, reps: 20 }, { name: 'پلانک', sets: 3, reps: 60 }] },
-    { day: 'پنجشنبه', muscles: ['سینه', 'پشت', 'بازو'], exercises: [{ name: 'پارالل (دیپ)', sets: 3, reps: 10 }, { name: 'بارفیکس', sets: 3, reps: 8 }, { name: 'فلای سینه دستگاه', sets: 3, reps: 15 }, { name: 'جلوبازو لاری', sets: 3, reps: 12 }, { name: 'پشت بازو هالتر خوابیده', sets: 3, reps: 12 }] },
-    { day: 'جمعه', muscles: [], exercises: [] }
-  ])
-});
-
 const normalizeProgram = (program: WorkoutProgram | null): NormalizedWorkoutProgram | null => {
   if (!program) return null;
   return {
@@ -79,7 +61,7 @@ const normalizeProgram = (program: WorkoutProgram | null): NormalizedWorkoutProg
 interface AppContextType {
   state: AppState;
   appVersion: string;
-  activeProgramData: NormalizedWorkoutProgram | null; // ✅ حالا تایپ صحیح است
+  activeProgramData: NormalizedWorkoutProgram | null; // ✅ فقط داده نرمال شده
   profiles: AthleteProfile[];
   activeProfile: AthleteProfile | null;
   setActiveProfile: (id: string | null) => void;
@@ -110,17 +92,7 @@ const AppContext = createContext<AppContextType | null>(null);
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AppState>(loadState);
   
-  useEffect(() => {
-    if (state.activeProfileId && state.programs.filter(p => p.profileId === state.activeProfileId).length === 0) {
-      const defaultProg = createDefaultProgram(state.activeProfileId);
-      setState(prev => ({
-        ...prev,
-        programs: [...prev.programs, defaultProg],
-        activeProgram: defaultProg.id
-      }));
-    }
-  }, [state.activeProfileId, state.programs]);
-
+  // ✅ حذف کامل useEffect مربوط به برنامه پیش‌فرض
   useEffect(() => { saveState(state); }, [state]);
 
   const activeProfile = useMemo(() => 
