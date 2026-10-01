@@ -1,36 +1,43 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
-import { AppState, AthleteProfile, WorkoutProgram, NutritionProgram, SupplementProgram, WorkoutSession, ProgressEntry } from '../types';
+import { AppState, AthleteProfile, WorkoutProgram, NutritionProgram, SupplementProgram, WorkoutSession as BaseWorkoutSession, ProgressEntry } from '../types';
 import { loadState, saveState } from '../utils/storage';
+
+// گسترش تایپ Session برای پشتیبانی از name (اختیاری)
+export interface WorkoutSession extends BaseWorkoutSession {
+  name?: string;
+}
 
 interface AppContextType {
   state: AppState;
+  // اضافه کردن activeProgramData به عنوان آبجکت کامل برنامه
+  activeProgramData: WorkoutProgram | null; 
   // Profile management
   profiles: AthleteProfile[];
   activeProfile: AthleteProfile | null;
   setActiveProfile: (id: string | null) => void;
   saveProfile: (profile: AthleteProfile) => void;
   deleteProfile: (id: string) => void;
-  // Workout Program management (filtered by active profile)
+  // Workout Program management
   programs: WorkoutProgram[];
   addProgram: (program: WorkoutProgram) => void;
   updateProgram: (program: WorkoutProgram) => void;
   removeProgram: (id: string) => void;
   setActiveProgram: (id: string | null) => void;
-  // Nutrition Program management (filtered by active profile)
+  // Nutrition Program management
   nutritionPrograms: NutritionProgram[];
   addNutritionProgram: (program: NutritionProgram) => void;
   removeNutritionProgram: (id: string) => void;
   setActiveNutritionProgram: (id: string | null) => void;
-  // Supplement Program management (filtered by active profile)
+  // Supplement Program management
   supplementPrograms: SupplementProgram[];
   addSupplementProgram: (program: SupplementProgram) => void;
   removeSupplementProgram: (id: string) => void;
   setActiveSupplementProgram: (id: string | null) => void;
-  // Session management (filtered by active profile)
+  // Session management
   sessions: WorkoutSession[];
   addSession: (session: WorkoutSession) => void;
   updateSession: (session: WorkoutSession) => void;
-  // Progress management (filtered by active profile)
+  // Progress management
   progress: ProgressEntry[];
   addProgress: (entry: ProgressEntry) => void;
 }
@@ -49,42 +56,45 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return state.profiles.find(p => p.id === state.activeProfileId) || null;
   }, [state.profiles, state.activeProfileId]);
 
+  // محاسبه آبجکت کامل برنامه فعال
+  const activeProgramData = useMemo(() => {
+    if (!state.activeProgram) return null;
+    return state.programs.find(p => p.id === state.activeProgram) || null;
+  }, [state.programs, state.activeProgram]);
+
   // Filtered data for active profile
-  const programs = useMemo(() => 
+  const programs = useMemo(() =>
     state.programs.filter(p => p.profileId === state.activeProfileId),
     [state.programs, state.activeProfileId]
   );
 
-  const sessions = useMemo(() => 
-    state.sessions.filter(s => s.profileId === state.activeProfileId),
+  const sessions = useMemo(() =>
+    state.sessions.filter(s => s.profileId === state.activeProfileId) as WorkoutSession[],
     [state.sessions, state.activeProfileId]
   );
 
-  const progress = useMemo(() => 
+  const progress = useMemo(() =>
     state.progress.filter(p => p.profileId === state.activeProfileId),
     [state.progress, state.activeProfileId]
   );
 
-  const nutritionPrograms = useMemo(() => 
+  const nutritionPrograms = useMemo(() =>
     state.nutritionPrograms.filter(p => p.profileId === state.activeProfileId),
     [state.nutritionPrograms, state.activeProfileId]
   );
 
-  const supplementPrograms = useMemo(() => 
+  const supplementPrograms = useMemo(() =>
     state.supplementPrograms.filter(p => p.profileId === state.activeProfileId),
     [state.supplementPrograms, state.activeProfileId]
   );
 
-  // Profile management — when switching profile, also switch active programs
   const setActiveProfile = useCallback((id: string | null) => {
     setState(prev => {
       if (id === prev.activeProfileId) return prev;
-
       const profilePrograms = prev.programs.filter(p => p.profileId === id);
       const profileNutrition = prev.nutritionPrograms.filter(p => p.profileId === id);
       const profileSupplements = prev.supplementPrograms.filter(p => p.profileId === id);
 
-      // Keep current active if it belongs to the new profile; otherwise pick first or null
       const nextActiveProgram =
         profilePrograms.find(p => p.id === prev.activeProgram)?.id ??
         profilePrograms[0]?.id ??
@@ -157,12 +167,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  // Workout Program management
   const addProgram = useCallback((program: WorkoutProgram) => {
     setState(prev => ({
       ...prev,
       programs: [...prev.programs, program],
-      // Auto-activate if this is the first program for the profile or no active
       activeProgram: prev.activeProgram || program.id,
     }));
   }, []);
@@ -192,7 +200,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setState(prev => ({ ...prev, activeProgram: id }));
   }, []);
 
-  // Nutrition Program management
   const addNutritionProgram = useCallback((program: NutritionProgram) => {
     setState(prev => ({
       ...prev,
@@ -219,7 +226,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setState(prev => ({ ...prev, activeNutritionProgram: id }));
   }, []);
 
-  // Supplement Program management
   const addSupplementProgram = useCallback((program: SupplementProgram) => {
     setState(prev => ({
       ...prev,
@@ -246,7 +252,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setState(prev => ({ ...prev, activeSupplementProgram: id }));
   }, []);
 
-  // Session management
   const addSession = useCallback((session: WorkoutSession) => {
     setState(prev => ({ ...prev, sessions: [...prev.sessions, session] }));
   }, []);
@@ -258,7 +263,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }));
   }, []);
 
-  // Progress management
   const addProgress = useCallback((entry: ProgressEntry) => {
     setState(prev => ({ ...prev, progress: [...prev.progress, entry] }));
   }, []);
@@ -266,6 +270,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   return (
     <AppContext.Provider value={{
       state,
+      activeProgramData, // اضافه شده
       profiles: state.profiles,
       activeProfile,
       setActiveProfile,

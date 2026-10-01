@@ -13,7 +13,7 @@ const getDayName = (date: Date) => {
 
 export default function TodaySession() {
   const navigate = useNavigate();
-  const { activeProgram } = useAppContext();
+  const { activeProgramData: activeProgram } = useAppContext();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 

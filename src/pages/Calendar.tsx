@@ -15,7 +15,7 @@ const WEEK_DAYS = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه'
 
 export default function Calendar() {
   const navigate = useNavigate();
-  const { activeProgram } = useAppContext();
+  const { activeProgramData: activeProgram } = useAppContext();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
