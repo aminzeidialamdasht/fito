@@ -11,11 +11,10 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useSubscription } from '../subscription/SubscriptionContext';
 import { DEFAULT_WORKOUT_PLAN, SAMPLE_PROFILE } from '../data/defaultPlans';
-import DashboardHero from '../components/DashboardHero';
 import SuggestedPrograms from '../components/SuggestedPrograms';
 
 export default function Dashboard() {
-  const { state, activeProfile, sessions, programs, profiles, setActiveProfile, nutritionPrograms } = useAppContext();
+  const { state, activeProfile, sessions, programs, profiles, setActiveProfile } = useAppContext();
   const { theme } = useTheme();
   const navigate = useNavigate();
   const isDark = theme === 'dark';
@@ -36,10 +35,13 @@ export default function Dashboard() {
   const activeProgram = programs.find(p => p.id === state.activeProgram) || DEFAULT_WORKOUT_PLAN;
   const programDays: any[] = Array.isArray((activeProgram as any)?.days) ? (activeProgram as any).days : [];
 
+  // FIXED: Accurate Persian Weekday Calculation
   const today = new Date();
-  const dayOfWeek = (today.getDay() + 1) % 7;
+  const jsDay = today.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+  // Map JS Day to Persian Index (0=Sat, 1=Sun, ..., 6=Fri)
+  const persianDayIndex = (jsDay + 1) % 7; 
   const WEEKDAY_NAMES = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
-  const todayName = WEEKDAY_NAMES[dayOfWeek];
+  const todayName = WEEKDAY_NAMES[persianDayIndex];
 
   const normalizePersian = (value?: string) => String(value || '').replace(/\u200c|\u200f|\u200e/g, '').trim();
   const weekdayMatches = (value?: string, target?: string) => {
@@ -53,7 +55,7 @@ export default function Dashboard() {
     programDays.find((d: any) => weekdayMatches(d?.weekday, name) || weekdayMatches(d?.day, name));
 
   const hasExplicitSchedule = programDays.some((d: any) => typeof d?.weekday === 'string' && d.weekday.trim().length > 0);
-  const todayWorkout = hasExplicitSchedule ? findProgramDayByWeekday(todayName) : programDays.length ? programDays[dayOfWeek % programDays.length] : undefined;
+  const todayWorkout = hasExplicitSchedule ? findProgramDayByWeekday(todayName) : undefined;
   const isTodayRest = hasExplicitSchedule && !todayWorkout;
   const todayDayIndex = todayWorkout ? programDays.indexOf(todayWorkout) : -1;
 
@@ -63,37 +65,39 @@ export default function Dashboard() {
   const weeklyProgress = Math.min(100, (weeklyCompleted / weeklyGoal) * 100);
   const totalVolume = completedSessions.reduce((acc, s) => acc + s.totalVolume, 0);
 
-  // FIXED Streak Dots with Real Weekday Labels (Sat-Fri)
+  // FIXED: Streak Dots Logic with Correct Today Mapping
   const streakDots = useMemo(() => {
     const days = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'];
-    const currentJsDay = today.getDay(); // 0=Sun, 6=Sat
     
     return days.map((dayLabel, i) => {
-      // Convert Persian index (0=Sat) to JS Day (6=Sat)
-      const targetJsDay = (i + 1) % 7; 
+      // i is Persian Index (0=Sat). Convert to JS Day for date calculation
+      // Sat(0) -> JS 6, Sun(1) -> JS 0, ..., Fri(6) -> JS 5
+      const targetJsDay = (i === 0) ? 6 : i - 1;
       
-      let diff = targetJsDay - currentJsDay;
+      let diff = targetJsDay - jsDay;
       if (diff < 0) diff += 7;
+      if (diff > 6) diff -= 7; // Handle wrap around correctly
       
       const d = new Date(today);
       d.setDate(d.getDate() - diff);
       const dateStr = d.toDateString();
       
       const hasSession = sessions.some(s => s.completed && new Date(s.date).toDateString() === dateStr);
+      const isToday = (i === persianDayIndex);
       
-      return { label: dayLabel, active: hasSession, isToday: diff === 0 };
+      return { label: dayLabel, active: hasSession, isToday };
     });
-  }, [sessions]);
+  }, [sessions, persianDayIndex, jsDay]);
 
   const shortcuts = [
-    { icon: Dumbbell, label: 'تمرین', path: '/workout', color: '#14b8a6', gradient: 'from-teal-500 to-emerald-600' },
-    { icon: Brain, label: 'پرامپت', path: '/prompt', color: '#8b5cf6', gradient: 'from-violet-500 to-purple-600' },
-    { icon: Import, label: 'ورود', path: '/import', color: '#3b82f6', gradient: 'from-blue-500 to-cyan-600' },
-    { icon: Apple, label: 'تغذیه', path: '/nutrition', color: '#10b981', gradient: 'from-emerald-500 to-green-600' },
-    { icon: Pill, label: 'مکمل', path: '/supplements', color: '#ec4899', gradient: 'from-pink-500 to-rose-600' },
-    { icon: Trophy, label: 'پیشرفت', path: '/progress', color: '#f59e0b', gradient: 'from-amber-500 to-orange-600' },
-    { icon: Calendar, label: 'تقویم', path: '/calendar', color: '#0ea5e9', gradient: 'from-sky-500 to-blue-600' },
-    { icon: Zap, label: 'سوپرست', path: '/prompt', color: '#f97316', gradient: 'from-orange-500 to-red-600' },
+    { icon: Dumbbell, label: 'تمرین', path: '/workout', gradient: 'from-teal-500 to-emerald-600' },
+    { icon: Brain, label: 'پرامپت', path: '/prompt', gradient: 'from-violet-500 to-purple-600' },
+    { icon: Import, label: 'ورود', path: '/import', gradient: 'from-blue-500 to-cyan-600' },
+    { icon: Apple, label: 'تغذیه', path: '/nutrition', gradient: 'from-emerald-500 to-green-600' },
+    { icon: Pill, label: 'مکمل', path: '/supplements', gradient: 'from-pink-500 to-rose-600' },
+    { icon: Trophy, label: 'پیشرفت', path: '/progress', gradient: 'from-amber-500 to-orange-600' },
+    { icon: Calendar, label: 'تقویم', path: '/calendar', gradient: 'from-sky-500 to-blue-600' },
+    { icon: Zap, label: 'سوپرست', path: '/prompt', gradient: 'from-orange-500 to-red-600' },
   ];
 
   return (
@@ -121,7 +125,7 @@ export default function Dashboard() {
       <div className={`rounded-3xl p-5 border ${borderCard} ${cardBg} relative overflow-hidden`}>
         <div className="flex items-start justify-between mb-4">
           <div>
-            <p className={`text-sm font-bold ${textSub}`}>سلام، {profile?.name || 'امیرحسین'} 👋</p>
+            <p className={`text-sm font-bold ${textSub}`}>سلام، {profile?.name || 'امین'} 👋</p>
             <h2 className={`text-xl font-black mt-1 ${textMain}`}>مربی هوشمند تو</h2>
           </div>
           <div className="w-12 h-12 rounded-full flex items-center justify-center text-lg font-black"
@@ -156,7 +160,7 @@ export default function Dashboard() {
 
       {/* Stats Row */}
       <div className="grid grid-cols-2 gap-3">
-        {/* FIXED Streak Card with Weekday Labels */}
+        {/* FIXED: Responsive Streak Card */}
         <div className={`rounded-2xl p-4 border ${borderCard} ${cardBg}`}>
           <div className="flex items-center gap-2 mb-3">
             <Flame size={18} style={{ color: '#f59e0b' }} />
@@ -164,10 +168,11 @@ export default function Dashboard() {
           </div>
           <p className={`text-3xl font-black ${textMain}`}>{toPersianNumber(currentStreak)} <span className="text-sm font-bold">روز</span></p>
           
-          <div className="flex justify-between mt-4 gap-1">
+          {/* Reduced gap and smaller circles for mobile fit */}
+          <div className="flex justify-between mt-4 gap-0.5">
             {streakDots.map((d, i) => (
-              <div key={i} className="flex flex-col items-center gap-1.5">
-                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold transition-all ${
+              <div key={i} className="flex flex-col items-center gap-1 flex-1">
+                <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center text-[8px] sm:text-[9px] font-bold transition-all ${
                   d.active ? 'text-white shadow-sm' : (isDark ? 'bg-slate-800 text-slate-600' : 'bg-gray-100 text-gray-400')
                 }`}
                 style={d.active ? { background: teal } : {}}>
@@ -207,7 +212,7 @@ export default function Dashboard() {
         <button onClick={() => { soundEffects.playClick(); navigate(`/workout?day=${todayDayIndex}&autoStart=true`); }}
           className="w-full py-4 rounded-2xl font-black text-lg flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 text-white hover:brightness-110"
           style={{ background: `linear-gradient(to left, ${teal}, ${tealLight})` }}>
-          <Dumbbell size={22} /> شروع تمرین امروز
+          <Dumbbell size={22} /> شروع تمرین امروز ({todayName})
         </button>
       )}
 
@@ -215,7 +220,7 @@ export default function Dashboard() {
         <div className={`rounded-2xl p-4 border ${borderCard} ${cardBg} flex items-center gap-3`}>
           <Heart size={20} style={{ color: '#ef4444' }} />
           <div>
-            <p className={`font-bold text-sm ${textMain}`}>امروز روز استراحته 💪</p>
+            <p className={`font-bold text-sm ${textMain}`}>امروز ({todayName}) روز استراحته 💪</p>
             <p className={`text-xs ${textSub}`}>ریکاوری کن تا فردا قوی‌تر باشی!</p>
           </div>
         </div>
