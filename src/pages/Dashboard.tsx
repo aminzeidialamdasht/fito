@@ -111,7 +111,7 @@ export default function Dashboard() {
         <div className="flex items-start justify-between mb-4">
           <div>
             <p className={`text-sm font-bold ${textSub}`}>سلام، {profile?.name || 'امیرحسین'} 👋</p>
-            <h2 className={`text-xl font-black mt-1 ${textMain}`}>مربی عابی تو</h2>
+            <h2 className={`text-xl font-black mt-1 ${textMain}`}>مربی هوشمند تو</h2>
           </div>
           <div className="w-12 h-12 rounded-full flex items-center justify-center text-lg font-black"
             style={{ background: `${teal}20`, color: teal }}>
