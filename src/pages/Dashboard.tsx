@@ -29,6 +29,7 @@ export default function Dashboard() {
   const textMain = isDark ? '#ffffff' : '#0f172a';
   const textSub = isDark ? '#94a3b8' : '#64748b';
   const borderCard = isDark ? 'border-white/5' : 'border-teal-100';
+  const gold = isDark ? '#d4af37' : '#f59e0b';
 
   const completedSessions = sessions.filter(s => s.completed);
   const currentStreak = calculateStreak(sessions);
@@ -62,18 +63,28 @@ export default function Dashboard() {
   const weeklyProgress = Math.min(100, (weeklyCompleted / weeklyGoal) * 100);
   const totalVolume = completedSessions.reduce((acc, s) => acc + s.totalVolume, 0);
 
+  // FIXED Streak Dots with Real Weekday Labels (Sat-Fri)
   const streakDots = useMemo(() => {
     const days = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'];
-    return days.map((day, i) => {
-      const d = new Date();
-      d.setDate(d.getDate() - (6 - i));
+    const currentJsDay = today.getDay(); // 0=Sun, 6=Sat
+    
+    return days.map((dayLabel, i) => {
+      // Convert Persian index (0=Sat) to JS Day (6=Sat)
+      const targetJsDay = (i + 1) % 7; 
+      
+      let diff = targetJsDay - currentJsDay;
+      if (diff < 0) diff += 7;
+      
+      const d = new Date(today);
+      d.setDate(d.getDate() - diff);
       const dateStr = d.toDateString();
+      
       const hasSession = sessions.some(s => s.completed && new Date(s.date).toDateString() === dateStr);
-      return { day, active: hasSession };
+      
+      return { label: dayLabel, active: hasSession, isToday: diff === 0 };
     });
   }, [sessions]);
 
-  // Animated Shortcut Cards Data
   const shortcuts = [
     { icon: Dumbbell, label: 'تمرین', path: '/workout', color: '#14b8a6', gradient: 'from-teal-500 to-emerald-600' },
     { icon: Brain, label: 'پرامپت', path: '/prompt', color: '#8b5cf6', gradient: 'from-violet-500 to-purple-600' },
@@ -145,23 +156,28 @@ export default function Dashboard() {
 
       {/* Stats Row */}
       <div className="grid grid-cols-2 gap-3">
+        {/* FIXED Streak Card with Weekday Labels */}
         <div className={`rounded-2xl p-4 border ${borderCard} ${cardBg}`}>
           <div className="flex items-center gap-2 mb-3">
             <Flame size={18} style={{ color: '#f59e0b' }} />
             <span className={`text-xs font-bold ${textSub}`}>استریک تمرینی</span>
           </div>
           <p className={`text-3xl font-black ${textMain}`}>{toPersianNumber(currentStreak)} <span className="text-sm font-bold">روز</span></p>
-          <div className="flex justify-between mt-3 gap-1">
+          
+          <div className="flex justify-between mt-4 gap-1">
             {streakDots.map((d, i) => (
-              <div key={i} className="flex flex-col items-center gap-1">
-                <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold transition-all ${d.active ? 'text-white' : isDark ? 'bg-slate-800 text-slate-600' : 'bg-gray-100 text-gray-400'}`}
-                  style={d.active ? { background: teal } : {}}>
-                  {d.day}
+              <div key={i} className="flex flex-col items-center gap-1.5">
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold transition-all ${
+                  d.active ? 'text-white shadow-sm' : (isDark ? 'bg-slate-800 text-slate-600' : 'bg-gray-100 text-gray-400')
+                }`}
+                style={d.active ? { background: teal } : {}}>
+                  {d.label}
                 </div>
+                {d.isToday && <div className="w-1 h-1 rounded-full" style={{background: gold}} />}
               </div>
             ))}
           </div>
-          <p className={`text-[10px] mt-2 text-center ${textSub}`}>عالی! استریکت رو حفظ کن.</p>
+          <p className={`text-[10px] mt-3 text-center ${textSub}`}>عالی! استریکت رو حفظ کن.</p>
         </div>
 
         <div className={`rounded-2xl p-4 border ${borderCard} ${cardBg}`}>
@@ -205,7 +221,7 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* NEW: Colorful Animated Shortcut Cards */}
+      {/* Colorful Animated Shortcut Cards */}
       <div>
         <div className="flex items-center justify-between mb-3">
           <h2 className={`font-black text-sm flex items-center gap-2 ${textMain}`}><Sparkles size={16} style={{ color: '#f59e0b' }} /> میانبرها</h2>
@@ -214,10 +230,7 @@ export default function Dashboard() {
           {shortcuts.map((item, i) => (
             <button key={i} onClick={() => { soundEffects.playClick(); navigate(item.path); }}
               className={`group relative flex flex-col items-center gap-2 p-3 rounded-2xl transition-all duration-300 active:scale-90 hover:-translate-y-1 hover:shadow-lg overflow-hidden bg-gradient-to-br ${item.gradient}`}>
-              
-              {/* Shine Effect on Hover */}
               <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 skew-y-12" />
-              
               <div className="relative z-10 w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-inner">
                 <item.icon size={20} className="text-white drop-shadow-md" />
               </div>

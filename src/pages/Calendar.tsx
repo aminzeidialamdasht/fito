@@ -11,7 +11,6 @@ export default function CalendarPage() {
   const navigate = useNavigate();
   const isDark = theme === 'dark';
   
-  // State for expanding exercise lists per day
   const [expandedDays, setExpandedDays] = useState<Record<number, boolean>>({});
 
   const textMain = isDark ? '#ffffff' : '#0f172a';
@@ -22,17 +21,21 @@ export default function CalendarPage() {
 
   const activeProgram = programs.find(p => p.id === state.activeProgram) || programs[0];
 
+  // محاسبه ایندکس امروز بر اساس تقویم شمسی (شنبه=0 تا جمعه=6)
   const today = new Date();
-  const currentDayIndex = (today.getDay() + 1) % 7; 
+  const jsDay = today.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+  const currentDayIndex = (jsDay + 1) % 7; 
 
   const weekDays = useMemo(() => {
     if (!activeProgram?.days) return [];
-    const persianDays = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
+    // نگاشت صریح ایندکس به نام روزهای هفته فارسی
+    const persianWeekdays = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
     
     return activeProgram.days.map((day: any, i: number) => ({
       ...day,
       index: i,
-      name: day.day || day.weekday || persianDays[i] || `روز ${i + 1}`,
+      name: day.day || day.weekday || persianWeekdays[i] || `روز ${i + 1}`,
+      weekdayName: persianWeekdays[i], // ذخیره نام روز برای نمایش جداگانه
       isToday: i === currentDayIndex,
       muscleGroups: day.muscleGroups || day.muscle_groups || [],
       exercises: Array.isArray(day.exercises) ? day.exercises : [],
@@ -80,12 +83,15 @@ export default function CalendarPage() {
                 ? (isDark ? 'border-[#d4af37] bg-[#d4af37]/10' : 'border-[#14b8a6] bg-[#14b8a6]/10') 
                 : (isDark ? 'border-white/5 bg-[#1e293b]' : 'border-gray-100 bg-white shadow-sm')}`}
             >
-              {/* Day Header (Always Visible) */}
+              {/* Day Header */}
               <div className="p-4">
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <h4 className={`font-bold text-base ${textMain}`}>{day.name}</h4>
+                      {/* نمایش شماره جلسه و نام روز هفته */}
+                      <h4 className={`font-bold text-base ${textMain}`}>
+                        روز {toPersianNumber(day.index + 1)} ({day.weekdayName})
+                      </h4>
                       {day.isToday && (
                         <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full text-white" style={{ background: teal }}>امروز</span>
                       )}

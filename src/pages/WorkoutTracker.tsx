@@ -4,7 +4,7 @@ import { useAppContext } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { useActiveWorkout } from '../hooks/useActiveWorkout';
 import { v4 as uuidv4 } from 'uuid';
-import { Dumbbell, Check, X, Minus, Plus, Trophy, AlertTriangle, Play, ChevronLeft } from 'lucide-react';
+import { Dumbbell, Check, X, Minus, Plus, Trophy, AlertTriangle, Play, ChevronLeft, Layers } from 'lucide-react';
 import { toPersianNumber } from '../utils/jalali';
 
 export default function WorkoutTracker() {
@@ -221,12 +221,11 @@ export default function WorkoutTracker() {
     );
   }
 
-  // NEW: Exercise List View (Before Starting Session)
+  // Exercise List View (Before Starting Session)
   if (!isActive && selectedDay) {
     const exercises = selectedDay.exercises || [];
     return (
       <div className={`min-h-screen pb-24 ${darkBg}`}>
-        {/* Header */}
         <div className={`sticky top-0 z-10 px-4 py-3 flex items-center justify-between backdrop-blur-md ${isDark ? 'bg-[#0f172a]/90' : 'bg-white/90'}`}>
           <button onClick={() => navigate(-1)} className={`p-2 rounded-full ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
             <ChevronLeft size={24} />
@@ -236,7 +235,6 @@ export default function WorkoutTracker() {
         </div>
 
         <div className="p-4 space-y-4">
-          {/* Day Info Card */}
           <div className={`rounded-2xl p-5 border ${isDark ? 'border-white/5 bg-[#1e293b]' : 'border-teal-100 bg-white shadow-sm'}`}>
             <div className="flex items-center gap-3 mb-3">
               <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: `${gold}15` }}>
@@ -258,7 +256,6 @@ export default function WorkoutTracker() {
             </div>
           </div>
 
-          {/* Exercises List */}
           <div className="space-y-3">
             {exercises.map((ex: any, i: number) => (
               <div key={i} className={`rounded-2xl p-4 border ${isDark ? 'border-white/5 bg-[#1e293b]' : 'border-gray-100 bg-white shadow-sm'}`}>
@@ -287,7 +284,6 @@ export default function WorkoutTracker() {
             ))}
           </div>
 
-          {/* Start Session Button */}
           <button onClick={handleStartOrResume}
             className="w-full py-4 rounded-2xl font-black text-lg flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 text-black mt-6"
             style={{ background: gold }}>
@@ -322,19 +318,25 @@ export default function WorkoutTracker() {
         </div>
       </div>
 
-      {/* Rest Timer Overlay */}
+      {/* FIXED Rest Timer Overlay with High Contrast Inner Circle */}
       {isResting && restTimer > 0 && (
-        <div className="fixed inset-0 z-20 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-20 flex items-center justify-center bg-black/70 backdrop-blur-sm">
           <div className={`w-72 rounded-3xl p-8 text-center border-2 shadow-2xl ${cardBg}`} style={{ borderColor: `${gold}60` }}>
-            <div className="mx-auto w-36 h-36 rounded-full border-4 flex flex-col items-center justify-center mb-4"
-              style={{ borderColor: gold, background: `conic-gradient(${gold} ${(restTimer / 180) * 360}deg, transparent 0deg)` }}>
-              <div className={`w-28 h-28 rounded-full flex flex-col items-center justify-center ${darkBg}`}>
+            <div className="mx-auto w-40 h-40 rounded-full border-4 flex flex-col items-center justify-center mb-4 relative"
+              style={{ 
+                borderColor: gold, 
+                background: `conic-gradient(${gold} ${(restTimer / 180) * 360}deg, transparent 0deg)` 
+              }}>
+              {/* Inner Circle for Readability */}
+              <div className={`absolute inset-2 rounded-full flex flex-col items-center justify-center ${isDark ? 'bg-[#0f172a]' : 'bg-white'}`}>
                 <Dumbbell size={24} style={{ color: gold }} />
                 <p className="font-black text-4xl tracking-wider mt-1" style={{ color: gold }}>{formatTime(restTimer)}</p>
-                <p className="text-xs opacity-60 mt-1" style={{ color: gold }}>استراحت</p>
+                <p className="text-xs font-bold mt-1" style={{ color: gold }}>استراحت</p>
               </div>
             </div>
-            <button onClick={() => setIsResting(false)} className={`text-xs px-6 py-2 rounded-full font-bold ${isDark ? 'bg-white/10 text-white' : 'bg-gray-100 text-gray-700'}`}>رد کردن استراحت</button>
+            <button onClick={() => setIsResting(false)} className={`text-xs px-6 py-2 rounded-full font-bold ${isDark ? 'bg-white/10 text-white' : 'bg-gray-100 text-gray-700'}`}>
+              رد کردن استراحت
+            </button>
           </div>
         </div>
       )}
