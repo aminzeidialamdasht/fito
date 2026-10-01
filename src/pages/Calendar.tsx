@@ -4,6 +4,12 @@ import { ChevronLeft, Play, Calendar as CalendarIcon, Info, ChevronDown, Dumbbel
 import { useAppContext } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { toPersianNumber } from '../utils/jalali';
+import type { WorkoutDay as BaseWorkoutDay } from '../types';
+
+// ✅ تعریف تایپ محلی گسترش‌یافته برای حل خطای TS2339
+interface ExtendedWorkoutDay extends BaseWorkoutDay {
+  totalSets?: number;
+}
 
 const getDayName = (date: Date) => {
   const days = ['یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه', 'شنبه'];
@@ -14,7 +20,6 @@ const WEEK_DAYS = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه'
 
 export default function Calendar() {
   const navigate = useNavigate();
-  // دریافت دیتای کاملاً نرمال‌شده از هسته هوشمند
   const { activeProgramData } = useAppContext();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
@@ -22,9 +27,9 @@ export default function Calendar() {
   const [activeDay, setActiveDay] = useState<string | null>(null);
   const todayName = getDayName(new Date());
 
-  // پیدا کردن روز جاری از دیتای استاندارد شده
+  // پیدا کردن روز جاری با کست به تایپ گسترش‌یافته
   const currentDayPlan = useMemo(() => 
-    activeProgramData?.days?.find((d: any) => d.day === todayName),
+    activeProgramData?.days?.find((d: any) => d.day === todayName) as ExtendedWorkoutDay | undefined,
     [activeProgramData, todayName]
   );
 
@@ -92,7 +97,7 @@ export default function Calendar() {
           <h3 className={`font-bold text-sm px-1 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>برنامه هفتگی:</h3>
           
           {WEEK_DAYS.map((dayName, index) => {
-            const dayPlan = activeProgramData?.days?.find((d: any) => d.day === dayName);
+            const dayPlan = activeProgramData?.days?.find((d: any) => d.day === dayName) as ExtendedWorkoutDay | undefined;
             const isToday = dayName === todayName;
             const isRest = !dayPlan || dayPlan.exercises?.length === 0;
             const isOpen = activeDay === dayName;
