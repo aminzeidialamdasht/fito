@@ -5,9 +5,13 @@ import { loadState, saveState } from '../utils/storage';
 export const APP_VERSION = 'v1.5.0';
 export interface WorkoutSession extends BaseWorkoutSession { name?: string; }
 
-// ✅ تایپ محلی برای نگهداری totalSets پس از نرمال‌سازی
+// ✅ تایپ‌های محلی برای حفظ totalSets پس از نرمال‌سازی
 interface NormalizedWorkoutDay extends WorkoutDay {
   totalSets: number;
+}
+
+interface NormalizedWorkoutProgram extends Omit<WorkoutProgram, 'days'> {
+  days: NormalizedWorkoutDay[];
 }
 
 const DAY_MAP: Record<string, string> = {
@@ -37,7 +41,6 @@ const normalizeDays = (days: any[]): NormalizedWorkoutDay[] => {
     }
     const sets = day.exercises?.reduce((sum: number, ex: any) => sum + (Number(ex.sets) || 0), 0) || 0;
     
-    // ✅ کست به تایپ محلی که totalSets را نگه می‌دارد
     return {
       ...day,
       day: persianDay,
@@ -47,7 +50,7 @@ const normalizeDays = (days: any[]): NormalizedWorkoutDay[] => {
   });
 };
 
-const createDefaultProgram = (profileId: string): WorkoutProgram => ({
+const createDefaultProgram = (profileId: string): NormalizedWorkoutProgram => ({
   id: 'default-push-pull-legs',
   profileId,
   name: 'برنامه پوش/پول/لگ (رایگان)',
@@ -65,15 +68,18 @@ const createDefaultProgram = (profileId: string): WorkoutProgram => ({
   ])
 });
 
-const normalizeProgram = (program: WorkoutProgram | null): WorkoutProgram | null => {
+const normalizeProgram = (program: WorkoutProgram | null): NormalizedWorkoutProgram | null => {
   if (!program) return null;
-  return { ...program, days: normalizeDays(program.days as any) };
+  return {
+    ...program,
+    days: normalizeDays(program.days as any)
+  } as NormalizedWorkoutProgram;
 };
 
 interface AppContextType {
   state: AppState;
   appVersion: string;
-  activeProgramData: WorkoutProgram | null;
+  activeProgramData: NormalizedWorkoutProgram | null; // ✅ حالا تایپ صحیح است
   profiles: AthleteProfile[];
   activeProfile: AthleteProfile | null;
   setActiveProfile: (id: string | null) => void;
