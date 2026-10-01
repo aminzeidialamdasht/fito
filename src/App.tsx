@@ -41,7 +41,8 @@ function AppContent({ showWelcome, onContinue }: { showWelcome: boolean; onConti
         <Route path="/today-session" element={<TodaySession />} />
         
         <Route path="/prompt" element={<Layout><PremiumGate title="تولید پرامپت"><PromptGenerator /></PremiumGate></Layout>} />
-        <Route path="/import" element={<Layout><PremiumGate title="ورود برنامه تمرینی"><ProgramImport /></PremiumGate></Layout>} />
+        {/* ورود برنامه: صفحه باز است تا برنامه پیش‌فرض رایگان در دسترس باشد؛ JSON اختصاصی داخل صفحه قفل می‌شود */}
+        <Route path="/import" element={<Layout><ProgramImport /></Layout>} />
         <Route path="/nutrition" element={<Layout><Nutrition /></Layout>} />
         <Route path="/nutrition-import" element={<Layout><PremiumGate title="ورود برنامه تغذیه"><NutritionImport /></PremiumGate></Layout>} />
         <Route path="/supplements" element={<Layout><Supplements /></Layout>} />

@@ -6,21 +6,21 @@ import { soundEffects } from '../utils/sound';
 import {
   Dumbbell, Trophy, Flame, Apple, Pill, Brain, Import,
   Calendar, ChevronLeft, User, Sparkles, Zap, Target, Activity,
-  CheckCircle2, Heart, BarChart3, ArrowUpRight
+  CheckCircle2, Heart, BarChart3, ArrowUpRight, Crown, Lock
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useSubscription } from '../subscription/SubscriptionContext';
 
-// ✅ حذف کامل ایمپورت DEFAULT_WORKOUT_PLAN و SAMPLE_PROFILE
+const isBazaarBuild = import.meta.env.VITE_APP_FLAVOR === 'bazaar';
 
 export default function Dashboard() {
   const { state, activeProfile, sessions, programs, profiles, setActiveProfile } = useAppContext();
   const { theme } = useTheme();
   const navigate = useNavigate();
   const isDark = theme === 'dark';
-  const { isPremium } = useSubscription();
+  const { isPremium, buy } = useSubscription();
+  const [buyBusy, setBuyBusy] = useState(false);
   
-  // ✅ فقط از پروفایل فعال استفاده کن، نه نمونه پیش‌فرض
   const profile = activeProfile;
 
   const teal = isDark ? '#14b8a6' : '#0d9488';
@@ -35,7 +35,6 @@ export default function Dashboard() {
   const completedSessions = sessions.filter(s => s.completed);
   const currentStreak = calculateStreak(sessions);
   
-  // ✅ فقط برنامه‌های واقعی را بخوان
   const activeProgram = programs.find(p => p.id === state.activeProgram);
   const programDays: any[] = Array.isArray((activeProgram as any)?.days) ? (activeProgram as any).days : [];
 
@@ -94,8 +93,74 @@ export default function Dashboard() {
     { icon: Zap, label: 'سوپرست', path: '/prompt', gradient: 'from-orange-500 to-red-600' },
   ];
 
+  const handleBuy = async () => {
+    setBuyBusy(true);
+    await buy();
+    setBuyBusy(false);
+  };
+
   return (
     <div className={`min-h-screen pb-24 space-y-5 ${bgMain}`}>
+      {/* بنر اشتراک — فقط نسخه بازار و کاربر غیرمشترک */}
+      {isBazaarBuild && !isPremium && (
+        <div
+          className={`rounded-2xl p-4 border relative overflow-hidden ${
+            isDark
+              ? 'bg-gradient-to-l from-[#1a1520] to-[#1e293b] border-[#d4af37]/35'
+              : 'bg-gradient-to-l from-amber-50 to-teal-50 border-amber-200'
+          }`}
+        >
+          <div className="flex items-start gap-3">
+            <div
+              className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${
+                isDark ? 'bg-[#d4af37]/20 text-[#d4af37]' : 'bg-amber-100 text-amber-700'
+              }`}
+            >
+              <Crown size={22} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className={`font-black text-sm ${isDark ? 'text-[#d4af37]' : 'text-amber-800'}`}>
+                برنامه اختصاصی با هوش مصنوعی
+              </p>
+              <p className={`text-xs mt-1 leading-6 ${textSub}`}>
+                برای دریافت برنامه تمرینی شخصی‌سازی‌شده توسط AI، اشتراک ماهانه تهیه کنید.
+                بدون اشتراک می‌توانید از{' '}
+                <button
+                  type="button"
+                  onClick={() => { soundEffects.playClick(); navigate('/import'); }}
+                  className={`font-bold underline ${isDark ? 'text-teal-400' : 'text-teal-700'}`}
+                >
+                  برنامه پیش‌فرض رایگان
+                </button>
+                {' '}استفاده کنید.
+              </p>
+              <div className="flex flex-wrap gap-2 mt-3">
+                <button
+                  type="button"
+                  onClick={() => { soundEffects.playClick(); handleBuy(); }}
+                  disabled={buyBusy}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 disabled:opacity-50 ${
+                    isDark ? 'bg-[#d4af37] text-black' : 'bg-amber-500 text-white'
+                  }`}
+                >
+                  <Lock size={12} />
+                  {buyBusy ? 'لطفاً صبر کنید...' : 'تهیه اشتراک'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { soundEffects.playClick(); navigate('/import'); }}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold border ${
+                    isDark ? 'border-white/20 text-white' : 'border-teal-300 text-teal-800'
+                  }`}
+                >
+                  ورود برنامه پیش‌فرض
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Profile Switcher */}
       {profiles.length > 1 && (
         <div className={`rounded-2xl p-3 border ${borderCard} ${cardBg}`}>
@@ -257,8 +322,6 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-
-      {/* ✅ حذف کامل SuggestedPrograms که منبع برنامه پیش‌فرض بود */}
     </div>
   );
 }
