@@ -10,6 +10,19 @@ interface ExtendedWorkoutDay extends BaseWorkoutDay {
   totalSets?: number;
 }
 
+// ✅ نگاشت هوشمند برای تطبیق نام روزهای مختلف
+const DAY_MAP: Record<string, string> = {
+  'saturday': 'شنبه', 'sat': 'شنبه', '0': 'شنبه',
+  'sunday': 'یکشنبه', 'sun': 'یکشنبه', '1': 'یکشنبه',
+  'monday': 'دوشنبه', 'mon': 'دوشنبه', '2': 'دوشنبه',
+  'tuesday': 'سه‌شنبه', 'tue': 'سه‌شنبه', '3': 'سه‌شنبه',
+  'wednesday': 'چهارشنبه', 'wed': 'چهارشنبه', '4': 'چهارشنبه',
+  'thursday': 'پنجشنبه', 'thu': 'پنجشنبه', '5': 'پنجشنبه',
+  'friday': 'جمعه', 'fri': 'جمعه', '6': 'جمعه',
+  'شنبه': 'شنبه', 'یکشنبه': 'یکشنبه', 'دوشنبه': 'دوشنبه', 
+  'سه‌شنبه': 'سه‌شنبه', 'چهارشنبه': 'چهارشنبه', 'پنجشنبه': 'پنجشنبه', 'جمعه': 'جمعه'
+};
+
 const getDayName = (date: Date) => {
   const days = ['یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه', 'شنبه'];
   return days[date.getDay()];
@@ -23,18 +36,23 @@ export default function TodaySession() {
 
   const todayName = getDayName(new Date());
 
+  // ✅ جستجوی انعطاف‌پذیر
   const currentDayPlan = useMemo(() => {
     if (!activeProgramData?.days) return undefined;
     return activeProgramData.days.find((d: any) => {
       const planDay = String(d.day || '').trim().toLowerCase();
       const targetDay = todayName.trim().toLowerCase();
-      return planDay === targetDay;
+      
+      const normalizedPlanDay = DAY_MAP[planDay] || planDay;
+      const normalizedTargetDay = DAY_MAP[targetDay] || targetDay;
+      
+      return normalizedPlanDay === normalizedTargetDay;
     }) as ExtendedWorkoutDay | undefined;
   }, [activeProgramData, todayName]);
 
   const hasExercises = currentDayPlan && Array.isArray(currentDayPlan.exercises) && currentDayPlan.exercises.length > 0;
 
-  // ✅ اگر برنامه‌ای نیست یا امروز استراحت است
+  // ✅ مدیریت حالت بدون برنامه یا استراحت
   if (!activeProgramData || !hasExercises) {
     return (
       <div className={`min-h-screen flex flex-col items-center justify-center p-6 text-center ${isDark ? 'bg-[#0f172a] text-white' : 'bg-[#f8fafc] text-gray-900'}`}>

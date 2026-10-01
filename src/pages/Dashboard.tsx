@@ -10,8 +10,8 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useSubscription } from '../subscription/SubscriptionContext';
-import { DEFAULT_WORKOUT_PLAN, SAMPLE_PROFILE } from '../data/defaultPlans';
-import SuggestedPrograms from '../components/SuggestedPrograms';
+
+// ✅ حذف کامل ایمپورت DEFAULT_WORKOUT_PLAN و SAMPLE_PROFILE
 
 export default function Dashboard() {
   const { state, activeProfile, sessions, programs, profiles, setActiveProfile } = useAppContext();
@@ -19,7 +19,9 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const isDark = theme === 'dark';
   const { isPremium } = useSubscription();
-  const profile = activeProfile ?? (!isPremium ? SAMPLE_PROFILE : null);
+  
+  // ✅ فقط از پروفایل فعال استفاده کن، نه نمونه پیش‌فرض
+  const profile = activeProfile;
 
   const teal = isDark ? '#14b8a6' : '#0d9488';
   const tealLight = isDark ? '#2dd4bf' : '#14b8a6';
@@ -32,14 +34,14 @@ export default function Dashboard() {
 
   const completedSessions = sessions.filter(s => s.completed);
   const currentStreak = calculateStreak(sessions);
-  const activeProgram = programs.find(p => p.id === state.activeProgram) || DEFAULT_WORKOUT_PLAN;
+  
+  // ✅ فقط برنامه‌های واقعی را بخوان
+  const activeProgram = programs.find(p => p.id === state.activeProgram);
   const programDays: any[] = Array.isArray((activeProgram as any)?.days) ? (activeProgram as any).days : [];
 
-  // FIXED: Accurate Persian Weekday Calculation
   const today = new Date();
-  const jsDay = today.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
-  // Map JS Day to Persian Index (0=Sat, 1=Sun, ..., 6=Fri)
-  const persianDayIndex = (jsDay + 1) % 7; 
+  const jsDay = today.getDay();
+  const persianDayIndex = (jsDay + 1) % 7;
   const WEEKDAY_NAMES = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
   const todayName = WEEKDAY_NAMES[persianDayIndex];
 
@@ -65,26 +67,18 @@ export default function Dashboard() {
   const weeklyProgress = Math.min(100, (weeklyCompleted / weeklyGoal) * 100);
   const totalVolume = completedSessions.reduce((acc, s) => acc + s.totalVolume, 0);
 
-  // FIXED: Streak Dots Logic with Correct Today Mapping
   const streakDots = useMemo(() => {
     const days = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'];
-    
     return days.map((dayLabel, i) => {
-      // i is Persian Index (0=Sat). Convert to JS Day for date calculation
-      // Sat(0) -> JS 6, Sun(1) -> JS 0, ..., Fri(6) -> JS 5
       const targetJsDay = (i === 0) ? 6 : i - 1;
-      
       let diff = targetJsDay - jsDay;
       if (diff < 0) diff += 7;
-      if (diff > 6) diff -= 7; // Handle wrap around correctly
-      
+      if (diff > 6) diff -= 7;
       const d = new Date(today);
       d.setDate(d.getDate() - diff);
       const dateStr = d.toDateString();
-      
       const hasSession = sessions.some(s => s.completed && new Date(s.date).toDateString() === dateStr);
       const isToday = (i === persianDayIndex);
-      
       return { label: dayLabel, active: hasSession, isToday };
     });
   }, [sessions, persianDayIndex, jsDay]);
@@ -125,7 +119,7 @@ export default function Dashboard() {
       <div className={`rounded-3xl p-5 border ${borderCard} ${cardBg} relative overflow-hidden`}>
         <div className="flex items-start justify-between mb-4">
           <div>
-            <p className={`text-sm font-bold ${textSub}`}>سلام، {profile?.name || 'امین'} 👋</p>
+            <p className={`text-sm font-bold ${textSub}`}>سلام، {profile?.name || 'ورزشکار'} 👋</p>
             <h2 className={`text-xl font-black mt-1 ${textMain}`}>مربی هوشمند تو</h2>
           </div>
           <div className="w-12 h-12 rounded-full flex items-center justify-center text-lg font-black"
@@ -160,15 +154,12 @@ export default function Dashboard() {
 
       {/* Stats Row */}
       <div className="grid grid-cols-2 gap-3">
-        {/* FIXED: Responsive Streak Card */}
         <div className={`rounded-2xl p-4 border ${borderCard} ${cardBg}`}>
           <div className="flex items-center gap-2 mb-3">
             <Flame size={18} style={{ color: '#f59e0b' }} />
             <span className={`text-xs font-bold ${textSub}`}>استریک تمرینی</span>
           </div>
           <p className={`text-3xl font-black ${textMain}`}>{toPersianNumber(currentStreak)} <span className="text-sm font-bold">روز</span></p>
-          
-          {/* Reduced gap and smaller circles for mobile fit */}
           <div className="flex justify-between mt-4 gap-0.5">
             {streakDots.map((d, i) => (
               <div key={i} className="flex flex-col items-center gap-1 flex-1">
@@ -207,8 +198,8 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Big Start Workout Button */}
-      {!isTodayRest && todayWorkout && (
+      {/* Big Start Workout Button - Only show if real program exists */}
+      {!isTodayRest && todayWorkout && activeProgram && (
         <button onClick={() => { soundEffects.playClick(); navigate(`/workout?day=${todayDayIndex}&autoStart=true`); }}
           className="w-full py-4 rounded-2xl font-black text-lg flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 text-white hover:brightness-110"
           style={{ background: `linear-gradient(to left, ${teal}, ${tealLight})` }}>
@@ -216,7 +207,7 @@ export default function Dashboard() {
         </button>
       )}
 
-      {isTodayRest && (
+      {isTodayRest && activeProgram && (
         <div className={`rounded-2xl p-4 border ${borderCard} ${cardBg} flex items-center gap-3`}>
           <Heart size={20} style={{ color: '#ef4444' }} />
           <div>
@@ -267,7 +258,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <SuggestedPrograms isDark={isDark} isPremium={isPremium} />
+      {/* ✅ حذف کامل SuggestedPrograms که منبع برنامه پیش‌فرض بود */}
     </div>
   );
 }
