@@ -6,7 +6,7 @@ import { useTheme } from '../context/ThemeContext';
 import { toPersianNumber } from '../utils/jalali';
 import type { WorkoutDay as BaseWorkoutDay } from '../types';
 
-// ✅ تعریف تایپ محلی گسترش‌یافته برای حل خطای TS2339
+// ✅ تایپ محلی برای پشتیبانی از totalSets بدون دستکاری types.ts
 interface ExtendedWorkoutDay extends BaseWorkoutDay {
   totalSets?: number;
 }
@@ -27,7 +27,7 @@ export default function Calendar() {
   const [activeDay, setActiveDay] = useState<string | null>(null);
   const todayName = getDayName(new Date());
 
-  // پیدا کردن روز جاری با کست به تایپ گسترش‌یافته
+  // کست به تایپ گسترش‌یافته
   const currentDayPlan = useMemo(() => 
     activeProgramData?.days?.find((d: any) => d.day === todayName) as ExtendedWorkoutDay | undefined,
     [activeProgramData, todayName]
@@ -36,9 +36,10 @@ export default function Calendar() {
   const handleStartSession = () => navigate('/today-session');
   const toggleDay = (dayName: string) => setActiveDay(prev => prev === dayName ? null : dayName);
 
+  if (!activeProgramData) return null;
+
   return (
     <div className={`min-h-screen pb-24 ${isDark ? 'bg-[#0f172a]' : 'bg-[#f8fafc]'}`}>
-      {/* هدر */}
       <div className={`sticky top-0 z-40 backdrop-blur-md border-b px-4 py-4 flex items-center justify-between ${isDark ? 'bg-[#0f172a]/90 border-white/10' : 'bg-white/90 border-gray-200'}`}>
         <div className="flex items-center gap-3">
           <button onClick={() => navigate(-1)} className="p-2 rounded-full hover:bg-black/5">
@@ -54,7 +55,6 @@ export default function Calendar() {
       </div>
 
       <div className="p-4 space-y-4">
-        {/* کارت روز جاری */}
         {currentDayPlan && currentDayPlan.exercises?.length > 0 ? (
           <div className={`rounded-2xl p-5 border shadow-sm relative overflow-hidden ${isDark ? 'bg-[#1e293b] border-teal-500/30' : 'bg-white border-teal-200'}`}>
             <div className="relative z-10">
@@ -67,7 +67,6 @@ export default function Calendar() {
                   <Play size={20} fill="currentColor" className="ml-0.5" />
                 </button>
               </div>
-              
               <div className="space-y-2 mt-4 pt-4 border-t border-dashed border-gray-200 dark:border-white/10">
                 {currentDayPlan.exercises.map((ex: any, idx: number) => (
                   <div key={idx} className={`flex items-center justify-between p-3 rounded-xl ${isDark ? 'bg-white/5' : 'bg-gray-50'}`}>
@@ -79,7 +78,6 @@ export default function Calendar() {
                   </div>
                 ))}
               </div>
-
               <div className={`flex items-center gap-4 text-xs font-bold pt-4 mt-2 border-t ${isDark ? 'border-white/10 text-gray-400' : 'border-gray-100 text-gray-500'}`}>
                 <span className="flex items-center gap-1"><Info size={12} />{toPersianNumber(currentDayPlan.exercises.length)} حرکت</span>
                 <span className="flex items-center gap-1"><Dumbbell size={12} />{toPersianNumber(currentDayPlan.totalSets || 0)} ست کل</span>
@@ -88,20 +86,17 @@ export default function Calendar() {
           </div>
         ) : (
           <div className={`rounded-2xl p-8 text-center border ${isDark ? 'bg-[#1e293b] border-white/5' : 'bg-white border-gray-200'}`}>
-            <p className="font-bold opacity-70">امروز ({todayName}) روز استراحت است 🎉</p>
+            <p className="font-bold opacity-70">امروز ({todayName}) روز استراحت است </p>
           </div>
         )}
 
-        {/* لیست آکاردئونی */}
         <div className="space-y-3">
           <h3 className={`font-bold text-sm px-1 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>برنامه هفتگی:</h3>
-          
           {WEEK_DAYS.map((dayName, index) => {
             const dayPlan = activeProgramData?.days?.find((d: any) => d.day === dayName) as ExtendedWorkoutDay | undefined;
             const isToday = dayName === todayName;
             const isRest = !dayPlan || dayPlan.exercises?.length === 0;
             const isOpen = activeDay === dayName;
-            
             if (isToday) return null;
 
             return (
@@ -116,7 +111,6 @@ export default function Calendar() {
                       <p className={`text-[10px] ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>{isRest ? 'استراحت' : `${dayPlan?.exercises?.length || 0} حرکت · ${dayPlan?.totalSets || 0} ست`}</p>
                     </div>
                   </div>
-                  
                   {!isRest && (
                     <div className="flex items-center gap-2">
                        <button onClick={(e) => { e.stopPropagation(); handleStartSession(); }} className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-white/10 text-gray-400' : 'hover:bg-gray-100 text-gray-400'}`}><Play size={16} fill="currentColor" /></button>
@@ -124,7 +118,6 @@ export default function Calendar() {
                     </div>
                   )}
                 </button>
-
                 {!isRest && (
                   <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}>
                     <div className={`p-4 pt-0 space-y-2 border-t ${isDark ? 'border-white/5' : 'border-gray-100'}`}>
