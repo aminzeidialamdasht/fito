@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { soundEffects } from '../utils/sound';
 import { DEFAULT_WORKOUT_PLAN } from '../data/defaultPlans';
 import { useAppContext } from '../context/AppContext';
+import type { WorkoutProgram } from '../types';
 
 interface Props {
   isDark: boolean;
@@ -13,38 +14,43 @@ export default function SuggestedPrograms({ isDark, isPremium }: Props) {
   const navigate = useNavigate();
   const { state, programs, setActiveProgram, addProgram, activeProfile } = useAppContext();
 
+  // Safe normalization of the sample plan to match WorkoutProgram type
+  const normalizedSamplePlan: WorkoutProgram = {
+    id: (DEFAULT_WORKOUT_PLAN as any).id || 'sample-push-pull-legs',
+    name: (DEFAULT_WORKOUT_PLAN as any).program_name || (DEFAULT_WORKOUT_PLAN as any).name || 'برنامه پوش/پول/لگ',
+    profileId: '', // Will be set dynamically when adding
+    duration: (DEFAULT_WORKOUT_PLAN as any).duration || '۴ هفته',
+    createdAt: new Date().toISOString(),
+    days: (DEFAULT_WORKOUT_PLAN as any).days || [],
+    ...(DEFAULT_WORKOUT_PLAN as any), // Spread rest of properties
+  };
+
   const handleStartSample = () => {
     soundEffects.playClick();
     
-    // اطمینان از وجود پروفایل فعال
     if (!activeProfile) {
       alert('لطفاً ابتدا یک پروفایل بسازید.');
       navigate('/profile');
       return;
     }
 
-    // بررسی اینکه آیا برنامه نمونه قبلاً برای این پروفایل اضافه شده یا نه
-    const existingSample = programs.find(p => 
-      p.id === DEFAULT_WORKOUT_PLAN.id && p.profileId === activeProfile.id
-    );
+    // Generate unique ID per profile to avoid conflicts
+    const sampleId = `${normalizedSamplePlan.id}_${activeProfile.id}`;
+    
+    const existingSample = programs.find(p => p.id === sampleId);
 
     if (!existingSample) {
-      // ساخت کپی از برنامه نمونه با profileId صحیح
-      const sampleWithProfile = {
-        ...DEFAULT_WORKOUT_PLAN,
-        id: `${DEFAULT_WORKOUT_PLAN.id}_${activeProfile.id}`, // ID منحصر به فرد برای هر پروفایل
+      const sampleWithProfile: WorkoutProgram = {
+        ...normalizedSamplePlan,
+        id: sampleId,
         profileId: activeProfile.id,
       };
       addProgram(sampleWithProfile);
-      
-      // فعال کردن برنامه جدید
-      setActiveProgram(sampleWithProfile.id);
+      setActiveProgram(sampleId);
     } else {
-      // اگر قبلاً وجود داشت، فقط فعالش کن
       setActiveProgram(existingSample.id);
     }
 
-    // هدایت به صفحه تمرین
     navigate('/workout?day=0&autoStart=true');
   };
 
@@ -75,10 +81,10 @@ export default function SuggestedPrograms({ isDark, isPremium }: Props) {
             </div>
             <div className="flex-1 min-w-0">
               <h3 className={`font-bold text-sm ${isDark ? 'text-white' : 'text-slate-800'}`}>
-                {(DEFAULT_WORKOUT_PLAN as any).program_name || 'برنامه پوش/پول/لگ'}
+                {normalizedSamplePlan.name}
               </h3>
               <p className={`text-[11px] mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-                سطح متوسط · {(DEFAULT_WORKOUT_PLAN as any).duration || '۴ هفته'} · ۳ روز در هفته
+                سطح متوسط · {normalizedSamplePlan.duration} ·  روز در هفته
               </p>
               <button
                 onClick={handleStartSample}
@@ -92,7 +98,7 @@ export default function SuggestedPrograms({ isDark, isPremium }: Props) {
           </div>
         </div>
 
-        {/* AI Program Card (Locked for non-premium) */}
+        {/* AI Program Card */}
         <div className={`rounded-2xl p-4 border relative overflow-hidden ${
           isDark ? 'bg-[#1a1a2e] border-[#d4af37]/20' : 'bg-white border-amber-200 shadow-sm'
         }`}>
