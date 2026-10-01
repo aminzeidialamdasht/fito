@@ -19,9 +19,38 @@ const DAY_MAP: Record<string, string> = {
   'wednesday': 'چهارشنبه', 'wed': 'چهارشنبه', '4': 'چهارشنبه',
   'thursday': 'پنجشنبه', 'thu': 'پنجشنبه', '5': 'پنجشنبه',
   'friday': 'جمعه', 'fri': 'جمعه', '6': 'جمعه',
-  'شنبه': 'شنبه', 'یکشنبه': 'یکشنبه', 'دوشنبه': 'دوشنبه', 
+  'شنبه': 'شنبه', 'یکشنبه': 'یکشنبه', 'دوشنبه': 'دوشنبه',
   'سه‌شنبه': 'سه‌شنبه', 'چهارشنبه': 'چهارشنبه', 'پنجشنبه': 'پنجشنبه', 'جمعه': 'جمعه'
 };
+
+const PERSIAN_WEEKDAYS = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
+
+/** استخراج نام روز هفته از weekday یا day (حتی اگر day توضیح طولانی باشد) */
+function getNormalizedWeekday(d: any): string {
+  // 1) اولویت با فیلد weekday
+  if (d?.weekday) {
+    const key = String(d.weekday).trim().toLowerCase();
+    if (DAY_MAP[key]) return DAY_MAP[key];
+    const raw = String(d.weekday).trim();
+    if (DAY_MAP[raw]) return DAY_MAP[raw];
+  }
+
+  // 2) تطبیق دقیق day
+  const planDay = String(d?.day || '').trim();
+  const lowerPlan = planDay.toLowerCase();
+  if (DAY_MAP[lowerPlan]) return DAY_MAP[lowerPlan];
+  if (DAY_MAP[planDay]) return DAY_MAP[planDay];
+
+  // 3) تطبیق جزئی: day شامل نام روز باشد
+  for (const wd of PERSIAN_WEEKDAYS) {
+    if (planDay.includes(wd)) return wd;
+  }
+  for (const [key, value] of Object.entries(DAY_MAP)) {
+    if (key.length >= 3 && lowerPlan.includes(key)) return value;
+  }
+
+  return planDay;
+}
 
 const getDayName = (date: Date) => {
   const days = ['یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه', 'شنبه'];
@@ -39,18 +68,11 @@ export default function Calendar() {
   const [activeDay, setActiveDay] = useState<string | null>(null);
   const todayName = getDayName(new Date());
 
-  // ✅ جستجوی انعطاف‌پذیر با نرمال‌سازی نام روز
+  // ✅ جستجوی انعطاف‌پذیر با weekday + day
   const currentDayPlan = useMemo(() => {
     if (!activeProgramData?.days) return undefined;
     return activeProgramData.days.find((d: any) => {
-      const planDay = String(d.day || '').trim().toLowerCase();
-      const targetDay = todayName.trim().toLowerCase();
-      
-      // تبدیل نام روز برنامه به فرمت استاندارد
-      const normalizedPlanDay = DAY_MAP[planDay] || planDay;
-      const normalizedTargetDay = DAY_MAP[targetDay] || targetDay;
-      
-      return normalizedPlanDay === normalizedTargetDay;
+      return getNormalizedWeekday(d) === todayName;
     }) as ExtendedWorkoutDay | undefined;
   }, [activeProgramData, todayName]);
 
@@ -127,15 +149,9 @@ export default function Calendar() {
           <h3 className={`font-bold text-sm px-1 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>برنامه هفتگی:</h3>
           {WEEK_DAYS.map((dayName, index) => {
             const dayPlan = activeProgramData.days.find((d: any) => {
-              const planDay = String(d.day || '').trim().toLowerCase();
-              const targetDay = dayName.trim().toLowerCase();
-              
-              const normalizedPlanDay = DAY_MAP[planDay] || planDay;
-              const normalizedTargetDay = DAY_MAP[targetDay] || targetDay;
-              
-              return normalizedPlanDay === normalizedTargetDay;
+              return getNormalizedWeekday(d) === dayName;
             }) as ExtendedWorkoutDay | undefined;
-            
+
             const isToday = dayName === todayName;
             const isRest = !dayPlan || !Array.isArray(dayPlan.exercises) || dayPlan.exercises.length === 0;
             const isOpen = activeDay === dayName;
@@ -146,7 +162,7 @@ export default function Calendar() {
                 <button onClick={() => !isRest && toggleDay(dayName)} disabled={isRest} className={`w-full flex items-center justify-between p-4 text-right ${isRest ? 'cursor-default' : 'cursor-pointer hover:bg-black/5 dark:hover:bg-white/5'}`}>
                   <div className="flex items-center gap-3">
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xs font-black shrink-0 ${isRest ? (isDark ? 'bg-gray-800 text-gray-600' : 'bg-gray-200 text-gray-400') : (isOpen ? 'bg-teal-500 text-white' : (isDark ? 'bg-teal-500/20 text-teal-400' : 'bg-teal-50 text-teal-700'))}`}>
-                      {isRest ? 'R' : ((index + 1) % 7) + 1} 
+                      {isRest ? 'R' : ((index + 1) % 7) + 1}
                     </div>
                     <div className="text-right">
                       <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>{dayName}</p>

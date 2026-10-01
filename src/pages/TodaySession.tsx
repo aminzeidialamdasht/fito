@@ -19,9 +19,38 @@ const DAY_MAP: Record<string, string> = {
   'wednesday': 'چهارشنبه', 'wed': 'چهارشنبه', '4': 'چهارشنبه',
   'thursday': 'پنجشنبه', 'thu': 'پنجشنبه', '5': 'پنجشنبه',
   'friday': 'جمعه', 'fri': 'جمعه', '6': 'جمعه',
-  'شنبه': 'شنبه', 'یکشنبه': 'یکشنبه', 'دوشنبه': 'دوشنبه', 
+  'شنبه': 'شنبه', 'یکشنبه': 'یکشنبه', 'دوشنبه': 'دوشنبه',
   'سه‌شنبه': 'سه‌شنبه', 'چهارشنبه': 'چهارشنبه', 'پنجشنبه': 'پنجشنبه', 'جمعه': 'جمعه'
 };
+
+const PERSIAN_WEEKDAYS = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
+
+/** استخراج نام روز هفته از weekday یا day (حتی اگر day توضیح طولانی باشد) */
+function getNormalizedWeekday(d: any): string {
+  // 1) اولویت با فیلد weekday
+  if (d?.weekday) {
+    const key = String(d.weekday).trim().toLowerCase();
+    if (DAY_MAP[key]) return DAY_MAP[key];
+    const raw = String(d.weekday).trim();
+    if (DAY_MAP[raw]) return DAY_MAP[raw];
+  }
+
+  // 2) تطبیق دقیق day
+  const planDay = String(d?.day || '').trim();
+  const lowerPlan = planDay.toLowerCase();
+  if (DAY_MAP[lowerPlan]) return DAY_MAP[lowerPlan];
+  if (DAY_MAP[planDay]) return DAY_MAP[planDay];
+
+  // 3) تطبیق جزئی: day شامل نام روز باشد
+  for (const wd of PERSIAN_WEEKDAYS) {
+    if (planDay.includes(wd)) return wd;
+  }
+  for (const [key, value] of Object.entries(DAY_MAP)) {
+    if (key.length >= 3 && lowerPlan.includes(key)) return value;
+  }
+
+  return planDay;
+}
 
 const getDayName = (date: Date) => {
   const days = ['یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه', 'شنبه'];
@@ -36,17 +65,11 @@ export default function TodaySession() {
 
   const todayName = getDayName(new Date());
 
-  // ✅ جستجوی انعطاف‌پذیر
+  // ✅ جستجوی انعطاف‌پذیر با weekday + day
   const currentDayPlan = useMemo(() => {
     if (!activeProgramData?.days) return undefined;
     return activeProgramData.days.find((d: any) => {
-      const planDay = String(d.day || '').trim().toLowerCase();
-      const targetDay = todayName.trim().toLowerCase();
-      
-      const normalizedPlanDay = DAY_MAP[planDay] || planDay;
-      const normalizedTargetDay = DAY_MAP[targetDay] || targetDay;
-      
-      return normalizedPlanDay === normalizedTargetDay;
+      return getNormalizedWeekday(d) === todayName;
     }) as ExtendedWorkoutDay | undefined;
   }, [activeProgramData, todayName]);
 
