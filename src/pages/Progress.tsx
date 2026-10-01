@@ -13,7 +13,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { formatDateJalali, toPersianNumber, getProgramTimelineDetails } from '../utils/jalali';
-import BodyHeatmap from '../components/BodyHeatmap';
+import AnatomySVG from '../components/AnatomySVG';
 
 type MeasurementKey = 'weight' | 'chest' | 'waist' | 'hips' | 'arms' | 'thighs' | 'calves' | 'shoulders' | 'neck';
 
@@ -242,7 +242,7 @@ export default function Progress() {
             <Info size={14} className={textSub} />
           </div>
           <div className="relative h-64 flex items-center justify-center">
-          <BodyHeatmap />
+          <AnatomySVG />
             <div className="absolute bottom-0 right-0 flex flex-col gap-1">
               {MUSCLE_GROUPS.filter(m => muscleStats[m.id] > 0).slice(0, 4).map(m => (
                 <div key={m.id} className="flex items-center gap-2 text-[10px] font-bold bg-black/20 px-2 py-1 rounded-full backdrop-blur-sm">
