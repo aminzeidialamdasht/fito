@@ -259,7 +259,7 @@ export default function ProgramImport() {
         <h2 className={`text-xl font-bold mt-4 mb-2 ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>
           پروفایل انتخاب نشده
         </h2>
-        <p className={`text-center ${isDark ? 'text-gray-400' : 'text-[#0f766e]/70'`}>
+        <p className={`text-center ${isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}`}>
           لطفاً ابتدا یک پروفایل را انتخاب کنید
         </p>
       </div>
