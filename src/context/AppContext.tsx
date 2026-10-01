@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
-import { AppState, AthleteProfile, WorkoutProgram, NutritionProgram, SupplementProgram, WorkoutSession as BaseWorkoutSession, ProgressEntry } from '../types';
+import { AppState, AthleteProfile, WorkoutProgram, NutritionProgram, SupplementProgram, WorkoutSession as BaseWorkoutSession, ProgressEntry, WorkoutDay as BaseWorkoutDay } from '../types';
 import { loadState, saveState } from '../utils/storage';
 import { DEFAULT_WORKOUT_PLAN } from '../data/defaultWorkoutPlan';
 
@@ -7,20 +7,29 @@ export interface WorkoutSession extends BaseWorkoutSession {
   name?: string;
 }
 
-// تابع کمکی برای نرمال‌سازی برنامه (چه پیش‌فرض چه ایمپورت شده)
+// گسترش تایپ WorkoutDay برای پشتیبانی از totalSets
+interface ExtendedWorkoutDay extends BaseWorkoutDay {
+  totalSets?: number;
+}
+
+// تابع کمکی برای نرمال‌سازی برنامه
 const normalizeProgram = (program: WorkoutProgram | null): WorkoutProgram => {
   if (!program) return DEFAULT_WORKOUT_PLAN as unknown as WorkoutProgram;
   
-  // اگر برنامه ایمپورت شده فاقد days باشد یا ساختارش ناقص باشد، از پیش‌فرض استفاده کن
   if (!program.days || program.days.length === 0) {
     return DEFAULT_WORKOUT_PLAN as unknown as WorkoutProgram;
   }
 
-  // اطمینان از وجود totalSets در هر روز (برای سازگاری با Calendar)
-  const normalizedDays = program.days.map(day => ({
-    ...day,
-    totalSets: day.totalSets || (day.exercises?.reduce((sum: number, ex: any) => sum + (ex.sets || 0), 0) || 0)
-  }));
+  // محاسبه و تزریق totalSets برای هر روز
+  const normalizedDays = program.days.map(day => {
+    const baseDay = day as any; // استفاده از any موقت برای دور زدن محدودیت تایپ
+    const calculatedTotalSets = baseDay.exercises?.reduce((sum: number, ex: any) => sum + (ex.sets || 0), 0) || 0;
+    
+    return {
+      ...baseDay,
+      totalSets: baseDay.totalSets || calculatedTotalSets
+    } as ExtendedWorkoutDay;
+  });
 
   return { ...program, days: normalizedDays };
 };
@@ -67,7 +76,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return state.profiles.find(p => p.id === state.activeProfileId) || null;
   }, [state.profiles, state.activeProfileId]);
 
-  // ✅ استفاده از تابع نرمال‌ساز برای تضمین سینک بودن داده‌ها
   const activeProgramData = useMemo(() => {
     let rawProgram: WorkoutProgram | null = null;
     if (state.activeProgram) {
