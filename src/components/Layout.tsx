@@ -7,13 +7,11 @@ import {
 import { useState } from 'react';
 import { getPersianDate } from '../utils/jalali';
 import { APP_VERSION } from '../context/AppContext';
-import { APP_VERSION } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 
-// آیتم‌های منوی کناری (سایدبار)
 const sidebarItems = [
   { path: '/', label: 'داشبورد', icon: LayoutDashboard },
-  { path: '/workouts', label: 'تاریخچه تمرینات', icon: Dumbbell }, // تغییر نام و مسیر
+  { path: '/workouts', label: 'تاریخچه تمرینات', icon: Dumbbell },
   { path: '/profile', label: 'پروفایل', icon: User },
   { path: '/prompt', label: 'پرامپت', icon: Brain },
   { path: '/import', label: 'ورود برنامه', icon: Import },
@@ -23,10 +21,9 @@ const sidebarItems = [
   { path: '/progress', label: 'پیشرفت', icon: Trophy },
 ];
 
-// آیتم‌های نوار پایین موبایل
 const bottomNavItems = [
   { path: '/', label: 'داشبورد', icon: Home },
-  { path: '/today-session', label: 'تمرینات', icon: Dumbbell }, // تغییر مسیر به today-session
+  { path: '/today-session', label: 'تمرینات', icon: Dumbbell },
   { path: '/calendar', label: 'تقویم', icon: Calendar },
   { path: '/progress', label: 'پیشرفت', icon: Trophy },
   { path: '/profile', label: 'پروفایل', icon: User },
@@ -41,57 +38,28 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className={'min-h-screen flex flex-col theme-transition ' + (
-      isDark
-        ? 'bg-[#080808]'
-        : 'bg-gradient-to-br from-[#f0fdfa] via-[#ffffff] to-[#ecfdf5]'
+      isDark ? 'bg-[#080808]' : 'bg-gradient-to-br from-[#f0fdfa] via-[#ffffff] to-[#ecfdf5]'
     )}>
-      {/* هدر */}
       <header className={'fixed top-0 left-0 right-0 z-50 backdrop-blur-xl border-b theme-transition ' + (
-        isDark
-          ? 'bg-[#0c0c0c]/90 border-white/5'
-          : 'bg-white/95 border-[#14b8a6]/20'
+        isDark ? 'bg-[#0c0c0c]/90 border-white/5' : 'bg-white/95 border-[#14b8a6]/20'
       )}>
         <div className="px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <button
-              onClick={() => setMenuOpen(!menuOpen)}
-              className={'lg:hidden p-2 rounded-xl transition-all ' + (
-                isDark ? 'text-[#d4af37] hover:bg-[#d4af37]/10' : 'text-[#0d9488] hover:bg-[#14b8a6]/10'
-              )}
-            >
+            <button onClick={() => setMenuOpen(!menuOpen)} className={'lg:hidden p-2 rounded-xl transition-all ' + (isDark ? 'text-[#d4af37] hover:bg-[#d4af37]/10' : 'text-[#0d9488] hover:bg-[#14b8a6]/10')}>
               {menuOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
             <div className="flex items-center gap-3">
-              <div className={'w-10 h-10 rounded-2xl flex items-center justify-center overflow-hidden ' + (
-                isDark
-                  ? 'bg-[#0D0D1A] shadow-lg shadow-[#d4af37]/20'
-                  : 'bg-[#0D0D1A] shadow-md'
-              )}>
+              <div className={'w-10 h-10 rounded-2xl flex items-center justify-center overflow-hidden ' + (isDark ? 'bg-[#0D0D1A] shadow-lg shadow-[#d4af37]/20' : 'bg-[#0D0D1A] shadow-md')}>
                 <img src="/coachino-icon.png" alt="کوچینو" className="w-9 h-9 object-contain" />
               </div>
               <div>
-                <h1 className={'font-bold text-base sm:text-lg leading-tight ' + (
-                  isDark ? 'text-white' : 'text-[#0d9488]'
-                )}>
-                  کوچینو
-                </h1>
-                <p className={'text-[10px] sm:text-xs ' + (isDark ? 'text-gray-500' : 'text-[#0f766e]/70')}>
-                  Coachino  · {getPersianDate()}
-                </p>
+                <h1 className={'font-bold text-base sm:text-lg leading-tight ' + (isDark ? 'text-white' : 'text-[#0d9488]')}>کوچینو</h1>
+                <p className={'text-[10px] sm:text-xs ' + (isDark ? 'text-gray-500' : 'text-[#0f766e]/70')}>{APP_VERSION} · Coachino · {getPersianDate()}</p>
               </div>
             </div>
           </div>
-
           <div className="flex items-center gap-2">
-            <button
-              onClick={toggleTheme}
-              className={'p-2 rounded-xl transition-all ' + (
-                isDark
-                  ? 'bg-white/5 border border-white/10 text-[#d4af37]'
-                  : 'bg-[#f0fdfa] border border-[#14b8a6]/30 text-[#0d9488]'
-              )}
-              title={isDark ? 'تم روشن' : 'تم تاریک'}
-            >
+            <button onClick={toggleTheme} className={'p-2 rounded-xl transition-all ' + (isDark ? 'bg-white/5 border border-white/10 text-[#d4af37]' : 'bg-[#f0fdfa] border border-[#14b8a6]/30 text-[#0d9488]')} title={isDark ? 'تم روشن' : 'تم تاریک'}>
               {isDark ? <Sun size={18} /> : <Moon size={18} />}
             </button>
           </div>
@@ -101,46 +69,24 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <div className="h-16 lg:h-[68px] flex-shrink-0" />
 
       <div className="flex flex-1">
-        {/* سایدبار دسکتاپ */}
-        <aside className={'hidden lg:flex flex-col w-60 border-l p-4 gap-1 sticky top-[68px] h-[calc(100vh-68px)] overflow-y-auto theme-transition ' + (
-          isDark ? 'bg-[#0c0c0c] border-white/5' : 'bg-white/50 border-[#14b8a6]/10'
-        )}>
-          <div className="mb-4 px-3">
-            <p className={'text-xs font-bold ' + (isDark ? 'text-gray-500' : 'text-[#0f766e]/70')}>منوی اصلی</p>
-          </div>
+        <aside className={'hidden lg:flex flex-col w-60 border-l p-4 gap-1 sticky top-[68px] h-[calc(100vh-68px)] overflow-y-auto theme-transition ' + (isDark ? 'bg-[#0c0c0c] border-white/5' : 'bg-white/50 border-[#14b8a6]/10')}>
+          <div className="mb-4 px-3"><p className={'text-xs font-bold ' + (isDark ? 'text-gray-500' : 'text-[#0f766e]/70')}>منوی اصلی</p></div>
           {sidebarItems.map(item => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
             return (
-              <button
-                key={item.path}
-                onClick={() => navigate(item.path)}
-                className={'group flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-all ' + (
-                  isActive
-                    ? (isDark ? 'bg-[#d4af37]/15 text-[#d4af37] font-bold' : 'bg-[#14b8a6]/15 text-[#0d9488] font-bold')
-                    : (isDark ? 'text-gray-400 hover:text-white hover:bg-white/5' : 'text-[#0f766e]/70 hover:text-[#0d9488] hover:bg-[#f0fdfa]')
-                )}
-              >
-                <Icon size={18} />
-                <span>{item.label}</span>
+              <button key={item.path} onClick={() => navigate(item.path)} className={'group flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-all ' + (isActive ? (isDark ? 'bg-[#d4af37]/15 text-[#d4af37] font-bold' : 'bg-[#14b8a6]/15 text-[#0d9488] font-bold') : (isDark ? 'text-gray-400 hover:text-white hover:bg-white/5' : 'text-[#0f766e]/70 hover:text-[#0d9488] hover:bg-[#f0fdfa]'))}>
+                <Icon size={18} /><span>{item.label}</span>
               </button>
             );
           })}
         </aside>
 
-        {/* منوی کشویی موبایل */}
         {menuOpen && (
           <div className="lg:hidden fixed inset-0 z-40 bg-black/70 backdrop-blur-sm" onClick={() => setMenuOpen(false)}>
-            <aside
-              className={'w-72 h-full p-5 flex flex-col gap-1 shadow-2xl ' + (
-                isDark ? 'bg-[#0c0c0c]' : 'bg-white'
-              )}
-              onClick={e => e.stopPropagation()}
-            >
+            <aside className={'w-72 h-full p-5 flex flex-col gap-1 shadow-2xl ' + (isDark ? 'bg-[#0c0c0c]' : 'bg-white')} onClick={e => e.stopPropagation()}>
               <div className={'flex items-center gap-3 mb-6 pb-5 border-b ' + (isDark ? 'border-white/10' : 'border-[#14b8a6]/20')}>
-                <div className={'w-12 h-12 rounded-2xl flex items-center justify-center overflow-hidden ' + (
-                  isDark ? 'bg-[#0D0D1A]' : 'bg-[#0D0D1A]'
-                )}>
+                <div className={'w-12 h-12 rounded-2xl flex items-center justify-center overflow-hidden ' + (isDark ? 'bg-[#0D0D1A]' : 'bg-[#0D0D1A]')}>
                   <img src="/coachino-icon.png" alt="کوچینو" className="w-11 h-11 object-contain" />
                 </div>
                 <div>
@@ -152,17 +98,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.path;
                 return (
-                  <button
-                    key={item.path}
-                    onClick={() => { navigate(item.path); setMenuOpen(false); }}
-                    className={'flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm transition-all ' + (
-                      isActive
-                        ? (isDark ? 'bg-[#d4af37]/15 text-[#d4af37] font-bold' : 'bg-[#14b8a6]/15 text-[#0d9488] font-bold')
-                        : (isDark ? 'text-gray-300 hover:bg-white/5' : 'text-[#0f766e]/70 hover:bg-[#f0fdfa]')
-                    )}
-                  >
-                    <Icon size={20} />
-                    <span>{item.label}</span>
+                  <button key={item.path} onClick={() => { navigate(item.path); setMenuOpen(false); }} className={'flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm transition-all ' + (isActive ? (isDark ? 'bg-[#d4af37]/15 text-[#d4af37] font-bold' : 'bg-[#14b8a6]/15 text-[#0d9488] font-bold') : (isDark ? 'text-gray-300 hover:bg-white/5' : 'text-[#0f766e]/70 hover:bg-[#f0fdfa]'))}>
+                    <Icon size={20} /><span>{item.label}</span>
                   </button>
                 );
               })}
@@ -170,40 +107,19 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </div>
         )}
 
-        {/* محتوای اصلی - افزایش pb به 36 برای جلوگیری از پوشش توسط نوار پایین */}
         <main className="flex-1 px-4 py-6 lg:px-8 lg:py-8 overflow-auto pb-36 lg:pb-8">
           <div className="max-w-6xl mx-auto">{children}</div>
         </main>
       </div>
 
-      {/* نوار پایین موبایل */}
-      <nav className={'lg:hidden fixed bottom-0 left-0 right-0 z-50 theme-transition ' + (
-        isDark
-          ? 'bg-[#0c0c0c]/95 backdrop-blur-xl border-t border-white/5'
-          : 'bg-white/95 backdrop-blur-xl border-t border-[#14b8a6]/20'
-      )}>
+      <nav className={'lg:hidden fixed bottom-0 left-0 right-0 z-50 theme-transition ' + (isDark ? 'bg-[#0c0c0c]/95 backdrop-blur-xl border-t border-white/5' : 'bg-white/95 backdrop-blur-xl border-t border-[#14b8a6]/20')}>
         <div className="flex justify-around items-center py-2 px-1">
           {bottomNavItems.map(item => {
             const Icon = item.icon;
-            // تشخیص فعال بودن: مسیر دقیق یا شروع با مسیر (برای صفحات زیرمجموعه مثل tracker)
-            const isActive = location.pathname === item.path ||
-              (item.path !== '/' && location.pathname.startsWith(item.path));
-            
+            const isActive = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path));
             return (
-              <button
-                key={item.path}
-                onClick={() => navigate(item.path)}
-                className={'relative flex flex-col items-center gap-0.5 min-w-[56px] px-1 py-1 rounded-2xl transition-all ' + (
-                  isActive
-                    ? (isDark ? 'text-[#d4af37]' : 'text-[#0d9488]')
-                    : (isDark ? 'text-gray-500' : 'text-[#0f766e]/50')
-                )}
-              >
-                <div className={'w-11 h-11 rounded-2xl flex items-center justify-center transition-all ' + (
-                  isActive
-                    ? (isDark ? 'bg-[#d4af37]/15 shadow-lg shadow-[#d4af37]/10' : 'bg-[#14b8a6]/15')
-                    : ''
-                )}>
+              <button key={item.path} onClick={() => navigate(item.path)} className={'relative flex flex-col items-center gap-0.5 min-w-[56px] px-1 py-1 rounded-2xl transition-all ' + (isActive ? (isDark ? 'text-[#d4af37]' : 'text-[#0d9488]') : (isDark ? 'text-gray-500' : 'text-[#0f766e]/50'))}>
+                <div className={'w-11 h-11 rounded-2xl flex items-center justify-center transition-all ' + (isActive ? (isDark ? 'bg-[#d4af37]/15 shadow-lg shadow-[#d4af37]/10' : 'bg-[#14b8a6]/15') : '')}>
                   <Icon size={22} strokeWidth={isActive ? 2.5 : 1.8} />
                 </div>
                 <span className={'text-[10px] ' + (isActive ? 'font-bold' : 'font-medium')}>{item.label}</span>
