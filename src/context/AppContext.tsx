@@ -5,9 +5,11 @@ import { loadState, saveState } from '../utils/storage';
 export const APP_VERSION = 'v1.5.0';
 export interface WorkoutSession extends BaseWorkoutSession { name?: string; }
 
-// ==========================================
-// SMART NORMALIZATION & DAY MAPPING ENGINE
-// ==========================================
+// ✅ تایپ محلی برای نگهداری totalSets پس از نرمال‌سازی
+interface NormalizedWorkoutDay extends WorkoutDay {
+  totalSets: number;
+}
+
 const DAY_MAP: Record<string, string> = {
   'saturday': 'شنبه', 'sat': 'شنبه', '0': 'شنبه',
   'sunday': 'یکشنبه', 'sun': 'یکشنبه', '1': 'یکشنبه',
@@ -20,7 +22,7 @@ const DAY_MAP: Record<string, string> = {
   'سه‌شنبه': 'سه‌شنبه', 'چهارشنبه': 'چهارشنبه', 'پنجشنبه': 'پنجشنبه', 'جمعه': 'جمعه'
 };
 
-const normalizeDays = (days: any[]): WorkoutDay[] => {
+const normalizeDays = (days: any[]): NormalizedWorkoutDay[] => {
   if (!days || !Array.isArray(days)) return [];
   
   return days.map((day, index) => {
@@ -35,16 +37,16 @@ const normalizeDays = (days: any[]): WorkoutDay[] => {
     }
     const sets = day.exercises?.reduce((sum: number, ex: any) => sum + (Number(ex.sets) || 0), 0) || 0;
     
+    // ✅ کست به تایپ محلی که totalSets را نگه می‌دارد
     return {
       ...day,
       day: persianDay,
       totalSets: day.totalSets || sets,
       exercises: day.exercises || []
-    } as WorkoutDay;
+    } as NormalizedWorkoutDay;
   });
 };
 
-// ایجاد برنامه پیش‌فرض با ساختار استاندارد WorkoutProgram
 const createDefaultProgram = (profileId: string): WorkoutProgram => ({
   id: 'default-push-pull-legs',
   profileId,
@@ -63,19 +65,15 @@ const createDefaultProgram = (profileId: string): WorkoutProgram => ({
   ])
 });
 
-// نرمال‌سازی هر برنامه (چه ایمپورت شده چه پیش‌فرض)
 const normalizeProgram = (program: WorkoutProgram | null): WorkoutProgram | null => {
   if (!program) return null;
   return { ...program, days: normalizeDays(program.days as any) };
 };
 
-// ==========================================
-// CORE CONTEXT DEFINITION
-// ==========================================
 interface AppContextType {
   state: AppState;
   appVersion: string;
-  activeProgramData: WorkoutProgram | null; // حالا null هم معتبر است
+  activeProgramData: WorkoutProgram | null;
   profiles: AthleteProfile[];
   activeProfile: AthleteProfile | null;
   setActiveProfile: (id: string | null) => void;
@@ -106,7 +104,6 @@ const AppContext = createContext<AppContextType | null>(null);
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AppState>(loadState);
   
-  // ✅ منطق یکپارچه: اگر پروفایل فعال داریم ولی برنامه‌ای نیست، پیش‌فرض را ایمپورت کن
   useEffect(() => {
     if (state.activeProfileId && state.programs.filter(p => p.profileId === state.activeProfileId).length === 0) {
       const defaultProg = createDefaultProgram(state.activeProfileId);
@@ -129,7 +126,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (!state.activeProgram || !state.activeProfileId) return null;
     const raw = state.programs.find(p => p.id === state.activeProgram && p.profileId === state.activeProfileId);
     const normalized = normalizeProgram(raw || null);
-    // Deep clone برای شکستن کش ری‌اکت
     return normalized ? JSON.parse(JSON.stringify(normalized)) : null;
   }, [state.programs, state.activeProgram, state.activeProfileId]);
 
