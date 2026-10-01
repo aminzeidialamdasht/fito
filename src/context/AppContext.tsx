@@ -1,32 +1,49 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
-import { AppState, AthleteProfile, WorkoutProgram, NutritionProgram, SupplementProgram, WorkoutSession as BaseWorkoutSession, ProgressEntry, WorkoutDay as BaseWorkoutDay } from '../types';
+import { AppState, AthleteProfile, WorkoutProgram, NutritionProgram, SupplementProgram, WorkoutSession as BaseWorkoutSession, ProgressEntry } from '../types';
 import { loadState, saveState } from '../utils/storage';
 import { DEFAULT_WORKOUT_PLAN } from '../data/defaultWorkoutPlan';
 
-export interface WorkoutSession extends BaseWorkoutSession {
-  name?: string;
-}
+// ✅ ورژن اپلیکیشن - باید با تگ گیت هماهنگ باشد
+export const APP_VERSION = 'v1.4.5';
 
-interface ExtendedWorkoutDay extends BaseWorkoutDay {
-  totalSets?: number;
-}
+export interface WorkoutSession extends BaseWorkoutSession { name?: string; }
 
-// نگاشت نام روزهای انگلیسی به فارسی برای سینک کردن برنامه‌های ایمپورت شده
+// نگاشت کامل و انعطاف‌پذیر روزها (انگلیسی، فارسی، اعداد)
 const DAY_MAP: Record<string, string> = {
-  'Saturday': 'شنبه', 'Sunday': 'یکشنبه', 'Monday': 'دوشنبه',
-  'Tuesday': 'سه‌شنبه', 'Wednesday': 'چهارشنبه', 'Thursday': 'پنجشنبه', 'Friday': 'جمعه',
-  'Sat': 'شنبه', 'Sun': 'یکشنبه', 'Mon': 'دوشنبه', 'Tue': 'سه‌شنبه',
-  'Wed': 'چهارشنبه', 'Thu': 'پنجشنبه', 'Fri': 'جمعه'
+  'saturday': 'شنبه', 'sat': 'شنبه', '0': 'شنبه',
+  'sunday': 'یکشنبه', 'sun': 'یکشنبه', '1': 'یکشنبه',
+  'monday': 'دوشنبه', 'mon': 'دوشنبه', '2': 'دوشنبه',
+  'tuesday': 'سه‌شنبه', 'tue': 'سه‌شنبه', '3': 'سه‌شنبه',
+  'wednesday': 'چهارشنبه', 'wed': 'چهارشنبه', '4': 'چهارشنبه',
+  'thursday': 'پنجشنبه', 'thu': 'پنجشنبه', '5': 'پنجشنبه',
+  'friday': 'جمعه', 'fri': 'جمعه', '6': 'جمعه',
+  // پشتیبانی از نام‌های فارسی موجود در دیتا
+  'شنبه': 'شنبه', 'یکشنبه': 'یکشنبه', 'دوشنبه': 'دوشنبه', 
+  'سه‌شنبه': 'سه‌شنبه', 'چهارشنبه': 'چهارشنبه', 'پنجشنبه': 'پنجشنبه', 'جمعه': 'جمعه'
 };
 
 const normalizeDays = (days: any[]) => {
   if (!days || !Array.isArray(days)) return [];
   
-  return days.map(day => {
-    // تبدیل نام روز به فارسی استاندارد
-    const persianDay = DAY_MAP[day.day] || day.day;
+  return days.map((day, index) => {
+    let persianDay = day.day;
     
-    // محاسبه totalSets اگر وجود نداشت
+    // تلاش برای یافتن نام فارسی روز
+    if (day.day) {
+      const lowerKey = String(day.day).toLowerCase().trim();
+      if (DAY_MAP[lowerKey]) {
+        persianDay = DAY_MAP[lowerKey];
+      } else if (DAY_MAP[day.day]) {
+        // اگر دقیقاً فارسی بود
+        persianDay = day.day;
+      }
+    } 
+    // فالبک: اگر فیلد day نداشت یا ناشناخته بود، از ایندکس استفاده کن
+    else if (index >= 0 && index < 7) {
+       const fallbackDays = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
+       persianDay = fallbackDays[index];
+    }
+
     const sets = day.exercises?.reduce((sum: number, ex: any) => sum + (Number(ex.sets) || 0), 0) || 0;
     
     return {
@@ -34,7 +51,7 @@ const normalizeDays = (days: any[]) => {
       day: persianDay,
       totalSets: day.totalSets || sets,
       exercises: day.exercises || []
-    } as ExtendedWorkoutDay;
+    };
   });
 };
 
@@ -44,17 +61,15 @@ const normalizeProgram = (program: WorkoutProgram | null): WorkoutProgram => {
 
   const normalizedDays = normalizeDays(program.days as any);
   
-  // ایجاد یک آبجکت جدید برای تضمین تغییر Reference و آپدیت UI
-  return {
-    ...program,
-    id: program.id,
-    name: program.name,
-    days: normalizedDays
-  };
+  // لاگ دیباگ برای بررسی ساختار واقعی در کنسول
+  console.log(`[AppContext v${APP_VERSION}] Normalized Days:`, normalizedDays.map(d => ({ day: d.day, count: d.exercises?.length })));
+
+  return { ...program, days: normalizedDays };
 };
 
 interface AppContextType {
   state: AppState;
+  appVersion: string;
   activeProgramData: WorkoutProgram; 
   profiles: AthleteProfile[];
   activeProfile: AthleteProfile | null;
@@ -85,162 +100,46 @@ const AppContext = createContext<AppContextType | null>(null);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AppState>(loadState);
+  useEffect(() => { saveState(state); }, [state]);
 
-  useEffect(() => {
-    saveState(state);
-  }, [state]);
+  const activeProfile = useMemo(() => state.activeProfileId ? state.profiles.find(p => p.id === state.activeProfileId) || null : null, [state.profiles, state.activeProfileId]);
 
-  const activeProfile = useMemo(() => {
-    if (!state.activeProfileId) return null;
-    return state.profiles.find(p => p.id === state.activeProfileId) || null;
-  }, [state.profiles, state.activeProfileId]);
-
-  // ✅ نرمال‌سازی عمیق با ایجاد آبجکت جدید برای هر بار تغییر
   const activeProgramData = useMemo(() => {
     let rawProgram: WorkoutProgram | null = null;
-    if (state.activeProgram) {
-      rawProgram = state.programs.find(p => p.id === state.activeProgram) || null;
-    }
-    // استفاده از JSON parse/stringify برای اطمینان از Deep Copy و شکستن کش React
-    const normalized = normalizeProgram(rawProgram);
-    return JSON.parse(JSON.stringify(normalized));
+    if (state.activeProgram) rawProgram = state.programs.find(p => p.id === state.activeProgram) || null;
+    return JSON.parse(JSON.stringify(normalizeProgram(rawProgram)));
   }, [state.programs, state.activeProgram, state.activeProfileId]);
 
-  const programs = useMemo(() =>
-    state.programs.filter(p => p.profileId === state.activeProfileId),
-    [state.programs, state.activeProfileId]
-  );
+  const programs = useMemo(() => state.programs.filter(p => p.profileId === state.activeProfileId), [state.programs, state.activeProfileId]);
+  const sessions = useMemo(() => state.sessions.filter(s => s.profileId === state.activeProfileId) as WorkoutSession[], [state.sessions, state.activeProfileId]);
+  const progress = useMemo(() => state.progress.filter(p => p.profileId === state.activeProfileId), [state.progress, state.activeProfileId]);
+  const nutritionPrograms = useMemo(() => state.nutritionPrograms.filter(p => p.profileId === state.activeProfileId), [state.nutritionPrograms, state.activeProfileId]);
+  const supplementPrograms = useMemo(() => state.supplementPrograms.filter(p => p.profileId === state.activeProfileId), [state.supplementPrograms, state.activeProfileId]);
 
-  const sessions = useMemo(() =>
-    state.sessions.filter(s => s.profileId === state.activeProfileId) as WorkoutSession[],
-    [state.sessions, state.activeProfileId]
-  );
+  const setActiveProfile = useCallback((id: string | null) => setState(prev => prev.activeProfileId === id ? prev : ({ ...prev, activeProfileId: id, activeProgram: prev.programs.filter(p => p.profileId === id)[0]?.id ?? null })), []);
+  const saveProfile = useCallback((profile: AthleteProfile) => setState(prev => { const idx = prev.profiles.findIndex(p => p.id === profile.id); return { ...prev, profiles: idx >= 0 ? prev.profiles.map((p, i) => i === idx ? profile : p) : [...prev.profiles, profile], activeProfileId: prev.activeProfileId || profile.id }; }), []);
+  const deleteProfile = useCallback((id: string) => setState(prev => { const np = prev.profiles.filter(p => p.id !== id); const nid = prev.activeProfileId === id ? (np[0]?.id ?? null) : prev.activeProfileId; return { ...prev, profiles: np, programs: prev.programs.filter(p => p.profileId !== id), activeProfileId: nid, activeProgram: nid ? null : null }; }), []);
+  
+  const addProgram = useCallback((p: WorkoutProgram) => setState(prev => ({ ...prev, programs: [...prev.programs, p], activeProgram: prev.activeProgram || p.id })), []);
+  const updateProgram = useCallback((p: WorkoutProgram) => setState(prev => ({ ...prev, programs: prev.programs.map(x => x.id === p.id ? p : x) })), []);
+  const removeProgram = useCallback((id: string) => setState(prev => ({ ...prev, programs: prev.programs.filter(p => p.id !== id), activeProgram: prev.activeProgram === id ? null : prev.activeProgram })), []);
+  const setActiveProgram = useCallback((id: string | null) => setState(prev => ({ ...prev, activeProgram: id })), []);
+  
+  const addNutritionProgram = useCallback((p: NutritionProgram) => setState(prev => ({ ...prev, nutritionPrograms: [...prev.nutritionPrograms, p] })), []);
+  const removeNutritionProgram = useCallback((id: string) => setState(prev => ({ ...prev, nutritionPrograms: prev.nutritionPrograms.filter(p => p.id !== id) })), []);
+  const setActiveNutritionProgram = useCallback((id: string | null) => setState(prev => ({ ...prev, activeNutritionProgram: id })), []);
+  
+  const addSupplementProgram = useCallback((p: SupplementProgram) => setState(prev => ({ ...prev, supplementPrograms: [...prev.supplementPrograms, p] })), []);
+  const removeSupplementProgram = useCallback((id: string) => setState(prev => ({ ...prev, supplementPrograms: prev.supplementPrograms.filter(p => p.id !== id) })), []);
+  const setActiveSupplementProgram = useCallback((id: string | null) => setState(prev => ({ ...prev, activeSupplementProgram: id })), []);
 
-  const progress = useMemo(() =>
-    state.progress.filter(p => p.profileId === state.activeProfileId),
-    [state.progress, state.activeProfileId]
-  );
-
-  const nutritionPrograms = useMemo(() =>
-    state.nutritionPrograms.filter(p => p.profileId === state.activeProfileId),
-    [state.nutritionPrograms, state.activeProfileId]
-  );
-
-  const supplementPrograms = useMemo(() =>
-    state.supplementPrograms.filter(p => p.profileId === state.activeProfileId),
-    [state.supplementPrograms, state.activeProfileId]
-  );
-
-  const setActiveProfile = useCallback((id: string | null) => {
-    setState(prev => {
-      if (id === prev.activeProfileId) return prev;
-      const profilePrograms = prev.programs.filter(p => p.profileId === id);
-      return {
-        ...prev,
-        activeProfileId: id,
-        activeProgram: profilePrograms[0]?.id ?? null,
-        activeNutritionProgram: prev.nutritionPrograms.find(p => p.profileId === id)?.id ?? null,
-        activeSupplementProgram: prev.supplementPrograms.find(p => p.profileId === id)?.id ?? null,
-      };
-    });
-  }, []);
-
-  const saveProfile = useCallback((profile: AthleteProfile) => {
-    setState(prev => {
-      const existingIndex = prev.profiles.findIndex(p => p.id === profile.id);
-      const newProfiles = existingIndex >= 0 
-        ? prev.profiles.map((p, i) => i === existingIndex ? profile : p)
-        : [...prev.profiles, profile];
-      return { ...prev, profiles: newProfiles, activeProfileId: prev.activeProfileId || profile.id };
-    });
-  }, []);
-
-  const deleteProfile = useCallback((id: string) => {
-    setState(prev => {
-      const newProfiles = prev.profiles.filter(p => p.id !== id);
-      const nextId = prev.activeProfileId === id ? (newProfiles[0]?.id ?? null) : prev.activeProfileId;
-      return {
-        ...prev,
-        profiles: newProfiles,
-        programs: prev.programs.filter(p => p.profileId !== id),
-        nutritionPrograms: prev.nutritionPrograms.filter(p => p.profileId !== id),
-        supplementPrograms: prev.supplementPrograms.filter(p => p.profileId !== id),
-        sessions: prev.sessions.filter(s => s.profileId !== id),
-        progress: prev.progress.filter(p => p.profileId !== id),
-        activeProfileId: nextId,
-        activeProgram: nextId ? null : null,
-      };
-    });
-  }, []);
-
-  const addProgram = useCallback((program: WorkoutProgram) => {
-    setState(prev => ({ ...prev, programs: [...prev.programs, program], activeProgram: prev.activeProgram || program.id }));
-  }, []);
-
-  const updateProgram = useCallback((program: WorkoutProgram) => {
-    setState(prev => ({ ...prev, programs: prev.programs.map(p => p.id === program.id ? program : p) }));
-  }, []);
-
-  const removeProgram = useCallback((id: string) => {
-    setState(prev => {
-      const remaining = prev.programs.filter(p => p.id !== id);
-      return {
-        ...prev,
-        programs: remaining,
-        activeProgram: prev.activeProgram === id ? (remaining.find(p => p.profileId === prev.activeProfileId)?.id ?? null) : prev.activeProgram,
-      };
-    });
-  }, []);
-
-  const setActiveProgram = useCallback((id: string | null) => {
-    setState(prev => ({ ...prev, activeProgram: id }));
-  }, []);
-
-  const addNutritionProgram = useCallback((program: NutritionProgram) => {
-    setState(prev => ({ ...prev, nutritionPrograms: [...prev.nutritionPrograms, program], activeNutritionProgram: prev.activeNutritionProgram || program.id }));
-  }, []);
-
-  const removeNutritionProgram = useCallback((id: string) => {
-    setState(prev => {
-      const remaining = prev.nutritionPrograms.filter(p => p.id !== id);
-      return { ...prev, nutritionPrograms: remaining, activeNutritionProgram: prev.activeNutritionProgram === id ? (remaining[0]?.id ?? null) : prev.activeNutritionProgram };
-    });
-  }, []);
-
-  const setActiveNutritionProgram = useCallback((id: string | null) => {
-    setState(prev => ({ ...prev, activeNutritionProgram: id }));
-  }, []);
-
-  const addSupplementProgram = useCallback((program: SupplementProgram) => {
-    setState(prev => ({ ...prev, supplementPrograms: [...prev.supplementPrograms, program], activeSupplementProgram: prev.activeSupplementProgram || program.id }));
-  }, []);
-
-  const removeSupplementProgram = useCallback((id: string) => {
-    setState(prev => {
-      const remaining = prev.supplementPrograms.filter(p => p.id !== id);
-      return { ...prev, supplementPrograms: remaining, activeSupplementProgram: prev.activeSupplementProgram === id ? (remaining[0]?.id ?? null) : prev.activeSupplementProgram };
-    });
-  }, []);
-
-  const setActiveSupplementProgram = useCallback((id: string | null) => {
-    setState(prev => ({ ...prev, activeSupplementProgram: id }));
-  }, []);
-
-  const addSession = useCallback((session: WorkoutSession) => {
-    setState(prev => ({ ...prev, sessions: [...prev.sessions, session] }));
-  }, []);
-
-  const updateSession = useCallback((session: WorkoutSession) => {
-    setState(prev => ({ ...prev, sessions: prev.sessions.map(s => s.id === session.id ? session : s) }));
-  }, []);
-
-  const addProgress = useCallback((entry: ProgressEntry) => {
-    setState(prev => ({ ...prev, progress: [...prev.progress, entry] }));
-  }, []);
+  const addSession = useCallback((s: WorkoutSession) => setState(prev => ({ ...prev, sessions: [...prev.sessions, s] })), []);
+  const updateSession = useCallback((s: WorkoutSession) => setState(prev => ({ ...prev, sessions: prev.sessions.map(x => x.id === s.id ? s : x) })), []);
+  const addProgress = useCallback((e: ProgressEntry) => setState(prev => ({ ...prev, progress: [...prev.progress, e] })), []);
 
   return (
     <AppContext.Provider value={{
-      state, activeProgramData, profiles: state.profiles, activeProfile, setActiveProfile, saveProfile, deleteProfile,
+      state, appVersion: APP_VERSION, activeProgramData, profiles: state.profiles, activeProfile, setActiveProfile, saveProfile, deleteProfile,
       programs, addProgram, updateProgram, removeProgram, setActiveProgram,
       nutritionPrograms, addNutritionProgram, removeNutritionProgram, setActiveNutritionProgram,
       supplementPrograms, addSupplementProgram, removeSupplementProgram, setActiveSupplementProgram,

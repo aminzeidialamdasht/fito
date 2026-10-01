@@ -1,4 +1,6 @@
 import { Sparkles, ArrowLeft } from 'lucide-react';
+import { APP_VERSION } from '../context/AppContext';
+import { APP_VERSION } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 
 interface WelcomeProps { onContinue: () => void; }
@@ -16,6 +18,7 @@ export default function Welcome({ onContinue }: WelcomeProps) {
         <div className="flex items-center justify-center gap-2 mb-2">
           <Sparkles size={17} className={isDark ? 'text-[#88C038]' : 'text-[#6BA82A]'} />
           <span className={`text-sm font-bold ${isDark ? 'text-[#88C038]' : 'text-[#6BA82A]'}`}>دستیار هوشمند بدنسازی</span>
+                <span className="text-[10px] opacity-40 mt-1 block">{APP_VERSION}</span>
         </div>
         <h1 className="text-4xl font-black tracking-tight">کوچینو</h1>
         <p className={`mt-1 text-lg font-semibold ${isDark ? 'text-gray-300' : 'text-[#0f766e]'}`}>Coachino</p>

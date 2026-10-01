@@ -6,6 +6,8 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { getPersianDate } from '../utils/jalali';
+import { APP_VERSION } from '../context/AppContext';
+import { APP_VERSION } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 
 // آیتم‌های منوی کناری (سایدبار)
@@ -74,7 +76,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   کوچینو
                 </h1>
                 <p className={'text-[10px] sm:text-xs ' + (isDark ? 'text-gray-500' : 'text-[#0f766e]/70')}>
-                  Coachino · {getPersianDate()}
+                  Coachino  · {getPersianDate()}
                 </p>
               </div>
             </div>
