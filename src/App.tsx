@@ -31,21 +31,25 @@ function App() {
       <AppProvider>
         <HashRouter>
           {showWelcome ? <Welcome onContinue={continueToApp} /> : (
-            <Layout>
+            // تغییر موقت: فقط داشبورد داخل Layout باشد، بقیه صفحات بیرون
+            <>
               <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/prompt" element={<PremiumGate title="تولید پرامپت"><PromptGenerator /></PremiumGate>} />
-                <Route path="/import" element={<PremiumGate title="ورود برنامه تمرینی"><ProgramImport /></PremiumGate>} />
-                <Route path="/nutrition" element={<Nutrition />} />
-                <Route path="/nutrition-import" element={<PremiumGate title="ورود برنامه تغذیه"><NutritionImport /></PremiumGate>} />
-                <Route path="/supplements" element={<Supplements />} />
-                <Route path="/supplement-import" element={<PremiumGate title="ورود برنامه مکمل"><SupplementImport /></PremiumGate>} />
+                <Route path="/" element={<Layout><Dashboard /></Layout>} />
+                <Route path="/profile" element={<Layout><Profile /></Layout>} />
+                
+                {/* صفحات بدون Layout برای تست */}
                 <Route path="/workout" element={<WorkoutTracker />} />
-                <Route path="/calendar" element={<CalendarPage />} />
                 <Route path="/progress" element={<Progress />} />
+                <Route path="/calendar" element={<CalendarPage />} />
+                
+                <Route path="/prompt" element={<Layout><PremiumGate title="تولید پرامپت"><PromptGenerator /></PremiumGate></Layout>} />
+                <Route path="/import" element={<Layout><PremiumGate title="ورود برنامه تمرینی"><ProgramImport /></PremiumGate></Layout>} />
+                <Route path="/nutrition" element={<Layout><Nutrition /></Layout>} />
+                <Route path="/nutrition-import" element={<Layout><PremiumGate title="ورود برنامه تغذیه"><NutritionImport /></PremiumGate></Layout>} />
+                <Route path="/supplements" element={<Layout><Supplements /></Layout>} />
+                <Route path="/supplement-import" element={<Layout><PremiumGate title="ورود برنامه مکمل"><SupplementImport /></PremiumGate></Layout>} />
               </Routes>
-            </Layout>
+            </>
           )}
         </HashRouter>
       </AppProvider>

@@ -1,21 +1,29 @@
 import { useMemo, useState } from 'react';
 import {
-  BarChart3, Plus, Trophy, TrendingUp, Save, Dumbbell, Scale,
-  Activity, Clock, Bell, Brain, Ruler
+  Trophy, TrendingUp, Save, Dumbbell, Scale,
+  Activity, Clock, Bell, Brain, Ruler, Plus,
+  BarChart3, Target, ChevronRight, Info, ChevronLeft
 } from 'lucide-react';
 import {
-  BarChart, Bar, AreaChart, Area,
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar
 } from 'recharts';
 import { v4 as uuidv4 } from 'uuid';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
-import { ProgressEntry } from '../types';
 import { formatDateJalali, toPersianNumber, getProgramTimelineDetails } from '../utils/jalali';
 
 type MeasurementKey = 'weight' | 'chest' | 'waist' | 'hips' | 'arms' | 'thighs' | 'calves' | 'shoulders' | 'neck';
+
+const MUSCLE_GROUPS = [
+  { id: 'chest', label: 'سینه', path: 'M 70 80 Q 90 80 100 100 L 100 130 Q 90 140 70 130 Z M 130 80 Q 110 80 100 100 L 100 130 Q 110 140 130 130 Z' },
+  { id: 'shoulders', label: 'سرشانه', path: 'M 60 70 Q 50 70 45 85 L 65 90 Z M 140 70 Q 150 70 155 85 L 135 90 Z' },
+  { id: 'arms', label: 'بازو', path: 'M 45 85 Q 35 100 30 130 L 45 135 Q 50 110 65 90 Z M 155 85 Q 165 100 170 130 L 155 135 Q 150 110 135 90 Z' },
+  { id: 'abs', label: 'شکم', path: 'M 90 135 L 110 135 L 108 180 L 92 180 Z' },
+  { id: 'quads', label: 'چهارسر', path: 'M 85 185 L 98 185 L 95 250 L 80 250 Z M 102 185 L 115 185 L 120 250 L 105 250 Z' },
+  { id: 'traps', label: 'کول', path: 'M 75 60 Q 100 50 125 60 L 130 75 Q 100 65 70 75 Z' },
+];
 
 export default function Progress() {
   const { state, programs, sessions, progress, activeProfile, addProgress } = useAppContext();
@@ -23,68 +31,59 @@ export default function Progress() {
   const navigate = useNavigate();
   const isDark = theme === 'dark';
 
+  const gold = isDark ? '#d4af37' : '#f59e0b';
+  const teal = isDark ? '#14b8a6' : '#0d9488';
+  const bgMain = isDark ? '#0f172a' : '#ffffff';
+  const cardBg = isDark ? '#1e293b' : '#f8fafc';
+  const textMain = isDark ? '#ffffff' : '#0f172a';
+  const textSub = isDark ? '#94a3b8' : '#64748b';
+  const borderCard = isDark ? 'border-white/5' : 'border-teal-100';
+
   const activeProgram = programs.find(p => p.id === state.activeProgram);
   const activeProgramTimeline = activeProgram
     ? getProgramTimelineDetails(activeProgram.startDate, activeProgram.duration, activeProgram.createdAt)
     : null;
+
   const [showForm, setShowForm] = useState(false);
-  const [selectedExercise, setSelectedExercise] = useState('');
   const [form, setForm] = useState({
     weight: 0, chest: 0, waist: 0, hips: 0, arms: 0, thighs: 0, calves: 0, shoulders: 0, neck: 0, notes: ''
   });
 
   const completedSessions = useMemo(() => sessions.filter(s => s.completed), [sessions]);
-  const totalVolume = completedSessions.reduce((sum, s) => sum + s.totalVolume, 0);
-  const avgVolume = completedSessions.length ? Math.round(totalVolume / completedSessions.length) : 0;
-  const weightChange = progress.length >= 2 ? progress[progress.length - 1].weight - progress[0].weight : 0;
-
-  const availableExercises = useMemo(() => {
-    const set = new Set<string>();
-    completedSessions.forEach(s => s.sets.filter(x => x.completed).forEach(x => set.add(x.exerciseName)));
-    const list = Array.from(set);
-    return list.length ? list : ['پرس سینه', 'اسکوات با هالتر', 'ددلیفت'];
-  }, [completedSessions]);
-
-  const currentExercise = selectedExercise || availableExercises[0];
-
-  const exerciseChartData = useMemo(() => {
-    const history: { date: string; weight: number }[] = [];
-    [...completedSessions].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()).forEach(session => {
-      const sets = session.sets.filter(s => s.completed && s.exerciseName === currentExercise);
-      if (sets.length > 0) {
-        const maxSet = sets.reduce((prev, curr) => (curr.weight > prev.weight ? curr : prev), sets[0]);
-        history.push({ date: formatDateJalali(session.date), weight: maxSet.weight });
-      }
-    });
-    return history;
-  }, [completedSessions, currentExercise]);
-
   const sortedProgress = useMemo(() =>
     [...progress].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()), [progress]);
+
+  const muscleStats = useMemo(() => {
+    const stats: Record<string, number> = {};
+    MUSCLE_GROUPS.forEach(m => stats[m.id] = 0);
+    completedSessions.forEach(session => {
+      session.sets.filter(s => s.completed).forEach(set => {
+        const name = set.exerciseName.toLowerCase();
+        if (name.includes('پرس سینه') || name.includes('فلای') || name.includes('قفسه')) stats['chest']++;
+        else if (name.includes('سرشانه') || name.includes('نشر')) stats['shoulders']++;
+        else if (name.includes('جلوبازو') || name.includes('پشت بازو')) stats['arms']++;
+        else if (name.includes('کرانچ') || name.includes('شکم') || name.includes('پلانک')) stats['abs']++;
+        else if (name.includes('اسکوات') || name.includes('پرس پا') || name.includes('لانژ')) stats['quads']++;
+        else if (name.includes('شراگ') || name.includes('کول')) stats['traps']++;
+      });
+    });
+    return stats;
+  }, [completedSessions]);
+
+  const maxMuscleVol = Math.max(...Object.values(muscleStats), 1);
+
+  const balanceData = useMemo(() => {
+    return MUSCLE_GROUPS.map(m => ({
+      subject: m.label,
+      A: muscleStats[m.id],
+      fullMark: Math.max(maxMuscleVol * 1.2, 10)
+    }));
+  }, [muscleStats, maxMuscleVol]);
 
   const weightChartData = useMemo(() =>
     sortedProgress.filter(e => e.weight > 0).map(e => ({
       date: formatDateJalali(e.date), weight: e.weight,
     })), [sortedProgress]);
-
-  const radarData = useMemo(() => {
-    const keys: MeasurementKey[] = ['chest', 'arms', 'thighs', 'waist', 'hips', 'neck'];
-    const labels: Record<string, string> = {
-      chest: 'سینه', arms: 'بازو', thighs: 'ران', waist: 'کمر', hips: 'باسن', neck: 'گردن',
-    };
-    const latest = sortedProgress[sortedProgress.length - 1];
-    const prev = sortedProgress.length >= 2 ? sortedProgress[sortedProgress.length - 2] : null;
-    if (!latest?.measurements) {
-      return keys.map(k => ({ subject: labels[k], current: 0, previous: 0 }));
-    }
-    return keys.map(k => ({
-      subject: labels[k],
-      current: (latest.measurements as any)?.[k] || 0,
-      previous: prev ? ((prev.measurements as any)?.[k] || 0) : 0,
-    }));
-  }, [sortedProgress]);
-
-  const hasRadarData = radarData.some(d => d.current > 0);
 
   const save = () => {
     if (!activeProfile) return;
@@ -94,14 +93,9 @@ export default function Progress() {
       date: new Date().toISOString(),
       weight: form.weight || activeProfile.weight || 0,
       measurements: {
-        chest: form.chest || undefined,
-        waist: form.waist || undefined,
-        hips: form.hips || undefined,
-        arms: form.arms || undefined,
-        thighs: form.thighs || undefined,
-        calves: form.calves || undefined,
-        shoulders: form.shoulders || undefined,
-        neck: form.neck || undefined,
+        chest: form.chest || undefined, waist: form.waist || undefined, hips: form.hips || undefined,
+        arms: form.arms || undefined, thighs: form.thighs || undefined, calves: form.calves || undefined,
+        shoulders: form.shoulders || undefined, neck: form.neck || undefined,
       },
       notes: form.notes,
     });
@@ -109,45 +103,46 @@ export default function Progress() {
     setForm({ weight: 0, chest: 0, waist: 0, hips: 0, arms: 0, thighs: 0, calves: 0, shoulders: 0, neck: 0, notes: '' });
   };
 
-  const card = isDark ? 'bg-[#1a1a2e] border border-white/5' : 'bg-white border border-[#14b8a6]/15 shadow-sm';
-  const accent = isDark ? 'text-[#d4af37]' : 'text-[#0d9488]';
-  const accentBg = isDark ? 'bg-[#d4af37]' : 'bg-[#14b8a6]';
-
   return (
-    <div className="space-y-5 animate-fade-in">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className={`text-xl font-black flex items-center gap-2 ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>
-            <Trophy size={22} className={accent} /> پیگیری پیشرفت
-          </h2>
-          <p className={`text-xs mt-0.5 ${isDark ? 'text-gray-500' : 'text-teal-700/60'}`}>
-            بدن‌سازی · پیشرفت مداوم، انگیزه همیشگی
-          </p>
+    <div className={`min-h-screen pb-24 space-y-5 ${bgMain}`}>
+      {/* Header with Back Button */}
+      <div className="flex items-center justify-between px-1">
+        <div className="flex items-center gap-3">
+          <button onClick={() => navigate('/')} className={`p-2 rounded-full ${isDark ? 'bg-white/5' : 'bg-gray-100'}`}>
+            <ChevronLeft size={20} style={{ color: textMain }} />
+          </button>
+          <div>
+            <h2 className={`text-xl font-black flex items-center gap-2 ${textMain}`}>
+              <Trophy size={22} style={{ color: gold }} /> پیگیری پیشرفت
+            </h2>
+            <p className={`text-xs mt-0.5 ${textSub}`}>بدن‌سازی · پیشرفت مداوم، انگیزه همیشگی</p>
+          </div>
         </div>
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-bold text-sm text-black ${accentBg} shadow-lg active:scale-95 transition-transform`}
-        >
+        <button onClick={() => setShowForm(!showForm)}
+          className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-bold text-sm text-black shadow-lg active:scale-95 transition-transform`}
+          style={{ background: teal }}>
           <Plus size={16} /> ثبت اندازه‌گیری
         </button>
       </div>
 
+      {/* Program Timeline Card */}
       {activeProgram && activeProgramTimeline && (
-        <div className={`rounded-2xl p-5 ${card}`}>
+        <div className={`rounded-2xl p-5 border ${borderCard} ${cardBg}`}>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${isDark ? 'bg-[#d4af37]/15 text-[#d4af37]' : 'bg-[#14b8a6]/15 text-[#0d9488]'}`}>
+              <div className={`w-11 h-11 rounded-xl flex items-center justify-center`} style={{ background: `${gold}15`, color: gold }}>
                 <Clock size={22} />
               </div>
               <div>
-                <span className={`text-xs font-bold ${accent}`}>برنامه تمرینی فعال</span>
-                <h3 className={`text-lg font-bold ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>{activeProgram.name}</h3>
+                <span className={`text-xs font-bold`} style={{ color: gold }}>برنامه تمرینی فعال</span>
+                <h3 className={`text-lg font-bold ${textMain}`}>{activeProgram.name}</h3>
               </div>
             </div>
             <button onClick={() => navigate('/import')} className={`text-xs font-bold px-3 py-1.5 rounded-lg border ${isDark ? 'border-gray-700 text-gray-300' : 'border-teal-200 text-[#0d9488]'}`}>
               تغییر برنامه
             </button>
           </div>
+          
           {activeProgramTimeline.isAlarmRequired && (
             <div className={`mb-4 rounded-xl p-4 border flex items-center justify-between gap-3 ${isDark ? 'bg-amber-500/15 border-amber-500/40 text-amber-200' : 'bg-amber-50 border-amber-300 text-amber-900'}`}>
               <div className="flex items-center gap-3">
@@ -159,52 +154,62 @@ export default function Progress() {
               </button>
             </div>
           )}
+
           <div className="flex justify-between text-xs font-bold mb-1">
-            <span className="text-gray-400">پیشرفت برنامه</span>
-            <span className={accent}>{toPersianNumber(activeProgramTimeline.progressPercent)}٪</span>
+            <span className={textSub}>پیشرفت برنامه</span>
+            <span style={{ color: gold }}>{toPersianNumber(activeProgramTimeline.progressPercent)}٪</span>
           </div>
           <div className={`w-full h-2.5 rounded-full overflow-hidden ${isDark ? 'bg-gray-800' : 'bg-gray-100'}`}>
-            <div className={`h-full rounded-full ${activeProgramTimeline.isAlarmRequired ? 'bg-amber-500' : (isDark ? 'bg-[#d4af37]' : 'bg-[#14b8a6]')}`} style={{ width: `${activeProgramTimeline.progressPercent}%` }} />
+            <div className="h-full rounded-full transition-all duration-500" 
+              style={{ width: `${activeProgramTimeline.progressPercent}%`, background: activeProgramTimeline.isAlarmRequired ? '#f59e0b' : gold }} />
           </div>
         </div>
       )}
 
+      {/* Quick Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
-          ['جلسات کامل', completedSessions.length, isDark ? 'text-[#4a90d9]' : 'text-blue-600'],
-          ['میانگین حجم', `${avgVolume} kg`, 'text-green-500'],
-          ['تغییر وزن', `${weightChange >= 0 ? '+' : ''}${weightChange.toFixed(1)} kg`, weightChange >= 0 ? 'text-amber-500' : 'text-blue-500'],
-          ['حرکات', availableExercises.length, accent],
-        ].map(([label, value, color]) => (
-          <div key={String(label)} className={`rounded-xl p-4 ${card}`}>
-            <p className="text-gray-400 text-xs mb-1">{label}</p>
-            <p className={`text-2xl font-black ${color}`}>{toPersianNumber(String(value))}</p>
+          ['جلسات کامل', completedSessions.length, teal],
+          ['حجم کل', `${completedSessions.reduce((s, x) => s + x.totalVolume, 0)} kg`, gold],
+          ['تغییر وزن', (() => {
+             const c = sortedProgress.length >= 2 ? sortedProgress[sortedProgress.length - 1].weight - sortedProgress[0].weight : 0;
+             return `${c >= 0 ? '+' : ''}${c.toFixed(1)} kg`;
+          })(), (v: string) => v.includes('+') ? '#f59e0b' : '#3b82f6'],
+          ['تنوع حرکات', new Set(completedSessions.flatMap(s => s.sets.filter(x => x.completed).map(x => x.exerciseName))).size, teal],
+        ].map(([label, value, colorFn]: any, i) => (
+          <div key={i} className={`rounded-xl p-4 border ${borderCard} ${cardBg}`}>
+            <p className={`${textSub} text-xs mb-1`}>{label}</p>
+            <p className="text-2xl font-black" style={{ color: typeof colorFn === 'function' ? colorFn(value) : colorFn }}>
+              {toPersianNumber(String(value))}
+            </p>
           </div>
         ))}
       </div>
 
+      {/* Form Modal */}
       {showForm && (
-        <div className={`rounded-2xl p-5 ${card}`}>
-          <h3 className={`font-bold mb-4 ${accent}`}>ثبت اندازه‌گیری جدید</h3>
+        <div className={`rounded-2xl p-5 border ${borderCard} ${cardBg} animate-fade-in`}>
+          <h3 className={`font-bold mb-4 flex items-center gap-2`} style={{ color: teal }}><Save size={18}/> ثبت اندازه‌گیری جدید</h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {([['weight','وزن','kg'],['chest','سینه','cm'],['waist','کمر','cm'],['hips','باسن','cm'],['arms','بازو','cm'],['thighs','ران','cm'],['calves','ساق','cm'],['shoulders','شانه','cm'],['neck','گردن','cm']] as const).map(([key, label, unit]) => (
-              <label key={key} className="text-xs text-gray-400">
+              <label key={key} className={`text-xs ${textSub}`}>
                 {label} ({unit})
                 <input type="number" value={(form as any)[key] || ''} onChange={e => setForm({ ...form, [key]: Number(e.target.value) })}
-                  className={`mt-1 w-full rounded-lg px-3 py-2 ${isDark ? 'bg-[#0d0d1a] text-white border border-white/10' : 'bg-gray-50 border'}`} />
+                  className={`mt-1 w-full rounded-lg px-3 py-2 outline-none focus:ring-2 ${isDark ? 'bg-[#0f172a] text-white border border-white/10 focus:ring-teal-500/50' : 'bg-white border border-gray-200 focus:ring-teal-500/30'}`} />
               </label>
             ))}
           </div>
-          <button onClick={save} className="mt-4 px-5 py-2.5 rounded-xl font-bold bg-green-500 text-white flex items-center gap-2">
-            <Save size={16} /> ذخیره
+          <button onClick={save} className="mt-4 px-5 py-2.5 rounded-xl font-bold text-white flex items-center gap-2 w-full justify-center" style={{ background: teal }}>
+            ذخیره اطلاعات
           </button>
         </div>
       )}
 
-      <div className={`rounded-2xl p-5 ${card}`}>
-        <h3 className={`font-bold flex items-center gap-2 mb-4 ${accent}`}><TrendingUp size={18} /> روند وزن</h3>
+      {/* Weight Trend Chart */}
+      <div className={`rounded-2xl p-5 border ${borderCard} ${cardBg}`}>
+        <h3 className={`font-bold flex items-center gap-2 mb-4 ${textMain}`}><TrendingUp size={18} style={{color: teal}}/> روند وزن</h3>
         {weightChartData.length < 2 ? (
-          <div className="text-center py-8 text-gray-500">
+          <div className="text-center py-8" style={{color: textSub}}>
             <Scale size={36} className="mx-auto mb-2 opacity-40" />
             <p className="text-sm">حداقل دو اندازه‌گیری لازم است.</p>
           </div>
@@ -213,83 +218,95 @@ export default function Progress() {
             <AreaChart data={weightChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="wg" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={isDark ? '#d4af37' : '#14b8a6'} stopOpacity={0.4} />
-                  <stop offset="100%" stopColor={isDark ? '#d4af37' : '#14b8a6'} stopOpacity={0} />
+                  <stop offset="0%" stopColor={teal} stopOpacity={0.4} />
+                  <stop offset="100%" stopColor={teal} stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#333' : '#e5e7eb'} />
-              <XAxis dataKey="date" stroke={isDark ? '#888' : '#6b7280'} fontSize={10} />
-              <YAxis stroke={isDark ? '#888' : '#6b7280'} fontSize={10} domain={['dataMin - 2', 'dataMax + 2']} />
-              <Tooltip contentStyle={{ background: isDark ? '#1a1a2e' : '#fff', border: 'none', borderRadius: 12, fontSize: 12 }} />
-              <Area type="monotone" dataKey="weight" stroke={isDark ? '#d4af37' : '#14b8a6'} strokeWidth={2.5} fill="url(#wg)" dot={{ r: 4, fill: isDark ? '#d4af37' : '#14b8a6' }} />
+              <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#334155' : '#e2e8f0'} vertical={false} />
+              <XAxis dataKey="date" stroke={textSub} fontSize={10} tickLine={false} axisLine={false} />
+              <YAxis stroke={textSub} fontSize={10} tickLine={false} axisLine={false} domain={['dataMin - 2', 'dataMax + 2']} />
+              <Tooltip contentStyle={{ background: cardBg, border: 'none', borderRadius: 12, fontSize: 12, boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+              <Area type="monotone" dataKey="weight" stroke={teal} strokeWidth={3} fill="url(#wg)" dot={{ r: 4, fill: teal, stroke: cardBg, strokeWidth: 2 }} />
             </AreaChart>
           </ResponsiveContainer>
         )}
       </div>
 
-      <div className={`rounded-2xl p-5 ${card}`}>
-        <h3 className={`font-bold flex items-center gap-2 mb-2 ${accent}`}><Ruler size={18} /> ارزیابی ابعاد بدن</h3>
-        {!hasRadarData ? (
-          <div className="text-center py-8 text-gray-500">
-            <Activity size={36} className="mx-auto mb-2 opacity-40" />
-            <p className="text-sm">اندازه‌گیری بدنی ثبت نشده.</p>
+      {/* Body Heatmap & Balance Section */}
+      <div className="grid md:grid-cols-2 gap-5">
+        {/* Body Heatmap */}
+        <div className={`rounded-2xl p-5 border ${borderCard} ${cardBg}`}>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className={`font-bold flex items-center gap-2 ${textMain}`}><Activity size={18} style={{color: gold}}/> نقشه حرارتی بدن</h3>
+            <Info size={14} className={textSub} />
           </div>
-        ) : (
-          <ResponsiveContainer width="100%" height={280}>
-            <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
-              <PolarGrid stroke={isDark ? '#333' : '#e5e7eb'} />
-              <PolarAngleAxis dataKey="subject" tick={{ fill: isDark ? '#aaa' : '#666', fontSize: 11 }} />
-              <PolarRadiusAxis angle={30} domain={[0, 'auto']} tick={{ fill: isDark ? '#666' : '#999', fontSize: 9 }} />
-              <Radar name="فعلی" dataKey="current" stroke="#14b8a6" fill="#14b8a6" fillOpacity={0.35} strokeWidth={2} />
-              {sortedProgress.length >= 2 && (
-                <Radar name="قبلی" dataKey="previous" stroke="#d4af37" fill="#d4af37" fillOpacity={0.15} strokeWidth={1.5} strokeDasharray="4 4" />
-              )}
-              <Tooltip contentStyle={{ background: isDark ? '#1a1a2e' : '#fff', border: 'none', borderRadius: 12, fontSize: 12 }} />
-            </RadarChart>
-          </ResponsiveContainer>
-        )}
-      </div>
-
-      <div className={`rounded-2xl p-5 ${card}`}>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className={`font-bold flex items-center gap-2 ${accent}`}><Dumbbell size={18} /> رکورد حرکات</h3>
-          <select value={currentExercise} onChange={e => setSelectedExercise(e.target.value)}
-            className={`rounded-xl px-3 py-1.5 text-xs font-bold border ${isDark ? 'bg-[#0d0d1a] text-white border-gray-700' : 'bg-gray-100 border-gray-200'}`}>
-            {availableExercises.map(ex => <option key={ex} value={ex}>{ex}</option>)}
-          </select>
+          <div className="relative h-64 flex items-center justify-center">
+            <svg viewBox="0 0 200 280" className="h-full w-auto drop-shadow-lg">
+              <path d="M 100 20 C 115 20 125 30 125 45 C 125 55 120 65 115 70 L 135 75 C 150 75 160 85 160 100 L 155 135 C 150 145 140 145 135 135 L 130 110 L 120 180 L 125 260 C 125 270 115 270 110 260 L 105 200 L 95 200 L 90 260 C 85 270 75 270 75 260 L 80 180 L 70 110 L 65 135 C 60 145 50 145 45 135 L 40 100 C 40 85 50 75 65 75 L 85 70 C 80 65 75 55 75 45 C 75 30 85 20 100 20 Z" 
+                fill={isDark ? '#334155' : '#e2e8f0'} opacity="0.3" />
+              {MUSCLE_GROUPS.map(m => {
+                const intensity = (muscleStats[m.id] / maxMuscleVol) || 0;
+                if (intensity === 0) return null;
+                return (
+                  <g key={m.id} className="transition-all duration-500 hover:opacity-80 cursor-pointer">
+                    <path d={m.path} fill={gold} opacity={0.3 + (intensity * 0.7)} stroke={gold} strokeWidth="1" />
+                    <title>{`${m.label}: ${toPersianNumber(muscleStats[m.id])} ست`}</title>
+                  </g>
+                );
+              })}
+            </svg>
+            <div className="absolute bottom-0 right-0 flex flex-col gap-1">
+              {MUSCLE_GROUPS.filter(m => muscleStats[m.id] > 0).slice(0, 4).map(m => (
+                <div key={m.id} className="flex items-center gap-2 text-[10px] font-bold bg-black/20 px-2 py-1 rounded-full backdrop-blur-sm">
+                  <div className="w-2 h-2 rounded-full" style={{background: gold}} />
+                  <span className={textMain}>{m.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-        {exerciseChartData.length === 0 ? (
-          <p className="text-center text-sm text-gray-500 py-6">سابقه‌ای ثبت نشده.</p>
-        ) : (
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={exerciseChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#333' : '#e5e7eb'} />
-              <XAxis dataKey="date" stroke={isDark ? '#888' : '#6b7280'} fontSize={10} />
-              <YAxis stroke={isDark ? '#888' : '#6b7280'} fontSize={10} unit=" kg" />
-              <Tooltip contentStyle={{ background: isDark ? '#1a1a2e' : '#fff', border: 'none', borderRadius: 12, fontSize: 12 }} />
-              <Bar dataKey="weight" fill={isDark ? '#d4af37' : '#14b8a6'} radius={[6, 6, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        )}
+
+        {/* Muscle Balance Radar Chart */}
+        <div className={`rounded-2xl p-5 border ${borderCard} ${cardBg}`}>
+          <h3 className={`font-bold flex items-center gap-2 mb-4 ${textMain}`}><Target size={18} style={{color: teal}}/> بالانس عضلانی</h3>
+          {balanceData.every(d => d.A === 0) ? (
+            <div className="text-center py-12" style={{color: textSub}}>
+              <Dumbbell size={36} className="mx-auto mb-2 opacity-40" />
+              <p className="text-sm">هنوز جلسه‌ای تکمیل نشده است.</p>
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height={260}>
+              <RadarChart cx="50%" cy="50%" outerRadius="75%" data={balanceData}>
+                <PolarGrid stroke={isDark ? '#334155' : '#e2e8f0'} />
+                <PolarAngleAxis dataKey="subject" tick={{ fill: textSub, fontSize: 11, fontWeight: 'bold' }} />
+                <PolarRadiusAxis angle={30} domain={[0, 'auto']} tick={false} axisLine={false} />
+                <Radar name="تمرین" dataKey="A" stroke={teal} fill={teal} fillOpacity={0.4} strokeWidth={2} />
+                <Tooltip contentStyle={{ background: cardBg, border: 'none', borderRadius: 12, fontSize: 12 }} />
+              </RadarChart>
+            </ResponsiveContainer>
+          )}
+        </div>
       </div>
 
-      <div className={`rounded-2xl p-5 ${card}`}>
-        <h3 className={`font-bold flex items-center gap-2 mb-4 ${accent}`}><BarChart3 size={18} /> آخرین اندازه‌گیری‌ها</h3>
+      {/* Recent Measurements List */}
+      <div className={`rounded-2xl p-5 border ${borderCard} ${cardBg}`}>
+        <h3 className={`font-bold flex items-center gap-2 mb-4 ${textMain}`}><BarChart3 size={18} style={{color: gold}}/> آخرین اندازه‌گیری‌ها</h3>
         {sortedProgress.length === 0 ? (
-          <p className="text-center text-sm text-gray-500 py-4">هنوز ثبت نشده.</p>
+          <p className="text-center text-sm py-4" style={{color: textSub}}>هنوز ثبت نشده.</p>
         ) : (
           <div className="space-y-2">
             {[...sortedProgress].reverse().slice(0, 6).map(entry => (
-              <div key={entry.id} className={`flex items-center justify-between p-3 rounded-xl ${isDark ? 'bg-[#0d0d1a]' : 'bg-[#f0fdfa]'}`}>
+              <div key={entry.id} className={`flex items-center justify-between p-3 rounded-xl transition-colors ${isDark ? 'bg-[#0f172a] hover:bg-[#1e293b]' : 'bg-[#f0fdfa] hover:bg-[#ccfbf1]'}`}>
                 <div className="flex items-center gap-3">
-                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${isDark ? 'bg-[#d4af37]/15 text-[#d4af37]' : 'bg-[#14b8a6]/15 text-[#0d9488]'}`}>
+                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center`} style={{ background: `${gold}15`, color: gold }}>
                     <Scale size={16} />
                   </div>
                   <div>
-                    <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>وزن: {toPersianNumber(entry.weight)} kg</p>
-                    <p className="text-[10px] text-gray-500">{formatDateJalali(entry.date)}</p>
+                    <p className={`font-bold text-sm ${textMain}`}>وزن: {toPersianNumber(entry.weight)} kg</p>
+                    <p className={`text-[10px] ${textSub}`}>{formatDateJalali(entry.date)}</p>
                   </div>
                 </div>
+                <ChevronRight size={16} className={textSub} />
               </div>
             ))}
           </div>

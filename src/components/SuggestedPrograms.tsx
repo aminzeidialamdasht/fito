@@ -2,6 +2,7 @@ import { Dumbbell, Brain, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { soundEffects } from '../utils/sound';
 import { DEFAULT_WORKOUT_PLAN } from '../data/defaultPlans';
+import { useAppContext } from '../context/AppContext';
 
 interface Props {
   isDark: boolean;
@@ -10,6 +11,42 @@ interface Props {
 
 export default function SuggestedPrograms({ isDark, isPremium }: Props) {
   const navigate = useNavigate();
+  const { state, programs, setActiveProgram, addProgram, activeProfile } = useAppContext();
+
+  const handleStartSample = () => {
+    soundEffects.playClick();
+    
+    // اطمینان از وجود پروفایل فعال
+    if (!activeProfile) {
+      alert('لطفاً ابتدا یک پروفایل بسازید.');
+      navigate('/profile');
+      return;
+    }
+
+    // بررسی اینکه آیا برنامه نمونه قبلاً برای این پروفایل اضافه شده یا نه
+    const existingSample = programs.find(p => 
+      p.id === DEFAULT_WORKOUT_PLAN.id && p.profileId === activeProfile.id
+    );
+
+    if (!existingSample) {
+      // ساخت کپی از برنامه نمونه با profileId صحیح
+      const sampleWithProfile = {
+        ...DEFAULT_WORKOUT_PLAN,
+        id: `${DEFAULT_WORKOUT_PLAN.id}_${activeProfile.id}`, // ID منحصر به فرد برای هر پروفایل
+        profileId: activeProfile.id,
+      };
+      addProgram(sampleWithProfile);
+      
+      // فعال کردن برنامه جدید
+      setActiveProgram(sampleWithProfile.id);
+    } else {
+      // اگر قبلاً وجود داشت، فقط فعالش کن
+      setActiveProgram(existingSample.id);
+    }
+
+    // هدایت به صفحه تمرین
+    navigate('/workout?day=0&autoStart=true');
+  };
 
   return (
     <div>
@@ -26,6 +63,7 @@ export default function SuggestedPrograms({ isDark, isPremium }: Props) {
         این برنامه‌ها برای همه باز است. برای برنامه اختصاصی با هوش مصنوعی، اشتراک تهیه کنید.
       </p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {/* Sample Program Card */}
         <div className={`rounded-2xl p-4 border ${
           isDark ? 'bg-[#1a1a2e] border-white/5' : 'bg-white border-teal-100 shadow-sm'
         }`}>
@@ -43,17 +81,18 @@ export default function SuggestedPrograms({ isDark, isPremium }: Props) {
                 سطح متوسط · {(DEFAULT_WORKOUT_PLAN as any).duration || '۴ هفته'} · ۳ روز در هفته
               </p>
               <button
-                onClick={() => { soundEffects.playClick(); navigate('/workout'); }}
-                className={`mt-2 text-xs font-bold px-3 py-1.5 rounded-lg ${
-                  isDark ? 'bg-[#d4af37]/20 text-[#d4af37]' : 'bg-teal-100 text-teal-700'
+                onClick={handleStartSample}
+                className={`mt-2 text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${
+                  isDark ? 'bg-[#d4af37]/20 text-[#d4af37] hover:bg-[#d4af37]/30' : 'bg-teal-100 text-teal-700 hover:bg-teal-200'
                 }`}
               >
-                شروع تمرین
+                شروع تمرین رایگان
               </button>
             </div>
           </div>
         </div>
 
+        {/* AI Program Card (Locked for non-premium) */}
         <div className={`rounded-2xl p-4 border relative overflow-hidden ${
           isDark ? 'bg-[#1a1a2e] border-[#d4af37]/20' : 'bg-white border-amber-200 shadow-sm'
         }`}>
@@ -79,11 +118,14 @@ export default function SuggestedPrograms({ isDark, isPremium }: Props) {
               </p>
               <button
                 onClick={() => { soundEffects.playClick(); navigate('/prompt'); }}
-                className={`mt-2 text-xs font-bold px-3 py-1.5 rounded-lg ${
-                  isDark ? 'bg-indigo-500/20 text-indigo-300' : 'bg-indigo-100 text-indigo-700'
+                disabled={!isPremium}
+                className={`mt-2 text-xs font-bold px-3 py-1.5 rounded-lg transition-all ${
+                  isPremium 
+                    ? (isDark ? 'bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30' : 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200')
+                    : 'bg-gray-500/20 text-gray-400 cursor-not-allowed opacity-60'
                 }`}
               >
-                {isPremium ? 'ساخت برنامه' : 'ارتقا و ساخت'}
+                {isPremium ? 'ساخت برنامه' : 'نیاز به اشتراک'}
               </button>
             </div>
           </div>

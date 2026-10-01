@@ -4,7 +4,7 @@ import { useAppContext } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { useActiveWorkout } from '../hooks/useActiveWorkout';
 import { v4 as uuidv4 } from 'uuid';
-import { Dumbbell, Check, Trophy, X, ChevronLeft, AlertTriangle, Minus, Plus } from 'lucide-react';
+import { Dumbbell, Check, X, Minus, Plus, Trophy, AlertTriangle, Play, ChevronLeft } from 'lucide-react';
 import { toPersianNumber } from '../utils/jalali';
 
 export default function WorkoutTracker() {
@@ -15,6 +15,7 @@ export default function WorkoutTracker() {
   const [searchParams] = useSearchParams();
 
   const { session, isActive, startSession, endSession, updateSession } = useActiveWorkout();
+  
   const activeProgram = programs.find(p => p.id === state.activeProgram) || programs[0];
 
   const getInitialDayIndex = () => {
@@ -35,8 +36,11 @@ export default function WorkoutTracker() {
   const selectedDay = activeProgram?.days[selectedDayIndex];
   const isCurrentDayActive = isActive && session?.dayId === String(selectedDayIndex);
 
-  const accent = isDark ? '#d4af37' : '#14b8a6';
-  const accentText = isDark ? 'text-[#d4af37]' : 'text-[#0d9488]';
+  const gold = isDark ? '#d4af37' : '#f59e0b';
+  const darkBg = isDark ? '#0f172a' : '#ffffff';
+  const cardBg = isDark ? '#1e293b' : '#f8fafc';
+  const textMain = isDark ? '#ffffff' : '#0f172a';
+  const textSub = isDark ? '#94a3b8' : '#64748b';
 
   useEffect(() => {
     if (isActive && selectedDay && (!(session as any)?.setsLog || (session as any).setsLog.length === 0)) {
@@ -119,7 +123,6 @@ export default function WorkoutTracker() {
 
   const completeWorkout = () => {
     if (!activeProfile || !activeProgram || !session) return;
-
     const setsLog = (session as any).setsLog || [];
     const completed = setsLog.filter((s: any) => s.completed);
     let totalVolume = 0;
@@ -151,7 +154,7 @@ export default function WorkoutTracker() {
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return toPersianNumber(String(mins).padStart(2, '0')) + ':' + toPersianNumber(String(secs).padStart(2, '0'));
+    return `${toPersianNumber(String(mins).padStart(2, '0'))}:${toPersianNumber(String(secs).padStart(2, '0'))}`;
   };
 
   const sets = (session as any)?.setsLog || [];
@@ -159,13 +162,28 @@ export default function WorkoutTracker() {
   const totalSets = sets.length || 1;
   const progressPct = Math.round((completedCount / totalSets) * 100);
 
+  const currentSetIndex = sets.findIndex((s: any) => !s.completed);
+  const currentSet = currentSetIndex !== -1 ? sets[currentSetIndex] : (sets.length > 0 ? sets[sets.length - 1] : null);
+  
+  if (!currentSet && isActive) {
+    return (
+      <div className={`flex flex-col items-center justify-center min-h-[80vh] ${textMain}`}>
+        <Dumbbell size={48} className="animate-bounce mb-4" style={{ color: gold }} />
+        <p>در حال آماده‌سازی تمرین...</p>
+      </div>
+    );
+  }
+
+  const currentExercise = currentSet?.exerciseName || '';
+  const totalSetsForExercise = sets.filter((s: any) => s.exerciseName === currentExercise).length;
+  const completedSetsForExercise = sets.filter((s: any) => s.exerciseName === currentExercise && s.completed).length;
+
   if (!activeProgram) {
     return (
       <div className="p-10 text-center space-y-4">
         <Dumbbell size={48} className="mx-auto opacity-40" />
         <p className="font-bold">برنامه‌ای یافت نشد</p>
-        <p className="text-sm text-gray-500">ابتدا یک برنامه تمرینی وارد کنید یا از برنامه‌های پیشنهادی استفاده کنید.</p>
-        <button onClick={() => navigate('/')} className={`px-6 py-3 rounded-xl font-bold text-black ${isDark ? 'bg-[#d4af37]' : 'bg-[#14b8a6]'}`}>
+        <button onClick={() => navigate('/')} className="px-6 py-3 rounded-xl font-bold text-white" style={{ background: gold }}>
           بازگشت به داشبورد
         </button>
       </div>
@@ -174,16 +192,13 @@ export default function WorkoutTracker() {
 
   if (showComplete) {
     return (
-      <div className={`flex flex-col items-center justify-center min-h-[80vh] ${isDark ? 'text-white' : 'text-gray-900'}`}>
-        <div className={`w-24 h-24 rounded-full flex items-center justify-center mb-6 ${isDark ? 'bg-[#d4af37]/15' : 'bg-[#14b8a6]/15'}`}>
-          <Trophy size={48} className={accentText} />
+      <div className={`flex flex-col items-center justify-center min-h-[80vh] ${textMain}`}>
+        <div className="w-24 h-24 rounded-full flex items-center justify-center mb-6" style={{ background: `${gold}20` }}>
+          <Trophy size={48} style={{ color: gold }} />
         </div>
         <h2 className="text-3xl font-black mb-2">جلسه عالی بود!</h2>
-        <p className={`mb-8 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>مدت زمان: {formatTime(workoutTime)}</p>
-        <button
-          onClick={() => navigate('/progress')}
-          className={`px-8 py-3.5 font-bold rounded-xl shadow-lg active:scale-95 transition-transform text-black ${isDark ? 'bg-[#d4af37]' : 'bg-[#14b8a6]'}`}
-        >
+        <p className={`mb-8 ${textSub}`}>مدت زمان: {formatTime(workoutTime)}</p>
+        <button onClick={() => navigate('/progress')} className="px-8 py-3.5 font-bold rounded-xl shadow-lg text-black" style={{ background: gold }}>
           مشاهده گزارش پیشرفت
         </button>
       </div>
@@ -193,270 +208,211 @@ export default function WorkoutTracker() {
   if (showCancelModal) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
-        <div className={`rounded-2xl p-6 max-w-sm w-full ${isDark ? 'bg-[#1a1a2e]' : 'bg-white'}`}>
-          <AlertTriangle className="text-[#ef4444] mx-auto mb-4" size={48} />
-          <h3 className={`font-bold text-xl text-center mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>لغو جلسه؟</h3>
-          <p className={`text-sm text-center mb-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-            آیا مطمئن هستید؟ اطلاعات ثبت‌شده ذخیره نخواهد شد.
-          </p>
+        <div className={`rounded-2xl p-6 max-w-sm w-full ${cardBg}`}>
+          <AlertTriangle className="text-red-500 mx-auto mb-4" size={48} />
+          <h3 className={`font-bold text-xl text-center mb-2 ${textMain}`}>لغو جلسه؟</h3>
+          <p className={`text-sm text-center mb-6 ${textSub}`}>آیا مطمئن هستید؟ اطلاعات ثبت‌شده ذخیره نخواهد شد.</p>
           <div className="flex gap-3">
-            <button onClick={() => setShowCancelModal(false)} className={`flex-1 py-3 rounded-xl font-bold ${isDark ? 'bg-gray-700 text-white' : 'bg-gray-200'}`}>
-              خیر
-            </button>
-            <button onClick={confirmCancel} className="flex-1 py-3 rounded-xl font-bold bg-[#ef4444] text-white">
-              بله، لغو کن
-            </button>
+            <button onClick={() => setShowCancelModal(false)} className={`flex-1 py-3 rounded-xl font-bold ${isDark ? 'bg-gray-700 text-white' : 'bg-gray-200'}`}>خیر</button>
+            <button onClick={confirmCancel} className="flex-1 py-3 rounded-xl font-bold bg-red-500 text-white">بله، لغو کن</button>
           </div>
         </div>
       </div>
     );
   }
 
-  if (!isActive) {
+  // NEW: Exercise List View (Before Starting Session)
+  if (!isActive && selectedDay) {
+    const exercises = selectedDay.exercises || [];
     return (
-      <div className={`space-y-5 min-h-screen ${isDark ? 'text-white' : 'text-gray-900'}`}>
-        <div className="flex items-center justify-between mb-2">
-          <button onClick={() => navigate(-1)} className={`p-2.5 rounded-full ${isDark ? 'bg-white/5' : 'bg-white shadow'}`}>
-            <ChevronLeft size={20} />
+      <div className={`min-h-screen pb-24 ${darkBg}`}>
+        {/* Header */}
+        <div className={`sticky top-0 z-10 px-4 py-3 flex items-center justify-between backdrop-blur-md ${isDark ? 'bg-[#0f172a]/90' : 'bg-white/90'}`}>
+          <button onClick={() => navigate(-1)} className={`p-2 rounded-full ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+            <ChevronLeft size={24} />
           </button>
-          <h2 className="text-xl font-black">انتخاب روز تمرین</h2>
+          <h2 className={`font-bold text-base ${textMain}`}>{selectedDay.day || selectedDay.weekday || `روز ${selectedDayIndex + 1}`}</h2>
           <div className="w-10" />
         </div>
-        <div className="grid gap-3">
-          {activeProgram.days.map((day: any, i: number) => (
-            <button
-              key={i}
-              onClick={() => { setSelectedDayIndex(i); navigate(`/workout?day=${i}`); }}
-              className={`p-4 rounded-2xl border text-right transition-all active:scale-[0.98] ${
-                i === selectedDayIndex
-                  ? (isDark ? 'border-[#d4af37] bg-[#d4af37]/10' : 'border-[#14b8a6] bg-[#14b8a6]/10')
-                  : isDark ? 'border-white/10 bg-[#1a1a2e]' : 'border-gray-200 bg-white'
-              }`}
-            >
-              <h3 className="font-bold text-lg">{day.day || day.weekday || `روز ${i + 1}`}</h3>
-              <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                {(day.muscleGroups || day.muscle_groups || []).join('، ')}
-              </p>
-            </button>
-          ))}
+
+        <div className="p-4 space-y-4">
+          {/* Day Info Card */}
+          <div className={`rounded-2xl p-5 border ${isDark ? 'border-white/5 bg-[#1e293b]' : 'border-teal-100 bg-white shadow-sm'}`}>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: `${gold}15` }}>
+                <Dumbbell size={24} style={{ color: gold }} />
+              </div>
+              <div>
+                <h3 className={`font-black text-lg ${textMain}`}>{selectedDay.day || selectedDay.weekday}</h3>
+                <p className={`text-xs ${textSub}`}>
+                  {(selectedDay.muscleGroups || selectedDay.muscle_groups || []).join(' · ')}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4 text-xs">
+              <span className={`font-bold ${textSub}`}>{toPersianNumber(exercises.length)} حرکت</span>
+              <span className={`font-bold ${textSub}`}>·</span>
+              <span className={`font-bold ${textSub}`}>
+                {toPersianNumber(exercises.reduce((sum: number, ex: any) => sum + (ex.sets || 1), 0))} ست
+              </span>
+            </div>
+          </div>
+
+          {/* Exercises List */}
+          <div className="space-y-3">
+            {exercises.map((ex: any, i: number) => (
+              <div key={i} className={`rounded-2xl p-4 border ${isDark ? 'border-white/5 bg-[#1e293b]' : 'border-gray-100 bg-white shadow-sm'}`}>
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <span className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black ${isDark ? 'bg-white/10 text-gray-300' : 'bg-gray-100 text-gray-600'}`}>
+                      {toPersianNumber(i + 1)}
+                    </span>
+                    <h4 className={`font-bold text-sm ${textMain}`}>{ex.name}</h4>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 text-xs pl-9">
+                  <span className={`font-bold px-2 py-0.5 rounded-full ${isDark ? 'bg-white/5 text-gray-400' : 'bg-gray-50 text-gray-500'}`}>
+                    {toPersianNumber(ex.sets || 1)} ست
+                  </span>
+                  <span className={`font-bold px-2 py-0.5 rounded-full ${isDark ? 'bg-white/5 text-gray-400' : 'bg-gray-50 text-gray-500'}`}>
+                    {toPersianNumber(ex.reps)} تکرار
+                  </span>
+                  {ex.rest && (
+                    <span className={`font-bold px-2 py-0.5 rounded-full ${isDark ? 'bg-amber-500/10 text-amber-400' : 'bg-amber-50 text-amber-600'}`}>
+                      استراحت {toPersianNumber(ex.rest)}ث
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Start Session Button */}
+          <button onClick={handleStartOrResume}
+            className="w-full py-4 rounded-2xl font-black text-lg flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 text-black mt-6"
+            style={{ background: gold }}>
+            <Play size={22} fill="currentColor" /> شروع جلسه تمرین
+          </button>
         </div>
-        <button
-          onClick={handleStartOrResume}
-          className={`w-full py-4 font-black rounded-2xl mt-4 text-lg shadow-lg active:scale-95 transition-transform text-black ${
-            isDark ? 'bg-[#d4af37]' : 'bg-[#14b8a6]'
-          }`}
-        >
-          شروع تمرین {selectedDay?.day || selectedDay?.weekday || ''}
-        </button>
       </div>
     );
   }
 
+  // Active Session View (Timer + Sets)
   return (
-    <div className={`min-h-screen pb-8 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-      <div className={`flex items-center justify-between mb-4 sticky top-0 z-10 py-3 -mx-4 px-4 backdrop-blur-xl ${
-        isDark ? 'bg-[#080808]/90' : 'bg-white/90'
-      }`}>
-        <button
-          onClick={() => setShowCancelModal(true)}
-          className={`p-2.5 rounded-full ${isDark ? 'bg-white/5 text-gray-400' : 'bg-gray-100 text-gray-600'}`}
-        >
-          <X size={22} />
-        </button>
+    <div className={`min-h-screen pb-24 ${darkBg}`}>
+      {/* Header */}
+      <div className={`sticky top-0 z-10 px-4 py-3 flex items-center justify-between backdrop-blur-md ${isDark ? 'bg-[#0f172a]/90' : 'bg-white/90'}`}>
+        <button onClick={() => setShowCancelModal(true)} className={`p-2 rounded-full ${isDark ? 'text-gray-400' : 'text-gray-600'}`}><X size={24} /></button>
         <div className="text-center">
-          <h2 className="font-bold text-base">{selectedDay?.day || selectedDay?.weekday}</h2>
-          <p className={`text-xs font-mono ${accentText}`}>{formatTime(workoutTime)}</p>
+          <h2 className={`font-bold text-base ${textMain}`}>{selectedDay?.day || selectedDay?.weekday}</h2>
+          <p className="text-xs font-mono" style={{ color: gold }}>{formatTime(workoutTime)}</p>
         </div>
-        <button
-          onClick={completeWorkout}
-          className={`px-4 py-2 text-sm font-bold rounded-xl shadow-md text-black ${isDark ? 'bg-[#d4af37]' : 'bg-[#14b8a6]'}`}
-        >
-          پایان
-        </button>
+        <button onClick={completeWorkout} className="px-4 py-2 text-sm font-bold rounded-xl text-black shadow-md" style={{ background: gold }}>پایان</button>
       </div>
 
-      <div className="mb-5">
-        <div className="flex justify-between text-[11px] font-bold mb-1.5">
-          <span className={isDark ? 'text-gray-400' : 'text-gray-500'}>
-            {toPersianNumber(completedCount)} از {toPersianNumber(totalSets)} ست تکمیل‌شده
-          </span>
-          <span className={accentText}>{toPersianNumber(progressPct)}٪</span>
+      {/* Progress Bar */}
+      <div className="px-4 mt-4">
+        <div className="flex justify-between text-xs font-bold mb-1.5">
+          <span className={textSub}>{toPersianNumber(completedCount)} از {toPersianNumber(totalSets)} ست تکمیل‌شده</span>
+          <span style={{ color: gold }}>{toPersianNumber(progressPct)}٪</span>
         </div>
         <div className={`h-2 rounded-full overflow-hidden ${isDark ? 'bg-white/10' : 'bg-gray-200'}`}>
-          <div
-            className={`h-full rounded-full transition-all duration-500 ${isDark ? 'bg-[#d4af37]' : 'bg-[#14b8a6]'}`}
-            style={{ width: `${progressPct}%` }}
-          />
+          <div className="h-full rounded-full transition-all duration-500" style={{ width: `${progressPct}%`, background: gold }} />
         </div>
       </div>
 
+      {/* Rest Timer Overlay */}
       {isResting && restTimer > 0 && (
-        <div className={`mb-6 rounded-3xl p-8 text-center border-2 ${
-          isDark
-            ? 'bg-[#d4af37]/10 border-[#d4af37]/40 shadow-xl shadow-[#d4af37]/10'
-            : 'bg-[#14b8a6]/10 border-[#14b8a6]/40 shadow-xl shadow-[#14b8a6]/10'
-        }`}>
-          <div className={`mx-auto w-36 h-36 rounded-full border-4 flex flex-col items-center justify-center mb-3 ${
-            isDark ? 'border-[#d4af37]' : 'border-[#14b8a6]'
-          }`}
-            style={{
-              background: isDark
-                ? `conic-gradient(#d4af37 ${(restTimer / 180) * 360}deg, transparent 0deg)`
-                : `conic-gradient(#14b8a6 ${(restTimer / 180) * 360}deg, transparent 0deg)`,
-            }}
-          >
-            <div className={`w-[7.5rem] h-[7.5rem] rounded-full flex flex-col items-center justify-center ${
-              isDark ? 'bg-[#0d0d1a]' : 'bg-white'
-            }`}>
-              <Dumbbell size={20} className={`mb-1 ${accentText}`} />
-              <p className={`font-black text-3xl tracking-wider ${accentText}`}>{formatTime(restTimer)}</p>
-              <p className="text-[10px] opacity-60 mt-0.5">استراحت</p>
+        <div className="fixed inset-0 z-20 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className={`w-72 rounded-3xl p-8 text-center border-2 shadow-2xl ${cardBg}`} style={{ borderColor: `${gold}60` }}>
+            <div className="mx-auto w-36 h-36 rounded-full border-4 flex flex-col items-center justify-center mb-4"
+              style={{ borderColor: gold, background: `conic-gradient(${gold} ${(restTimer / 180) * 360}deg, transparent 0deg)` }}>
+              <div className={`w-28 h-28 rounded-full flex flex-col items-center justify-center ${darkBg}`}>
+                <Dumbbell size={24} style={{ color: gold }} />
+                <p className="font-black text-4xl tracking-wider mt-1" style={{ color: gold }}>{formatTime(restTimer)}</p>
+                <p className="text-xs opacity-60 mt-1" style={{ color: gold }}>استراحت</p>
+              </div>
             </div>
+            <button onClick={() => setIsResting(false)} className={`text-xs px-6 py-2 rounded-full font-bold ${isDark ? 'bg-white/10 text-white' : 'bg-gray-100 text-gray-700'}`}>رد کردن استراحت</button>
           </div>
-          <button
-            onClick={() => setIsResting(false)}
-            className={`text-xs px-5 py-2 rounded-full font-bold ${
-              isDark ? 'bg-white/10 text-white' : 'bg-gray-100 text-gray-700'
-            }`}
-          >
-            رد کردن استراحت
-          </button>
         </div>
       )}
 
-      <div className="space-y-5">
-        {(selectedDay?.exercises || []).map((ex: any, ei: number) => {
-          const exerciseSets = sets.filter((s: any) => s.exerciseId === (ex.id || ex.name));
-          const doneSets = exerciseSets.filter((s: any) => s.completed).length;
-          return (
-            <div
-              key={ei}
-              className={`rounded-2xl p-5 border ${
-                isDark ? 'bg-[#1a1a2e] border-white/5' : 'bg-white border-gray-100 shadow-sm'
-              }`}
-            >
-              <div className="flex justify-between items-end mb-4 pb-3 border-b border-white/5">
-                <div>
-                  <h4 className={`font-black text-lg ${accentText}`}>{ex.name}</h4>
-                  <p className="text-xs opacity-50 mt-0.5">
-                    {toPersianNumber(ex.sets)} ست × {ex.reps}
-                    {ex.rest ? ` · استراحت ${toPersianNumber(ex.rest)}ث` : ''}
-                  </p>
+      {/* Main Content */}
+      <div className="flex flex-col items-center justify-center py-8 px-4">
+        <div className="relative w-56 h-56 rounded-full border-4 flex flex-col items-center justify-center mb-6 shadow-lg"
+          style={{ borderColor: gold, background: isDark ? '#1e293b' : '#fffbeb' }}>
+          <Dumbbell size={32} className="mb-2" style={{ color: gold }} />
+          <p className="font-black text-5xl tracking-widest" style={{ color: gold }}>{formatTime(workoutTime)}</p>
+          <p className="text-sm font-bold mt-2 opacity-80" style={{ color: gold }}>— استراحت —</p>
+        </div>
+
+        {/* Current Exercise Card */}
+        <div className={`w-full max-w-md rounded-2xl p-5 border shadow-sm ${cardBg}`} style={{ borderColor: `${gold}30` }}>
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <Dumbbell size={20} style={{ color: gold }} />
+            <h3 className={`text-xl font-black ${textMain}`}>{currentExercise}</h3>
+          </div>
+          
+          <div className="flex justify-center items-center gap-2 mb-6">
+            <span className={`text-sm font-bold ${textSub}`}>ست</span>
+            <span className={`text-lg font-black ${textMain}`}>{toPersianNumber(completedSetsForExercise + 1)}</span>
+            <span className={`text-sm font-bold ${textSub}`}>از</span>
+            <span className={`text-lg font-black ${textMain}`}>{toPersianNumber(totalSetsForExercise)}</span>
+            <Dumbbell size={18} style={{ color: gold }} />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            {/* Weight Input */}
+            <div className="flex flex-col items-center">
+              <label className={`text-xs font-bold mb-2 ${textSub}`}>وزن (کیلوگرم)</label>
+              <div className="flex items-center gap-2 w-full">
+                <button onClick={() => updateSet(currentSetIndex, 'weight', Math.max(0, Number(currentSet.weight || 0) - 2.5))}
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xl ${isDark ? 'bg-white/10' : 'bg-gray-100'}`} style={{ color: gold }}>−</button>
+                <div className="flex-1 relative">
+                  <input type="number" inputMode="decimal" placeholder="0"
+                    className={`w-full h-12 rounded-xl text-center text-xl font-black outline-none ${isDark ? 'bg-[#0f172a] text-white' : 'bg-white text-gray-900 border border-gray-200'}`}
+                    value={currentSet.weight === 0 ? '' : currentSet.weight}
+                    onChange={e => updateSet(currentSetIndex, 'weight', Number(e.target.value))} />
+                  <span className="absolute left-2 bottom-2 text-[10px] opacity-50">kg</span>
                 </div>
-                <span className={`text-xs font-bold px-2 py-1 rounded-lg ${
-                  doneSets === exerciseSets.length
-                    ? 'bg-green-500/20 text-green-400'
-                    : isDark ? 'bg-white/5 text-gray-400' : 'bg-gray-100 text-gray-500'
-                }`}>
-                  {toPersianNumber(doneSets)}/{toPersianNumber(exerciseSets.length)}
-                </span>
-              </div>
-
-              <div className="space-y-3">
-                {exerciseSets.map((set: any, si: number) => {
-                  const globalIndex = sets.indexOf(set);
-                  return (
-                    <div
-                      key={si}
-                      className={`flex items-center gap-2 p-3 rounded-xl transition-all ${
-                        set.completed
-                          ? (isDark ? 'bg-green-900/20 border border-green-500/30' : 'bg-green-50 border border-green-200')
-                          : (isDark ? 'bg-[#0d0d1a] border border-white/10' : 'bg-gray-50 border border-gray-200')
-                      }`}
-                    >
-                      <span className="text-xs font-bold w-5 opacity-40">#{toPersianNumber(set.setNumber)}</span>
-
-                      <div className="flex-1 flex items-center gap-1">
-                        <button
-                          type="button"
-                          onClick={() => updateSet(globalIndex, 'weight', Math.max(0, Number(set.weight || 0) - 2.5))}
-                          className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
-                            isDark ? 'bg-white/10 text-[#d4af37]' : 'bg-white border text-[#0d9488]'
-                          }`}
-                        >
-                          <Minus size={14} />
-                        </button>
-                        <div className="relative flex-1">
-                          <input
-                            type="number"
-                            inputMode="decimal"
-                            placeholder="وزن"
-                            className={`w-full rounded-lg py-2.5 text-center text-sm font-bold outline-none focus:ring-2 ${
-                              isDark
-                                ? 'bg-transparent text-white focus:ring-[#d4af37]/50'
-                                : 'bg-white text-gray-900 border border-gray-200 focus:ring-[#14b8a6]/50'
-                            }`}
-                            value={set.weight === 0 ? '' : set.weight}
-                            onChange={e => updateSet(globalIndex, 'weight', Number(e.target.value))}
-                          />
-                          <span className="absolute left-1.5 top-1/2 -translate-y-1/2 text-[9px] opacity-40">kg</span>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => updateSet(globalIndex, 'weight', Number(set.weight || 0) + 2.5)}
-                          className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
-                            isDark ? 'bg-white/10 text-[#d4af37]' : 'bg-white border text-[#0d9488]'
-                          }`}
-                        >
-                          <Plus size={14} />
-                        </button>
-                      </div>
-
-                      <span className="opacity-20 text-sm">×</span>
-
-                      <div className="flex-1 flex items-center gap-1">
-                        <button
-                          type="button"
-                          onClick={() => updateSet(globalIndex, 'actualReps', Math.max(0, Number(set.actualReps || 0) - 1))}
-                          className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
-                            isDark ? 'bg-white/10 text-[#d4af37]' : 'bg-white border text-[#0d9488]'
-                          }`}
-                        >
-                          <Minus size={14} />
-                        </button>
-                        <input
-                          type="number"
-                          inputMode="numeric"
-                          placeholder="تکرار"
-                          className={`w-full rounded-lg py-2.5 text-center text-sm font-bold outline-none focus:ring-2 ${
-                            isDark
-                              ? 'bg-transparent text-white focus:ring-[#d4af37]/50'
-                              : 'bg-white text-gray-900 border border-gray-200 focus:ring-[#14b8a6]/50'
-                          }`}
-                          value={set.actualReps === 0 ? '' : set.actualReps}
-                          onChange={e => updateSet(globalIndex, 'actualReps', Number(e.target.value))}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => updateSet(globalIndex, 'actualReps', Number(set.actualReps || 0) + 1)}
-                          className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
-                            isDark ? 'bg-white/10 text-[#d4af37]' : 'bg-white border text-[#0d9488]'
-                          }`}
-                        >
-                          <Plus size={14} />
-                        </button>
-                      </div>
-
-                      <button
-                        onClick={() => completeSet(globalIndex)}
-                        disabled={set.completed}
-                        className={`p-3 rounded-xl transition-all shrink-0 ${
-                          set.completed
-                            ? 'bg-green-500 text-white'
-                            : isDark
-                              ? 'bg-[#d4af37] text-black hover:brightness-110 shadow-md shadow-[#d4af37]/20'
-                              : 'bg-[#14b8a6] text-white hover:brightness-110 shadow-md'
-                        }`}
-                      >
-                        <Check size={20} strokeWidth={3} />
-                      </button>
-                    </div>
-                  );
-                })}
+                <button onClick={() => updateSet(currentSetIndex, 'weight', Number(currentSet.weight || 0) + 2.5)}
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xl ${isDark ? 'bg-white/10' : 'bg-gray-100'}`} style={{ color: gold }}>+</button>
               </div>
             </div>
-          );
-        })}
+
+            {/* Reps Input */}
+            <div className="flex flex-col items-center">
+              <label className={`text-xs font-bold mb-2 ${textSub}`}>تکرار</label>
+              <div className="flex items-center gap-2 w-full">
+                <button onClick={() => updateSet(currentSetIndex, 'actualReps', Math.max(0, Number(currentSet.actualReps || 0) - 1))}
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xl ${isDark ? 'bg-white/10' : 'bg-gray-100'}`} style={{ color: gold }}>−</button>
+                <div className="flex-1 relative">
+                  <input type="number" inputMode="numeric" placeholder="0"
+                    className={`w-full h-12 rounded-xl text-center text-xl font-black outline-none ${isDark ? 'bg-[#0f172a] text-white' : 'bg-white text-gray-900 border border-gray-200'}`}
+                    value={currentSet.actualReps === 0 ? '' : currentSet.actualReps}
+                    onChange={e => updateSet(currentSetIndex, 'actualReps', Number(e.target.value))} />
+                  <span className="absolute left-1 bottom-2 text-[10px] opacity-50">rep</span>
+                </div>
+                <button onClick={() => updateSet(currentSetIndex, 'actualReps', Number(currentSet.actualReps || 0) + 1)}
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xl ${isDark ? 'bg-white/10' : 'bg-gray-100'}`} style={{ color: gold }}>+</button>
+              </div>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <button onClick={() => completeSet(currentSetIndex)} disabled={currentSet.completed}
+            className={`w-full py-4 rounded-2xl font-black text-lg flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 text-black mb-3`}
+            style={{ background: currentSet.completed ? '#22c55e' : gold }}>
+            <Check size={24} strokeWidth={3} /> اتمام ست
+          </button>
+          
+          <button onClick={() => setShowCancelModal(true)}
+            className={`w-full py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${isDark ? 'bg-white/5 text-gray-400' : 'bg-gray-100 text-gray-600'}`}>
+            <X size={18} /> لغو ست
+          </button>
+        </div>
       </div>
     </div>
   );
