@@ -4,13 +4,6 @@ import { ChevronLeft, Play, Calendar as CalendarIcon, Info, ChevronDown, Dumbbel
 import { useAppContext } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { toPersianNumber } from '../utils/jalali';
-import { DEFAULT_WORKOUT_PLAN } from '../data/defaultWorkoutPlan';
-import type { WorkoutDay as BaseWorkoutDay } from '../types';
-
-// گسترش تایپ WorkoutDay برای پشتیبانی از totalSets
-interface ExtendedWorkoutDay extends BaseWorkoutDay {
-  totalSets?: number;
-}
 
 const getDayName = (date: Date) => {
   const days = ['یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه', 'شنبه'];
@@ -21,28 +14,22 @@ const WEEK_DAYS = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه'
 
 export default function Calendar() {
   const navigate = useNavigate();
-  // استفاده از activeProgramData به جای activeProgram
-  const { activeProgramData: activeProgram } = useAppContext();
+  // دریافت دیتای کاملاً نرمال‌شده از هسته هوشمند
+  const { activeProgramData } = useAppContext();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
   const [activeDay, setActiveDay] = useState<string | null>(null);
-
-  const currentProgram = activeProgram || DEFAULT_WORKOUT_PLAN;
   const todayName = getDayName(new Date());
 
-  const currentDayPlan = useMemo(() => {
-    if (!currentProgram?.days) return null;
-    return currentProgram.days.find((d: any) => d.day === todayName) as ExtendedWorkoutDay | undefined;
-  }, [currentProgram, todayName]);
+  // پیدا کردن روز جاری از دیتای استاندارد شده
+  const currentDayPlan = useMemo(() => 
+    activeProgramData?.days?.find((d: any) => d.day === todayName),
+    [activeProgramData, todayName]
+  );
 
-  const handleStartSession = () => {
-    navigate('/today-session');
-  };
-
-  const toggleDay = (dayName: string) => {
-    setActiveDay(prev => prev === dayName ? null : dayName);
-  };
+  const handleStartSession = () => navigate('/today-session');
+  const toggleDay = (dayName: string) => setActiveDay(prev => prev === dayName ? null : dayName);
 
   return (
     <div className={`min-h-screen pb-24 ${isDark ? 'bg-[#0f172a]' : 'bg-[#f8fafc]'}`}>
@@ -54,12 +41,9 @@ export default function Calendar() {
           </button>
           <div>
             <h1 className={`font-bold text-lg flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-              <CalendarIcon size={20} className="text-teal-500" />
-              تقویم تمرینی
+              <CalendarIcon size={20} className="text-teal-500" /> تقویم تمرینی
             </h1>
-            <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-              {currentProgram.name} {(!activeProgram) && '(پیش‌فرض)'}
-            </p>
+            <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{activeProgramData.name}</p>
           </div>
         </div>
       </div>
@@ -68,7 +52,6 @@ export default function Calendar() {
         {/* کارت روز جاری */}
         {currentDayPlan && currentDayPlan.exercises?.length > 0 ? (
           <div className={`rounded-2xl p-5 border shadow-sm relative overflow-hidden ${isDark ? 'bg-[#1e293b] border-teal-500/30' : 'bg-white border-teal-200'}`}>
-            <div className="absolute top-0 right-0 w-32 h-32 bg-teal-500/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none" />
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-4">
                 <div>
@@ -84,9 +67,7 @@ export default function Calendar() {
                 {currentDayPlan.exercises.map((ex: any, idx: number) => (
                   <div key={idx} className={`flex items-center justify-between p-3 rounded-xl ${isDark ? 'bg-white/5' : 'bg-gray-50'}`}>
                     <div className="flex items-center gap-3">
-                      <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${isDark ? 'bg-teal-500/20 text-teal-400' : 'bg-teal-100 text-teal-700'}`}>
-                        {idx + 1}
-                      </span>
+                      <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${isDark ? 'bg-teal-500/20 text-teal-400' : 'bg-teal-100 text-teal-700'}`}>{idx + 1}</span>
                       <span className={`text-sm font-bold ${isDark ? 'text-gray-200' : 'text-gray-800'}`}>{ex.name}</span>
                     </div>
                     <span className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{ex.sets} ست × {ex.reps}</span>
@@ -102,7 +83,7 @@ export default function Calendar() {
           </div>
         ) : (
           <div className={`rounded-2xl p-8 text-center border ${isDark ? 'bg-[#1e293b] border-white/5' : 'bg-white border-gray-200'}`}>
-            <p className="font-bold opacity-70">امروز ({todayName}) روز استراحت است </p>
+            <p className="font-bold opacity-70">امروز ({todayName}) روز استراحت است 🎉</p>
           </div>
         )}
 
@@ -111,52 +92,30 @@ export default function Calendar() {
           <h3 className={`font-bold text-sm px-1 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>برنامه هفتگی:</h3>
           
           {WEEK_DAYS.map((dayName, index) => {
-            const dayPlan = currentProgram?.days?.find((d: any) => d.day === dayName) as ExtendedWorkoutDay | undefined;
+            const dayPlan = activeProgramData?.days?.find((d: any) => d.day === dayName);
             const isToday = dayName === todayName;
             const isRest = !dayPlan || dayPlan.exercises?.length === 0;
             const isOpen = activeDay === dayName;
-
+            
             if (isToday) return null;
 
             return (
-              <div key={index} className={`rounded-xl border transition-all overflow-hidden ${
-                isRest 
-                  ? (isDark ? 'bg-[#1e293b]/50 border-white/5 opacity-60' : 'bg-gray-50 border-gray-100 opacity-60')
-                  : (isDark ? 'bg-[#1e293b] border-white/5' : 'bg-white border-gray-100')
-              }`}>
-                <button 
-                  onClick={() => !isRest && toggleDay(dayName)}
-                  disabled={isRest}
-                  className={`w-full flex items-center justify-between p-4 text-right ${isRest ? 'cursor-default' : 'cursor-pointer hover:bg-black/5 dark:hover:bg-white/5'}`}
-                >
+              <div key={index} className={`rounded-xl border transition-all overflow-hidden ${isRest ? (isDark ? 'bg-[#1e293b]/50 border-white/5 opacity-60' : 'bg-gray-50 border-gray-100 opacity-60') : (isDark ? 'bg-[#1e293b] border-white/5' : 'bg-white border-gray-100')}`}>
+                <button onClick={() => !isRest && toggleDay(dayName)} disabled={isRest} className={`w-full flex items-center justify-between p-4 text-right ${isRest ? 'cursor-default' : 'cursor-pointer hover:bg-black/5 dark:hover:bg-white/5'}`}>
                   <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xs font-black shrink-0 ${
-                      isRest
-                        ? (isDark ? 'bg-gray-800 text-gray-600' : 'bg-gray-200 text-gray-400')
-                        : (isOpen ? 'bg-teal-500 text-white' : (isDark ? 'bg-teal-500/20 text-teal-400' : 'bg-teal-50 text-teal-700'))
-                    }`}>
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xs font-black shrink-0 ${isRest ? (isDark ? 'bg-gray-800 text-gray-600' : 'bg-gray-200 text-gray-400') : (isOpen ? 'bg-teal-500 text-white' : (isDark ? 'bg-teal-500/20 text-teal-400' : 'bg-teal-50 text-teal-700'))}`}>
                       {isRest ? 'R' : ((index + 1) % 7) + 1} 
                     </div>
                     <div className="text-right">
                       <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>{dayName}</p>
-                      <p className={`text-[10px] ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
-                        {isRest ? 'استراحت' : `${dayPlan?.exercises?.length || 0} حرکت · ${dayPlan?.totalSets || 0} ست`}
-                      </p>
+                      <p className={`text-[10px] ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>{isRest ? 'استراحت' : `${dayPlan?.exercises?.length || 0} حرکت · ${dayPlan?.totalSets || 0} ست`}</p>
                     </div>
                   </div>
                   
                   {!isRest && (
                     <div className="flex items-center gap-2">
-                       <button 
-                        onClick={(e) => { e.stopPropagation(); handleStartSession(); }}
-                        className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-white/10 text-gray-400' : 'hover:bg-gray-100 text-gray-400'}`}
-                      >
-                        <Play size={16} fill="currentColor" />
-                      </button>
-                      <ChevronDown 
-                        size={20} 
-                        className={`transition-transform duration-300 ${isOpen ? 'rotate-180 text-teal-500' : 'text-gray-400'}`} 
-                      />
+                       <button onClick={(e) => { e.stopPropagation(); handleStartSession(); }} className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-white/10 text-gray-400' : 'hover:bg-gray-100 text-gray-400'}`}><Play size={16} fill="currentColor" /></button>
+                      <ChevronDown size={20} className={`transition-transform duration-300 ${isOpen ? 'rotate-180 text-teal-500' : 'text-gray-400'}`} />
                     </div>
                   )}
                 </button>

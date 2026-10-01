@@ -3,7 +3,6 @@ import { Play, ChevronLeft, Dumbbell } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { toPersianNumber } from '../utils/jalali';
-import { DEFAULT_WORKOUT_PLAN } from '../data/defaultWorkoutPlan';
 import { useMemo } from 'react';
 
 const getDayName = (date: Date) => {
@@ -13,17 +12,18 @@ const getDayName = (date: Date) => {
 
 export default function TodaySession() {
   const navigate = useNavigate();
-  const { activeProgramData: activeProgram } = useAppContext();
+  // دریافت دیتای کاملاً نرمال‌شده از هسته هوشمند
+  const { activeProgramData } = useAppContext();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
-  const currentProgram = activeProgram || DEFAULT_WORKOUT_PLAN;
   const todayName = getDayName(new Date());
 
-  const currentDayPlan = useMemo(() => {
-    if (!currentProgram?.days) return null;
-    return currentProgram.days.find((d: any) => d.day === todayName);
-  }, [currentProgram, todayName]);
+  // پیدا کردن برنامه روز جاری از دیتای استاندارد شده
+  const currentDayPlan = useMemo(() => 
+    activeProgramData?.days?.find((d: any) => d.day === todayName),
+    [activeProgramData, todayName]
+  );
 
   if (!currentDayPlan || currentDayPlan.exercises?.length === 0) {
     return (
@@ -44,7 +44,6 @@ export default function TodaySession() {
   };
 
   return (
-    // افزایش padding-bottom به 40 برای اطمینان از عدم پوشش توسط نوار پایین (h-16 + safe area)
     <div className={`min-h-screen pb-44 ${isDark ? 'bg-[#0f172a]' : 'bg-[#f8fafc]'}`}>
       {/* هدر */}
       <div className={`sticky top-0 z-40 backdrop-blur-md border-b px-4 py-4 flex items-center gap-3 ${isDark ? 'bg-[#0f172a]/90 border-white/10' : 'bg-white/90 border-gray-200'}`}>
@@ -94,8 +93,7 @@ export default function TodaySession() {
         </div>
       </div>
 
-      {/* دکمه شروع شناور - z-30 تا زیر نوار پایین (z-50) نرود اما دیده شود */}
-      {/* نکته: ما pb-40 داریم، پس این دکمه در فضای خالی پایین قرار می‌گیرد و نوار پایین روی آن نمی‌آید */}
+      {/* دکمه شروع شناور - تنظیم شده برای عدم پوشش توسط نوار پایین */}
       <div className={`fixed bottom-[70px] left-0 right-0 p-4 pt-2 border-t backdrop-blur-xl z-30 ${isDark ? 'bg-[#0f172a]/95 border-white/10' : 'bg-white/95 border-gray-200'}`}>
         <div className="max-w-2xl mx-auto">
           <button onClick={handleStart} className="w-full py-4 rounded-2xl font-black text-base text-white shadow-lg shadow-teal-500/20 active:scale-[0.98] transition-transform flex items-center justify-center gap-2" style={{ background: 'linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)' }}>

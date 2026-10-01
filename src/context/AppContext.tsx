@@ -3,12 +3,12 @@ import { AppState, AthleteProfile, WorkoutProgram, NutritionProgram, SupplementP
 import { loadState, saveState } from '../utils/storage';
 import { DEFAULT_WORKOUT_PLAN } from '../data/defaultWorkoutPlan';
 
-// ✅ ورژن اپلیکیشن - باید با تگ گیت هماهنگ باشد
-export const APP_VERSION = 'v1.4.5';
-
+export const APP_VERSION = 'v1.5.0';
 export interface WorkoutSession extends BaseWorkoutSession { name?: string; }
 
-// نگاشت کامل و انعطاف‌پذیر روزها (انگلیسی، فارسی، اعداد)
+// ==========================================
+// LAYER 1: SMART NORMALIZATION ENGINE
+// ==========================================
 const DAY_MAP: Record<string, string> = {
   'saturday': 'شنبه', 'sat': 'شنبه', '0': 'شنبه',
   'sunday': 'یکشنبه', 'sun': 'یکشنبه', '1': 'یکشنبه',
@@ -17,7 +17,6 @@ const DAY_MAP: Record<string, string> = {
   'wednesday': 'چهارشنبه', 'wed': 'چهارشنبه', '4': 'چهارشنبه',
   'thursday': 'پنجشنبه', 'thu': 'پنجشنبه', '5': 'پنجشنبه',
   'friday': 'جمعه', 'fri': 'جمعه', '6': 'جمعه',
-  // پشتیبانی از نام‌های فارسی موجود در دیتا
   'شنبه': 'شنبه', 'یکشنبه': 'یکشنبه', 'دوشنبه': 'دوشنبه', 
   'سه‌شنبه': 'سه‌شنبه', 'چهارشنبه': 'چهارشنبه', 'پنجشنبه': 'پنجشنبه', 'جمعه': 'جمعه'
 };
@@ -28,22 +27,18 @@ const normalizeDays = (days: any[]) => {
   return days.map((day, index) => {
     let persianDay = day.day;
     
-    // تلاش برای یافتن نام فارسی روز
+    // تطبیق هوشمند نام روزها (Case-insensitive + Fallback)
     if (day.day) {
       const lowerKey = String(day.day).toLowerCase().trim();
-      if (DAY_MAP[lowerKey]) {
-        persianDay = DAY_MAP[lowerKey];
-      } else if (DAY_MAP[day.day]) {
-        // اگر دقیقاً فارسی بود
-        persianDay = day.day;
-      }
-    } 
-    // فالبک: اگر فیلد day نداشت یا ناشناخته بود، از ایندکس استفاده کن
-    else if (index >= 0 && index < 7) {
+      if (DAY_MAP[lowerKey]) persianDay = DAY_MAP[lowerKey];
+      else if (DAY_MAP[day.day]) persianDay = day.day;
+    } else if (index >= 0 && index < 7) {
+       // فال‌بک بر اساس ایندکس اگر نام روز موجود نبود
        const fallbackDays = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
        persianDay = fallbackDays[index];
     }
 
+    // محاسبه خودکار totalSets در صورت فقدان
     const sets = day.exercises?.reduce((sum: number, ex: any) => sum + (Number(ex.sets) || 0), 0) || 0;
     
     return {
@@ -56,21 +51,19 @@ const normalizeDays = (days: any[]) => {
 };
 
 const normalizeProgram = (program: WorkoutProgram | null): WorkoutProgram => {
-  if (!program) return DEFAULT_WORKOUT_PLAN as unknown as WorkoutProgram;
-  if (!program.days || program.days.length === 0) return DEFAULT_WORKOUT_PLAN as unknown as WorkoutProgram;
-
-  const normalizedDays = normalizeDays(program.days as any);
-  
-  // لاگ دیباگ برای بررسی ساختار واقعی در کنسول
-  console.log(`[AppContext v${APP_VERSION}] Normalized Days:`, normalizedDays.map(d => ({ day: d.day, count: d.exercises?.length })));
-
-  return { ...program, days: normalizedDays };
+  if (!program || !program.days || program.days.length === 0) {
+    return DEFAULT_WORKOUT_PLAN as unknown as WorkoutProgram;
+  }
+  return { ...program, days: normalizeDays(program.days as any) };
 };
 
+// ==========================================
+// CORE CONTEXT DEFINITION
+// ==========================================
 interface AppContextType {
   state: AppState;
   appVersion: string;
-  activeProgramData: WorkoutProgram; 
+  activeProgramData: WorkoutProgram; // همیشه نرمال‌شده و آماده مصرف
   profiles: AthleteProfile[];
   activeProfile: AthleteProfile | null;
   setActiveProfile: (id: string | null) => void;
@@ -102,12 +95,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AppState>(loadState);
   useEffect(() => { saveState(state); }, [state]);
 
-  const activeProfile = useMemo(() => state.activeProfileId ? state.profiles.find(p => p.id === state.activeProfileId) || null : null, [state.profiles, state.activeProfileId]);
+  // ==========================================
+  // LAYER 2 & 3: PROFILE-AWARE REACTIVE STATE
+  // ==========================================
+  const activeProfile = useMemo(() => 
+    state.activeProfileId ? state.profiles.find(p => p.id === state.activeProfileId) || null : null, 
+    [state.profiles, state.activeProfileId]
+  );
 
   const activeProgramData = useMemo(() => {
+    // پیدا کردن برنامه فعال مخصوص پروفایل جاری
     let rawProgram: WorkoutProgram | null = null;
-    if (state.activeProgram) rawProgram = state.programs.find(p => p.id === state.activeProgram) || null;
-    return JSON.parse(JSON.stringify(normalizeProgram(rawProgram)));
+    if (state.activeProgram && state.activeProfileId) {
+      rawProgram = state.programs.find(p => p.id === state.activeProgram && p.profileId === state.activeProfileId) || null;
+    }
+    
+    // نرمال‌سازی + Deep Clone برای شکستن کش ری‌اکت و آپدیت آنی UI
+    const normalized = normalizeProgram(rawProgram);
+    return JSON.parse(JSON.stringify(normalized));
   }, [state.programs, state.activeProgram, state.activeProfileId]);
 
   const programs = useMemo(() => state.programs.filter(p => p.profileId === state.activeProfileId), [state.programs, state.activeProfileId]);
