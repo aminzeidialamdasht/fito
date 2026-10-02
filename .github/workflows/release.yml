@@ -32,10 +32,8 @@ jobs:
             CLEAN_VERSION="${TAG}"
           fi
 
-          # حذف v از ابتدای نسخه (v1.6.1 → 1.6.1)
           CLEAN_VERSION="${CLEAN_VERSION#v}"
 
-          # محاسبه versionCode از نسخه semantic (1.6.1 → 10601)
           IFS='.' read -r MAJOR MINOR PATCH <<< "$CLEAN_VERSION"
           MAJOR=${MAJOR:-0}
           MINOR=${MINOR:-0}
@@ -78,6 +76,8 @@ jobs:
         run: npm run build:${{ env.FLAVOR }}
 
       - name: Add Android Platform
+        env:
+          VITE_APP_FLAVOR: ${{ env.FLAVOR }}
         run: |
           rm -rf android
           npx cap add android
@@ -103,6 +103,8 @@ jobs:
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/release-key.jks"
 
       - name: Sync Capacitor
+        env:
+          VITE_APP_FLAVOR: ${{ env.FLAVOR }}
         run: npm run sync:${{ env.FLAVOR }}
 
       - name: Apply Launcher Icons
@@ -182,11 +184,7 @@ jobs:
             - **فروشگاه:** ${{ env.FLAVOR == 'myket' && 'مایکت' || env.FLAVOR == 'bazaar' && 'کافه‌بازار' || 'نسخه شخصی' }}
             - **نسخه:** ${{ env.CLEAN_VERSION }}
             - **VersionCode:** ${{ env.VERSION_CODE }}
-            - **App ID:** ${{ env.FLAVOR == 'personal' && 'com.amin.aifitness.personal' || 'com.aifitness.coach' }}
-
-            ### 🔧 اطلاعات فنی:
-            - حداقل Android: 7.0 (API 24)
-            - معماری: Universal
+            - **App ID:** ${{ env.FLAVOR == 'personal' && 'com.amin.aifitness.personal' || env.FLAVOR == 'myket' && 'com.coachino.myket' || 'com.aifitness.coach' }}
 
             ---
             **ساخته شده با ❤️ برای جامعه بدنسازی ایران**
