@@ -1,4 +1,4 @@
-package com.aifitness.coach
+package com.coachino.myket
 
 import com.getcapacitor.JSArray
 import com.getcapacitor.JSObject
@@ -28,7 +28,6 @@ class MyketBillingPlugin : Plugin() {
 
     @PluginMethod
     fun isAvailable(call: PluginCall) {
-        // شناسه پکیج مایکت روی دستگاه
         val installed = try {
             context.packageManager.getPackageInfo("ir.mservices.market", 0)
             true
@@ -40,8 +39,6 @@ class MyketBillingPlugin : Plugin() {
 
     @PluginMethod
     fun getActiveSubscriptions(call: PluginCall) {
-        // TODO: پیاده‌سازی کامل با SDK مایکت
-        // فعلاً آرایه خالی برمی‌گردانیم
         val arr = JSArray()
         call.resolve(JSObject().put("skus", arr))
     }
@@ -49,7 +46,6 @@ class MyketBillingPlugin : Plugin() {
     @PluginMethod
     fun subscribe(call: PluginCall) {
         val sku = call.getString("sku") ?: return call.reject("SKU_REQUIRED")
-        // TODO: پیاده‌سازی کامل با SDK مایکت
         call.reject("MYKET_NOT_IMPLEMENTED_YET")
     }
 }

@@ -13,7 +13,7 @@ const APP_CONFIG: Record<string, { appId: string; appName: string }> = {
     appName: 'Coachino',
   },
   myket: {
-    appId: 'com.aifitness.coach',
+    appId: 'com.coachino.myket',
     appName: 'Coachino',
   },
 };

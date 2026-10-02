@@ -11,7 +11,10 @@ import os, re, pathlib, shutil
 
 root = pathlib.Path(__file__).resolve().parent.parent
 android = root / "android"
-pkg_dir = android / "app/src/main/java/com/aifitness/coach"
+
+# ⚠️ appId مایکت: com.coachino.myket
+PKG_PATH = "com/coachino/myket"
+pkg_dir = android / "app/src/main/java" / PKG_PATH
 
 # 1) root build.gradle: kotlin plugin
 p = android / "build.gradle"
@@ -61,8 +64,13 @@ android {
 p.write_text(s)
 
 # 3) plugin + MainActivity registration
+# پکیج پلاگین هم باید با appId جدید هماهنگ باشد
+plugin_content = (root / "android-billing/MyketBillingPlugin.kt").read_text()
+plugin_content = plugin_content.replace("package com.aifitness.coach", "package com.coachino.myket")
 shutil.copy(root / "android-billing/MyketBillingPlugin.kt", pkg_dir / "MyketBillingPlugin.kt")
-(pkg_dir / "MainActivity.java").write_text("""package com.aifitness.coach;
+(pkg_dir / "MyketBillingPlugin.kt").write_text(plugin_content)
+
+(pkg_dir / "MainActivity.java").write_text("""package com.coachino.myket;
 
 import android.os.Bundle;
 import com.getcapacitor.BridgeActivity;
