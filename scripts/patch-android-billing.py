@@ -11,7 +11,11 @@ import os, re, pathlib, shutil
 
 root = pathlib.Path(__file__).resolve().parent.parent
 android = root / "android"
-pkg_dir = android / "app/src/main/java/com/aifitness/coach"
+PKG_PATH = "com/aifitness/coach"
+pkg_dir = android / "app/src/main/java" / PKG_PATH
+
+# اطمینان از وجود پوشه پکیج
+pkg_dir.mkdir(parents=True, exist_ok=True)
 
 # 1) root build.gradle: kotlin plugin + jitpack
 p = android / "build.gradle"
@@ -31,7 +35,7 @@ if "kotlin-android" not in s:
 if "Poolakey" not in s:
     s = s.replace("dependencies {",
                   "dependencies {\n    implementation 'com.github.cafebazaar.Poolakey:poolakey:2.2.0'", 1)
-# versionCode / versionName (کافه بازار هر آپلود جدید را با versionCode بزرگ‌تر می‌خواهد)
+# versionCode / versionName
 vc = os.environ.get("VERSION_CODE", "").strip()
 vn = os.environ.get("VERSION_NAME", "").strip()
 if vc.isdigit():
@@ -39,7 +43,7 @@ if vc.isdigit():
 if vn:
     s = re.sub(r'versionName\s+"[^"]*"', 'versionName "' + vn + '"', s)
 
-# امضای release با keystore (مقادیر از متغیر محیطی موقع بیلد خوانده می‌شود، نه ذخیره در فایل)
+# امضای release با keystore
 if "signingConfigs" not in s:
     s += """
 
