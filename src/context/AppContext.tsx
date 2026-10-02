@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import { AppState, AthleteProfile, WorkoutProgram, NutritionProgram, SupplementProgram, WorkoutSession as BaseWorkoutSession, ProgressEntry, WorkoutDay } from '../types';
 import { loadState, saveState } from '../utils/storage';
 
-export const APP_VERSION = 'v1.5.5';
+export const APP_VERSION = 'v1.6.0';
 export interface WorkoutSession extends BaseWorkoutSession { name?: string; }
 
 // ✅ تایپ محلی برای حفظ totalSets پس از نرمال‌سازی
