@@ -1,5 +1,5 @@
 import { Sparkles, ArrowLeft } from 'lucide-react';
-import { APP_VERSION } from '../context/AppContext';
+import { APP_VERSION } from '../version';
 import { useTheme } from '../context/ThemeContext';
 
 interface WelcomeProps { onContinue: () => void; }

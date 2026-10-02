@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { getPersianDate } from '../utils/jalali';
-import { APP_VERSION } from '../context/AppContext';
+import { APP_VERSION } from '../version';
 import { useTheme } from '../context/ThemeContext';
 
 const sidebarItems = [

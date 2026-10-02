@@ -19,22 +19,38 @@ jobs:
         run: |
           TAG=${GITHUB_REF#refs/tags/}
           if [[ "$TAG" == *"-myket" ]]; then
-            echo "FLAVOR=myket" >> $GITHUB_ENV
-            echo "APP_NAME=Coachino" >> $GITHUB_ENV
-            echo "APK_PREFIX=کوچینو (Coachino)-Myket" >> $GITHUB_ENV
-            echo "CLEAN_VERSION=${TAG%-myket}" >> $GITHUB_ENV
+            FLAVOR="myket"
+            APK_PREFIX="کوچینو (Coachino)-Myket"
+            CLEAN_VERSION="${TAG%-myket}"
           elif [[ "$TAG" == *"-bazaar" ]]; then
-            echo "FLAVOR=bazaar" >> $GITHUB_ENV
-            echo "APP_NAME=Coachino" >> $GITHUB_ENV
-            echo "APK_PREFIX=کوچینو (Coachino)-Bazaar" >> $GITHUB_ENV
-            echo "CLEAN_VERSION=${TAG%-bazaar}" >> $GITHUB_ENV
+            FLAVOR="bazaar"
+            APK_PREFIX="کوچینو (Coachino)-Bazaar"
+            CLEAN_VERSION="${TAG%-bazaar}"
           else
-            echo "FLAVOR=personal" >> $GITHUB_ENV
-            echo "APP_NAME=AI Fitness Personal" >> $GITHUB_ENV
-            echo "APK_PREFIX=AI-Fitness-Personal" >> $GITHUB_ENV
-            echo "CLEAN_VERSION=${TAG}" >> $GITHUB_ENV
+            FLAVOR="personal"
+            APK_PREFIX="AI-Fitness-Personal"
+            CLEAN_VERSION="${TAG}"
           fi
-          echo "✅ Flavor: $FLAVOR / Version: $CLEAN_VERSION"
+
+          # حذف v از ابتدای نسخه (v1.6.1 → 1.6.1)
+          CLEAN_VERSION="${CLEAN_VERSION#v}"
+
+          # محاسبه versionCode از نسخه semantic (1.6.1 → 10601)
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CLEAN_VERSION"
+          MAJOR=${MAJOR:-0}
+          MINOR=${MINOR:-0}
+          PATCH=${PATCH:-0}
+          VERSION_CODE=$((MAJOR * 10000 + MINOR * 100 + PATCH))
+
+          echo "FLAVOR=$FLAVOR" >> $GITHUB_ENV
+          echo "APP_NAME=Coachino" >> $GITHUB_ENV
+          echo "APK_PREFIX=$APK_PREFIX" >> $GITHUB_ENV
+          echo "CLEAN_VERSION=$CLEAN_VERSION" >> $GITHUB_ENV
+          echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
+
+          echo "✅ Flavor: $FLAVOR"
+          echo "✅ Version: $CLEAN_VERSION"
+          echo "✅ VersionCode: $VERSION_CODE"
 
       - name: Setup Node.js 24
         uses: actions/setup-node@v4
@@ -70,7 +86,7 @@ jobs:
         if: env.FLAVOR == 'bazaar'
         env:
           BAZAAR_RSA_KEY: ${{ secrets.BAZAAR_RSA_KEY }}
-          VERSION_CODE: ${{ github.run_number }}
+          VERSION_CODE: ${{ env.VERSION_CODE }}
           VERSION_NAME: ${{ env.CLEAN_VERSION }}
         run: python3 scripts/patch-android-billing.py
 
@@ -78,7 +94,7 @@ jobs:
         if: env.FLAVOR == 'myket'
         env:
           MYKET_RSA_KEY: ${{ secrets.MYKET_RSA_KEY }}
-          VERSION_CODE: ${{ github.run_number }}
+          VERSION_CODE: ${{ env.VERSION_CODE }}
           VERSION_NAME: ${{ env.CLEAN_VERSION }}
         run: python3 scripts/patch-android-billing-myket.py
 
@@ -152,6 +168,7 @@ jobs:
         run: |
           mkdir -p release
           cp "$APK_PATH" "release/${{ env.APK_PREFIX }}-v${{ env.CLEAN_VERSION }}.apk"
+          ls -la release/
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
@@ -163,7 +180,13 @@ jobs:
 
             ### 📱 اطلاعات بیلد:
             - **فروشگاه:** ${{ env.FLAVOR == 'myket' && 'مایکت' || env.FLAVOR == 'bazaar' && 'کافه‌بازار' || 'نسخه شخصی' }}
+            - **نسخه:** ${{ env.CLEAN_VERSION }}
+            - **VersionCode:** ${{ env.VERSION_CODE }}
             - **App ID:** ${{ env.FLAVOR == 'personal' && 'com.amin.aifitness.personal' || 'com.aifitness.coach' }}
+
+            ### 🔧 اطلاعات فنی:
+            - حداقل Android: 7.0 (API 24)
+            - معماری: Universal
 
             ---
             **ساخته شده با ❤️ برای جامعه بدنسازی ایران**
@@ -171,3 +194,12 @@ jobs:
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Summary
+        if: always()
+        run: |
+          echo "## 🎉 Release Build Complete!" >> $GITHUB_STEP_SUMMARY
+          echo "- **Flavor:** ${{ env.FLAVOR }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version:** ${{ env.CLEAN_VERSION }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **VersionCode:** ${{ env.VERSION_CODE }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **APK:** ${{ env.APK_PREFIX }}-v${{ env.CLEAN_VERSION }}.apk" >> $GITHUB_STEP_SUMMARY

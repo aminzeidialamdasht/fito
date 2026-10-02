@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Lock, Crown, Check } from 'lucide-react';
 import { useSubscription } from './SubscriptionContext';
 import { useTheme } from '../context/ThemeContext';
+import { STORE_NAME } from './billing';
 
 /** صفحه‌هایی که ورود/خروج پرامپت دارند را پشت اشتراک قفل می‌کند. */
 export default function PremiumGate({ children, title }: { children: React.ReactNode; title: string }) {
@@ -21,7 +22,7 @@ export default function PremiumGate({ children, title }: { children: React.React
     setMsg('');
     const ok = await buy();
     setBusy(false);
-    if (!ok) setMsg('خرید انجام نشد. مطمئن شوید کافه بازار نصب و وارد حساب شده است.');
+    if (!ok) setMsg(`خرید انجام نشد. مطمئن شوید ${STORE_NAME} نصب و وارد حساب شده است.`);
   };
 
   const onRestore = async () => {
