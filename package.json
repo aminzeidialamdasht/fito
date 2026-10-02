@@ -8,10 +8,13 @@
     "typecheck": "tsc --noEmit",
     "build:personal": "cross-env VITE_APP_FLAVOR=personal vite build",
     "build:bazaar": "cross-env VITE_APP_FLAVOR=bazaar vite build",
+    "build:myket": "cross-env VITE_APP_FLAVOR=myket vite build",
     "sync:personal": "cross-env VITE_APP_FLAVOR=personal npx cap sync android",
     "sync:bazaar": "cross-env VITE_APP_FLAVOR=bazaar npx cap sync android",
+    "sync:myket": "cross-env VITE_APP_FLAVOR=myket npx cap sync android",
     "android:personal": "npm run build:personal && npm run sync:personal && npx cap open android",
-    "android:bazaar": "npm run build:bazaar && npm run sync:bazaar && npx cap open android"
+    "android:bazaar": "npm run build:bazaar && npm run sync:bazaar && npx cap open android",
+    "android:myket": "npm run build:myket && npm run sync:myket && npx cap open android"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.2",

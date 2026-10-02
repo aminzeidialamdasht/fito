@@ -11,7 +11,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useSubscription } from '../subscription/SubscriptionContext';
 
-const isBazaarBuild = import.meta.env.VITE_APP_FLAVOR === 'bazaar';
+const isStoreBuild = ['bazaar', 'myket'].includes(import.meta.env.VITE_APP_FLAVOR || '');
 
 export default function Dashboard() {
   const { state, activeProfile, sessions, programs, profiles, setActiveProfile } = useAppContext();
@@ -102,7 +102,7 @@ export default function Dashboard() {
   return (
     <div className={`min-h-screen pb-24 space-y-5 ${bgMain}`}>
       {/* بنر اشتراک — فقط نسخه بازار و کاربر غیرمشترک */}
-      {isBazaarBuild && !isPremium && (
+      {isStoreBuild && !isPremium && (
         <div
           className={`rounded-2xl p-4 border relative overflow-hidden ${
             isDark

@@ -2,10 +2,20 @@ name: Build Coachino APK
 
 on:
   push:
-    branches: [ main, master, develop, 'feature/**' ]
+    branches: [ main, master, develop, 'feature/**', 'myket' ]
   pull_request:
     branches: [ main, master ]
   workflow_dispatch:
+    inputs:
+      flavor:
+        description: 'Build flavor'
+        required: true
+        default: 'bazaar'
+        type: choice
+        options:
+          - bazaar
+          - myket
+          - personal
 
 env:
   APP_NAME: Coachino
@@ -17,6 +27,20 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+
+      - name: Determine Flavor
+        id: flavor
+        run: |
+          # اگر workflow_dispatch بود، از ورودی استفاده کن
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            FLAVOR="${{ github.event.inputs.flavor }}"
+          elif [ "${{ github.ref_name }}" = "myket" ]; then
+            FLAVOR="myket"
+          else
+            FLAVOR="bazaar"
+          fi
+          echo "FLAVOR=$FLAVOR" >> $GITHUB_ENV
+          echo "✅ Flavor: $FLAVOR"
 
       - name: Setup Node.js 24
         uses: actions/setup-node@v4
@@ -44,28 +68,32 @@ jobs:
         run: npm run typecheck
 
       - name: Build Web Application
-        run: npm run build
+        run: npm run build:${{ env.FLAVOR }}
 
       - name: Add Android Platform
         run: |
           rm -rf android
           npx cap add android
 
-      - name: Patch Cafe Bazaar billing
+      - name: Patch Bazaar billing
+        if: env.FLAVOR == 'bazaar'
         env:
           BAZAAR_RSA_KEY: ${{ secrets.BAZAAR_RSA_KEY }}
-        run: |
-          python3 scripts/patch-android-billing.py
+        run: python3 scripts/patch-android-billing.py
+
+      - name: Patch Myket billing
+        if: env.FLAVOR == 'myket'
+        env:
+          MYKET_RSA_KEY: MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCbnTpfFZryXfIBZxfCK6o/W5HcS1rzbPf6Byjx0Tr10sktsjjsr+H6G6y3PFC9Rh2A56ni76KVyUttt+7lH6FjtLZZ0FXVkSa/x2JkNUWKuyLPBZqr9xzZxiQgSLDUdopSF5vQMMkT+0Iocm5Dv4rxblv6atbINVf60FJ8SXTUbQIDAQAB
+        run: python3 scripts/patch-android-billing-myket.py
 
       - name: Sync Capacitor
         run: npx cap sync android
 
       - name: Apply Coachino launcher icons
         run: |
-          # Capacitor regenerates android/; copy adaptive icons from native-assets
           RES=android/app/src/main/res
           mkdir -p "$RES/drawable" "$RES/mipmap-anydpi-v26" "$RES/values"
-          # Avoid Duplicate resources: Capacitor ships values/ic_launcher_background.xml
           rm -f "$RES/values/ic_launcher_background.xml"
           for D in mdpi hdpi xhdpi xxhdpi xxxhdpi; do mkdir -p "$RES/drawable-$D"; cp -f native-assets/android/drawable-$D/* "$RES/drawable-$D/"; done
           for D in mdpi hdpi xhdpi xxhdpi xxxhdpi; do mkdir -p "$RES/mipmap-$D"; cp -f native-assets/android/mipmap-$D/* "$RES/mipmap-$D/"; done
@@ -82,19 +110,19 @@ jobs:
         run: |
           cd android
           ./gradlew assembleDebug --no-daemon --stacktrace
-          cp app/build/outputs/apk/debug/app-debug.apk "app/build/outputs/apk/debug/کوچینو (Coachino).apk"
+          cp app/build/outputs/apk/debug/app-debug.apk "app/build/outputs/apk/debug/کوچینو (Coachino)-${{ env.FLAVOR }}.apk"
 
       - name: Upload Coachino APK
         uses: actions/upload-artifact@v4
         with:
-          name: کوچینو (Coachino)-Debug
-          path: android/app/build/outputs/apk/debug/کوچینو (Coachino).apk
+          name: کوچینو (Coachino)-${{ env.FLAVOR }}-Debug
+          path: android/app/build/outputs/apk/debug/کوچینو (Coachino)-${{ env.FLAVOR }}.apk
           retention-days: 30
 
       - name: Build Summary
         if: always()
         run: |
-          echo "## کوچینو (Coachino) — Debug Build" >> $GITHUB_STEP_SUMMARY
+          echo "## کوچینو (Coachino) — ${{ env.FLAVOR }} Debug Build" >> $GITHUB_STEP_SUMMARY
           echo "- Branch: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Flavor: ${{ env.FLAVOR }}" >> $GITHUB_STEP_SUMMARY
           echo "- Commit: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
-          echo "- APK: کوچینو (Coachino).apk" >> $GITHUB_STEP_SUMMARY

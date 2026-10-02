@@ -18,16 +18,23 @@ jobs:
         id: flavor
         run: |
           TAG=${GITHUB_REF#refs/tags/}
-          if [[ "$TAG" == *"-bazaar" ]]; then
+          if [[ "$TAG" == *"-myket" ]]; then
+            echo "FLAVOR=myket" >> $GITHUB_ENV
+            echo "APP_NAME=Coachino" >> $GITHUB_ENV
+            echo "APK_PREFIX=کوچینو (Coachino)-Myket" >> $GITHUB_ENV
+            echo "CLEAN_VERSION=${TAG%-myket}" >> $GITHUB_ENV
+          elif [[ "$TAG" == *"-bazaar" ]]; then
             echo "FLAVOR=bazaar" >> $GITHUB_ENV
             echo "APP_NAME=Coachino" >> $GITHUB_ENV
-            echo "APK_PREFIX=کوچینو (Coachino)" >> $GITHUB_ENV
+            echo "APK_PREFIX=کوچینو (Coachino)-Bazaar" >> $GITHUB_ENV
+            echo "CLEAN_VERSION=${TAG%-bazaar}" >> $GITHUB_ENV
           else
             echo "FLAVOR=personal" >> $GITHUB_ENV
             echo "APP_NAME=AI Fitness Personal" >> $GITHUB_ENV
             echo "APK_PREFIX=AI-Fitness-Personal" >> $GITHUB_ENV
+            echo "CLEAN_VERSION=${TAG}" >> $GITHUB_ENV
           fi
-          echo "✅ Build Flavor determined: $FLAVOR"
+          echo "✅ Flavor: $FLAVOR / Version: $CLEAN_VERSION"
 
       - name: Setup Node.js 24
         uses: actions/setup-node@v4
@@ -47,44 +54,40 @@ jobs:
           echo "ANDROID_SDK_ROOT=$ANDROID_HOME" >> $GITHUB_ENV
           yes | sdkmanager --licenses > /dev/null 2>&1 || true
           sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0" 2>/dev/null || true
-          echo "✅ Android SDK configured"
 
       - name: Install Dependencies
-        run: |
-          npm ci
-          echo "✅ Dependencies installed"
+        run: npm ci
 
       - name: Build Web Application
-        run: |
-          npm run build:${{ env.FLAVOR }}
-          echo "✅ Web app built for ${{ env.FLAVOR }}"
+        run: npm run build:${{ env.FLAVOR }}
 
       - name: Add Android Platform
         run: |
           rm -rf android
           npx cap add android
-          echo "✅ Android platform added"
 
-      - name: Patch Cafe Bazaar billing (Only for Bazaar)
+      - name: Patch Bazaar billing
         if: env.FLAVOR == 'bazaar'
         env:
           BAZAAR_RSA_KEY: ${{ secrets.BAZAAR_RSA_KEY }}
           VERSION_CODE: ${{ github.run_number }}
-        run: |
-          TAG=${GITHUB_REF#refs/tags/}
-          CLEAN_VERSION=${TAG%-bazaar}
-          export VERSION_NAME="$CLEAN_VERSION"
-          python3 scripts/patch-android-billing.py
-          echo "✅ Bazaar billing patched"
+          VERSION_NAME: ${{ env.CLEAN_VERSION }}
+        run: python3 scripts/patch-android-billing.py
+
+      - name: Patch Myket billing
+        if: env.FLAVOR == 'myket'
+        env:
+          MYKET_RSA_KEY: ${{ secrets.MYKET_RSA_KEY }}
+          VERSION_CODE: ${{ github.run_number }}
+          VERSION_NAME: ${{ env.CLEAN_VERSION }}
+        run: python3 scripts/patch-android-billing-myket.py
 
       - name: Decode signing keystore
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/release-key.jks"
 
       - name: Sync Capacitor
-        run: |
-          npm run sync:${{ env.FLAVOR }}
-          echo "✅ Capacitor synced for ${{ env.FLAVOR }}"
+        run: npm run sync:${{ env.FLAVOR }}
 
       - name: Apply Launcher Icons
         run: |
@@ -95,24 +98,18 @@ jobs:
           for D in mdpi hdpi xhdpi xxhdpi xxxhdpi; do mkdir -p "$RES/mipmap-$D"; cp -f native-assets/android/mipmap-$D/* "$RES/mipmap-$D/"; done
           cp -f native-assets/android/mipmap-anydpi-v26/* "$RES/mipmap-anydpi-v26/"
           cp -f native-assets/android/values/ic_launcher_colors.xml "$RES/values/"
-          echo "✅ Launcher icons applied"
 
       - name: Update Gradle Wrapper
         run: |
           cd android
           sed -i 's|gradle-[0-9.]*-bin.zip|gradle-8.13-bin.zip|g' gradle/wrapper/gradle-wrapper.properties
-          echo "✅ Gradle wrapper updated"
 
-      # ==========================================================
-      # ✅ مرحله جدید و حیاتی: تزریق تنظیمات امضا به build.gradle
-      # ==========================================================
       - name: Patch Android Signing Config
         run: |
           cd android/app
           node -e "
           const fs = require('fs');
           let content = fs.readFileSync('build.gradle', 'utf8');
-          
           if (!content.includes('signingConfigs {')) {
             const signingBlock = \`    signingConfigs {
                 release {
@@ -127,16 +124,11 @@ jobs:
             }
           \`;
             content = content.replace('buildTypes {', signingBlock + '    buildTypes {');
-            
             content = content.replace(
               'release {\\n            minifyEnabled false',
               'release {\\n            def keystorePath = System.getenv(\"KEYSTORE_PATH\")\\n            if (keystorePath) {\\n                signingConfig signingConfigs.release\\n            }\\n            minifyEnabled false'
             );
-            
             fs.writeFileSync('build.gradle', content);
-            console.log('✅ build.gradle patched with signing config');
-          } else {
-            console.log('✅ build.gradle already has signing config');
           }
           "
 
@@ -149,60 +141,29 @@ jobs:
         run: |
           cd android
           ./gradlew :app:assembleRelease --no-daemon --stacktrace
-
-          echo "Generated APK files:"
-          find app/build/outputs/apk -type f -name '*.apk' -print
-
-          APK_PATH="$(find app/build/outputs/apk/release \
-            -maxdepth 1 \
-            -type f \
-            -name '*.apk' \
-            ! -name '*-unaligned.apk' \
-            | head -n 1)"
-
+          APK_PATH="$(find app/build/outputs/apk/release -maxdepth 1 -type f -name '*.apk' ! -name '*-unaligned.apk' | head -n 1)"
           if [ -z "$APK_PATH" ]; then
             echo "::error::No release APK was generated"
             exit 1
           fi
-
           echo "APK_PATH=android/$APK_PATH" >> "$GITHUB_ENV"
-          echo "✅ Release APK built: $APK_PATH"
-
-      - name: Get Version from Tag
-        id: get_version
-        run: |
-          TAG=${GITHUB_REF#refs/tags/}
-          CLEAN_VERSION=${TAG%-bazaar}
-          echo "VERSION=$CLEAN_VERSION" >> $GITHUB_ENV
-          echo "✅ Version: $CLEAN_VERSION"
 
       - name: Rename APK
         run: |
-          test -f "$APK_PATH" || {
-            echo "::error::APK not found at $APK_PATH"
-            exit 1
-          }
-
           mkdir -p release
-          cp "$APK_PATH" "release/${{ env.APK_PREFIX }}-v${{ env.VERSION }}.apk"
-          echo "✅ APK renamed"
+          cp "$APK_PATH" "release/${{ env.APK_PREFIX }}-v${{ env.CLEAN_VERSION }}.apk"
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           files: release/*.apk
-          name: "${{ env.APK_PREFIX }} v${{ env.VERSION }}"
+          name: "${{ env.APK_PREFIX }} v${{ env.CLEAN_VERSION }}"
           body: |
-            ## 🏋️ انتشار نسخه ${{ env.VERSION }} (${{ env.FLAVOR }})
-            
+            ## 🏋️ انتشار نسخه ${{ env.CLEAN_VERSION }} (${{ env.FLAVOR }})
+
             ### 📱 اطلاعات بیلد:
-            - **نوع بیلد:** ${{ env.FLAVOR == 'bazaar' && 'تجاری (کافه‌بازار) با محدودیت اشتراک' || 'شخصی (فول) بدون محدودیت' }}
-            - **App ID:** ${{ env.FLAVOR == 'bazaar' && 'com.aifitness.coach' || 'com.amin.aifitness.personal' }}
-            
-            ### 🔧 اطلاعات فنی:
-            - حداقل Android: 7.0 (API 24)
-            - حجم: ~15 MB
-            - معماری: Universal
+            - **فروشگاه:** ${{ env.FLAVOR == 'myket' && 'مایکت' || env.FLAVOR == 'bazaar' && 'کافه‌بازار' || 'نسخه شخصی' }}
+            - **App ID:** ${{ env.FLAVOR == 'personal' && 'com.amin.aifitness.personal' || 'com.aifitness.coach' }}
 
             ---
             **ساخته شده با ❤️ برای جامعه بدنسازی ایران**
@@ -210,11 +171,3 @@ jobs:
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build Summary
-        if: always()
-        run: |
-          echo "## 🎉 Release Build Complete!" >> $GITHUB_STEP_SUMMARY
-          echo "- **Version:** ${{ env.VERSION }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Flavor:** ${{ env.FLAVOR }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **APK:** ${{ env.APK_PREFIX }}-v${{ env.VERSION }}.apk" >> $GITHUB_STEP_SUMMARY

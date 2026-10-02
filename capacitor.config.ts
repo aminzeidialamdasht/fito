@@ -1,11 +1,28 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
-// خواندن متغیر محیطی (پیش‌فرض: bazaar)
-const flavor = process.env.VITE_APP_FLAVOR || 'bazaar';
+// خواندن متغیر محیطی (پیش‌فرض: myket)
+const flavor = process.env.VITE_APP_FLAVOR || 'myket';
+
+const APP_CONFIG: Record<string, { appId: string; appName: string }> = {
+  personal: {
+    appId: 'com.amin.aifitness.personal',
+    appName: 'Coachino Personal',
+  },
+  bazaar: {
+    appId: 'com.aifitness.coach',
+    appName: 'Coachino',
+  },
+  myket: {
+    appId: 'com.aifitness.coach',
+    appName: 'Coachino',
+  },
+};
+
+const current = APP_CONFIG[flavor] || APP_CONFIG.myket;
 
 const config: CapacitorConfig = {
-  appId: flavor === 'personal' ? 'com.amin.aifitness.personal' : 'com.aifitness.coach',
-  appName: flavor === 'personal' ? 'AI Fitness Personal' : 'AI Fitness Coach',
+  appId: current.appId,
+  appName: current.appName,
   webDir: 'dist',
   bundledWebRuntime: false,
   server: {
@@ -17,7 +34,7 @@ const config: CapacitorConfig = {
     captureInput: true,
     webContentsDebuggingEnabled: false,
     backgroundColor: '#0D0D1A',
-    overrideUserAgent: 'AI-Fitness-Coach-Android',
+    overrideUserAgent: 'Coachino-Android',
   },
   ios: {
     backgroundColor: '#0D0D1A',

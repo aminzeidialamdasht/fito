@@ -1,5 +1,6 @@
 # Dependencies
 node_modules/
+node_modules/.vite
 
 # Build outputs
 dist/
@@ -11,7 +12,7 @@ android/app/capacitor.build.gradle
 android/capacitor.settings.gradle
 android/capacitor-cordova-android-plugins/
 
-# Env (اگر می‌خواهید کلیدها در گیت نباشند)
+# Env
 # .env.bazaar
 # .env.personal
 # .env.myket
@@ -19,4 +20,4 @@ android/capacitor-cordova-android-plugins/
 # Misc
 .DS_Store
 *.log
-coachino-icon.png(empty)node_modules/.vite
+coachino-icon.png

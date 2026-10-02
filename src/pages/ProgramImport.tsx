@@ -21,7 +21,7 @@ import { toPersianNumber, getProgramTimelineDetails } from '../utils/jalali';
 import { DEFAULT_WORKOUT_PLAN } from '../data/defaultPlans';
 import { useSubscription } from '../subscription/SubscriptionContext';
 
-const isBazaarBuild = import.meta.env.VITE_APP_FLAVOR === 'bazaar';
+const isStoreBuild = ['bazaar', 'myket'].includes(import.meta.env.VITE_APP_FLAVOR || '');
 
 const PERSIAN_WEEKDAYS = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
 
@@ -74,7 +74,7 @@ export default function ProgramImport() {
   const [imported, setImported] = useState(false);
   const [buyBusy, setBuyBusy] = useState(false);
 
-  const canUseJsonImport = !isBazaarBuild || isPremium;
+  const canUseJsonImport = !isStoreBuild || isPremium;
 
   const handleValidate = () => {
     if (!canUseJsonImport) return;
@@ -287,7 +287,7 @@ export default function ProgramImport() {
         </div>
       )}
 
-      {isBazaarBuild && (
+      {isStoreBuild && (
         <div className={`rounded-2xl p-5 border theme-transition ${
           isDark ? 'bg-[#1a1a2e] border-[#d4af37]/25' : 'bg-white border-amber-200'
         }`}>
@@ -339,7 +339,7 @@ export default function ProgramImport() {
       }`}>
         <h3 className={'font-bold mb-3 flex items-center gap-2 ' + (isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]')}>
           JSON برنامه تمرینی
-          {isBazaarBuild && !isPremium && (
+          {isStoreBuild && !isPremium && (
             <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
               isDark ? 'bg-[#d4af37]/20 text-[#d4af37]' : 'bg-amber-100 text-amber-700'
             }`}>
