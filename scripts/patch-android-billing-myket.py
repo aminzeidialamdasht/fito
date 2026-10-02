@@ -16,6 +16,9 @@ android = root / "android"
 PKG_PATH = "com/coachino/myket"
 pkg_dir = android / "app/src/main/java" / PKG_PATH
 
+# اطمینان از وجود پوشه پکیج (حیاتی!)
+pkg_dir.mkdir(parents=True, exist_ok=True)
+
 # 1) root build.gradle: kotlin plugin
 p = android / "build.gradle"
 s = p.read_text()
@@ -64,12 +67,7 @@ android {
 p.write_text(s)
 
 # 3) plugin + MainActivity registration
-# پکیج پلاگین هم باید با appId جدید هماهنگ باشد
-plugin_content = (root / "android-billing/MyketBillingPlugin.kt").read_text()
-plugin_content = plugin_content.replace("package com.aifitness.coach", "package com.coachino.myket")
 shutil.copy(root / "android-billing/MyketBillingPlugin.kt", pkg_dir / "MyketBillingPlugin.kt")
-(pkg_dir / "MyketBillingPlugin.kt").write_text(plugin_content)
-
 (pkg_dir / "MainActivity.java").write_text("""package com.coachino.myket;
 
 import android.os.Bundle;
