@@ -65,13 +65,18 @@ export default function TodaySession() {
 
   const todayName = getDayName(new Date());
 
-  // ✅ جستجوی انعطاف‌پذیر با weekday + day
-  const currentDayPlan = useMemo(() => {
-    if (!activeProgramData?.days) return undefined;
-    return activeProgramData.days.find((d: any) => {
+
+  const currentDayIndex = useMemo(() => {
+    if (!activeProgramData?.days) return -1;
+    return activeProgramData.days.findIndex((d: any) => {
       return getNormalizedWeekday(d) === todayName;
-    }) as ExtendedWorkoutDay | undefined;
+    });
   }, [activeProgramData, todayName]);
+
+  const currentDayPlan = useMemo(() => {
+    if (!activeProgramData?.days || currentDayIndex === -1) return undefined;
+    return activeProgramData.days[currentDayIndex] as ExtendedWorkoutDay;
+  }, [activeProgramData, currentDayIndex]);
 
   const hasExercises = currentDayPlan && Array.isArray(currentDayPlan.exercises) && currentDayPlan.exercises.length > 0;
 
@@ -95,7 +100,7 @@ export default function TodaySession() {
   const estimatedTime = Math.ceil(totalSets * 1.5);
 
   const handleStart = () => {
-    navigate('/tracker/today', { state: { dayPlan: currentDayPlan } });
+    navigate(`/tracker/${currentDayIndex}?day=${currentDayIndex}&autoStart=true`);
   };
 
   return (
