@@ -31,7 +31,6 @@ function AppContent({ showWelcome, onContinue }: { showWelcome: boolean; onConti
     <div className="flex flex-col min-h-screen">
       <Routes>
         {/* ریدایرکت مسیر غلط به مسیر صحیح */}
-        <Route path="/workout" element={<Navigate to="/workouts" replace />} />
         
         <Route path="/" element={<Layout><Dashboard /></Layout>} />
         <Route path="/calendar" element={<Layout><CalendarPage /></Layout>} />

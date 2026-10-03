@@ -265,7 +265,7 @@ export default function Dashboard() {
 
       {/* Big Start Workout Button - Only show if real program exists */}
       {!isTodayRest && todayWorkout && activeProgram && (
-        <button onClick={() => { soundEffects.playClick(); navigate(`/workout?day=${todayDayIndex}&autoStart=true`); }}
+        <button onClick={() => { soundEffects.playClick(); navigate('/today-session'); }}
           className="w-full py-4 rounded-2xl font-black text-lg flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 text-white hover:brightness-110"
           style={{ background: `linear-gradient(to left, ${teal}, ${tealLight})` }}>
           <Dumbbell size={22} /> شروع تمرین امروز ({todayName})

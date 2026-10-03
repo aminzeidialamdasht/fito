@@ -30,6 +30,8 @@ export default function WorkoutTracker() {
   const [workoutTime, setWorkoutTime] = useState(0);
   const [showComplete, setShowComplete] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const [exerciseChanged, setExerciseChanged] = useState(false);
+  const prevExerciseRef = useRef<string>("");
   const timerRef = useRef<any>(null);
   const restTimerRef = useRef<any>(null);
 
@@ -177,6 +179,16 @@ export default function WorkoutTracker() {
   const currentExercise = currentSet?.exerciseName || '';
   const totalSetsForExercise = sets.filter((s: any) => s.exerciseName === currentExercise).length;
   const completedSetsForExercise = sets.filter((s: any) => s.exerciseName === currentExercise && s.completed).length;
+
+  useEffect(() => {
+    if (!isActive) return;
+    const current = currentSet?.exerciseName || '';
+    if (prevExerciseRef.current && current && current !== prevExerciseRef.current) {
+      setExerciseChanged(true);
+      setTimeout(() => setExerciseChanged(false), 2500);
+    }
+    prevExerciseRef.current = current;
+  }, [currentSet?.exerciseName, isActive]);
 
   if (!activeProgram) {
     return (
@@ -350,6 +362,21 @@ export default function WorkoutTracker() {
           <p className="text-sm font-bold mt-2 opacity-80" style={{ color: gold }}>— استراحت —</p>
         </div>
 
+        {/* Next Exercise Banner */}
+        {exerciseChanged && (
+          <div className="w-full max-w-md mb-4 rounded-2xl p-4 flex items-center gap-3 shadow-lg animate-pulse"
+            style={{ background: `linear-gradient(135deg, ${gold}30, ${gold}10)`, border: `2px solid ${gold}` }}>
+            <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+              style={{ background: gold }}>
+              <Trophy size={20} className="text-black" />
+            </div>
+            <div className="flex-1">
+              <p className="text-xs font-bold opacity-70" style={{ color: gold }}>حرکت بعدی</p>
+              <p className={`text-base font-black ${textMain}`}>{currentExercise}</p>
+            </div>
+          </div>
+        )}
+
         {/* Current Exercise Card */}
         <div className={`w-full max-w-md rounded-2xl p-5 border shadow-sm ${cardBg}`} style={{ borderColor: `${gold}30` }}>
           <div className="flex items-center justify-center gap-2 mb-4">
@@ -404,11 +431,33 @@ export default function WorkoutTracker() {
           </div>
 
           {/* Action Buttons */}
-          <button onClick={() => completeSet(currentSetIndex)} disabled={currentSet.completed}
-            className={`w-full py-4 rounded-2xl font-black text-lg flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 text-black mb-3`}
-            style={{ background: currentSet.completed ? '#22c55e' : gold }}>
-            <Check size={24} strokeWidth={3} /> اتمام ست
-          </button>
+          {(() => {
+            const isLastSet = completedCount === totalSets - 1;
+            return (
+              <button
+                onClick={() => {
+                  if (isLastSet) {
+                    completeSet(currentSetIndex);
+                    setTimeout(() => completeWorkout(), 300);
+                  } else {
+                    completeSet(currentSetIndex);
+                  }
+                }}
+                disabled={currentSet.completed}
+                className={`w-full py-4 rounded-2xl font-black text-lg flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 text-black mb-3`}
+                style={{ background: currentSet.completed ? '#22c55e' : isLastSet ? '#22c55e' : gold }}>
+                {isLastSet ? (
+                  <>
+                    <Trophy size={24} strokeWidth={3} /> پایان جلسه تمرین
+                  </>
+                ) : (
+                  <>
+                    <Check size={24} strokeWidth={3} /> اتمام ست
+                  </>
+                )}
+              </button>
+            );
+          })()}
           
           <button onClick={() => setShowCancelModal(true)}
             className={`w-full py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${isDark ? 'bg-white/5 text-gray-400' : 'bg-gray-100 text-gray-600'}`}>
