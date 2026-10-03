@@ -186,6 +186,15 @@ export default function WorkoutTracker() {
   }
 
   const currentExercise = currentSet?.exerciseName || '';
+
+  // محاسبه حرکت بعدی
+  const exerciseNames: string[] = [];
+  sets.forEach((s: any) => {
+    if (!exerciseNames.includes(s.exerciseName)) exerciseNames.push(s.exerciseName);
+  });
+  const currentExerciseIdx = exerciseNames.indexOf(currentExercise);
+  const nextExerciseName = currentExerciseIdx >= 0 && currentExerciseIdx < exerciseNames.length - 1 ? exerciseNames[currentExerciseIdx + 1] : null;
+  const isLastExercise = currentExerciseIdx === exerciseNames.length - 1;
   const totalSetsForExercise = sets.filter((s: any) => s.exerciseName === currentExercise).length;
   const completedSetsForExercise = sets.filter((s: any) => s.exerciseName === currentExercise && s.completed).length;
 
@@ -362,17 +371,17 @@ export default function WorkoutTracker() {
           <p className="text-sm font-bold mt-2 opacity-80" style={{ color: gold }}>— استراحت —</p>
         </div>
 
-        {/* Next Exercise Banner */}
-        {exerciseChanged && (
-          <div className="w-full max-w-md mb-4 rounded-2xl p-4 flex items-center gap-3 shadow-lg animate-pulse"
-            style={{ background: `linear-gradient(135deg, ${gold}30, ${gold}10)`, border: `2px solid ${gold}` }}>
-            <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+        {/* Next Exercise Banner - always visible */}
+        {nextExerciseName && (
+          <div className="w-full max-w-md mb-4 rounded-2xl p-3 flex items-center gap-3 shadow-md"
+            style={{ background: `linear-gradient(135deg, ${gold}20, ${gold}05)`, border: `1px solid ${gold}60` }}>
+            <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
               style={{ background: gold }}>
-              <Trophy size={20} className="text-black" />
+              <Dumbbell size={18} className="text-black" />
             </div>
             <div className="flex-1">
-              <p className="text-xs font-bold opacity-70" style={{ color: gold }}>حرکت بعدی</p>
-              <p className={`text-base font-black ${textMain}`}>{currentExercise}</p>
+              <p className="text-[10px] font-bold opacity-60" style={{ color: gold }}>حرکت بعدی</p>
+              <p className={`text-sm font-black ${textMain}`}>{nextExerciseName}</p>
             </div>
           </div>
         )}
