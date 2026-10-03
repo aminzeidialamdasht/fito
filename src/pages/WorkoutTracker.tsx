@@ -166,6 +166,15 @@ export default function WorkoutTracker() {
 
   const currentSetIndex = sets.findIndex((s: any) => !s.completed);
   const currentSet = currentSetIndex !== -1 ? sets[currentSetIndex] : (sets.length > 0 ? sets[sets.length - 1] : null);
+  useEffect(() => {
+    if (!isActive) return;
+    const current = currentSet?.exerciseName || '';
+    if (prevExerciseRef.current && current && current !== prevExerciseRef.current) {
+      setExerciseChanged(true);
+      setTimeout(() => setExerciseChanged(false), 2500);
+    }
+    prevExerciseRef.current = current;
+  }, [currentSet?.exerciseName, isActive]);
   
   if (!currentSet && isActive) {
     return (
@@ -180,15 +189,6 @@ export default function WorkoutTracker() {
   const totalSetsForExercise = sets.filter((s: any) => s.exerciseName === currentExercise).length;
   const completedSetsForExercise = sets.filter((s: any) => s.exerciseName === currentExercise && s.completed).length;
 
-  useEffect(() => {
-    if (!isActive) return;
-    const current = currentSet?.exerciseName || '';
-    if (prevExerciseRef.current && current && current !== prevExerciseRef.current) {
-      setExerciseChanged(true);
-      setTimeout(() => setExerciseChanged(false), 2500);
-    }
-    prevExerciseRef.current = current;
-  }, [currentSet?.exerciseName, isActive]);
 
   if (!activeProgram) {
     return (
