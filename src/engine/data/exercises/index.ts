@@ -14,7 +14,7 @@ import type { Exercise, MuscleGroup, EquipmentType, DifficultyLevel, MovementPat
 import { CHEST_EXERCISES } from './chest';
 import { BACK_EXERCISES } from './back';
 import { SHOULDER_EXERCISES } from './shoulders';
-import { ARM_EXERCISES } from './arms';
+import { BICEPS_EXERCISES, TRICEPS_EXERCISES, FOREARMS_EXERCISES } from './arms';
 import { LEG_EXERCISES } from './legs';
 import { ABS_EXERCISES } from './abs';
 
@@ -23,7 +23,9 @@ export const ALL_EXERCISES: Exercise[] = [
   ...CHEST_EXERCISES,
   ...BACK_EXERCISES,
   ...SHOULDER_EXERCISES,
-  ...ARM_EXERCISES,
+  ...BICEPS_EXERCISES,
+  ...TRICEPS_EXERCISES,
+  ...FOREARMS_EXERCISES,
   ...LEG_EXERCISES,
   ...ABS_EXERCISES,
 ];
@@ -103,7 +105,7 @@ export function filterAvoidedExercises(avoidedIds: string[]): Exercise[] {
 }
 
 // Export all individual databases for direct access
-export { CHEST_EXERCISES, BACK_EXERCISES, SHOULDER_EXERCISES, ARM_EXERCISES, LEG_EXERCISES, ABS_EXERCISES };
+export { CHEST_EXERCISES, BACK_EXERCISES, SHOULDER_EXERCISES, BICEPS_EXERCISES, TRICEPS_EXERCISES, FOREARMS_EXERCISES, LEG_EXERCISES, ABS_EXERCISES };
 
 // Re-export types
 export type { Exercise, MuscleGroup, EquipmentType, DifficultyLevel, MovementPattern };

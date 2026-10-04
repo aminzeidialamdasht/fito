@@ -53,6 +53,7 @@ export type EquipmentType =
   | 'smith_machine'
   | 'ez_bar'
   | 'bench'
+  | 'preacher_bench'
   | 'pull_up_bar'
   | 'dip_station'
   | 'trx';
