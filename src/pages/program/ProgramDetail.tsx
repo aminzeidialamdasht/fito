@@ -224,14 +224,14 @@ export default function ProgramDetail() {
                           {ex.rest ? ` · استراحت ${toPersianNumber(ex.rest)} ثانیه` : ''}
                         </p>
                       </div>
-                      {ex.exerciseId && (
+                      {(ex.exerciseId || ex.id) && (
                         <button
                           onClick={() => {
                             soundEffects.playClick();
                             setSubstituteTarget({
                               dayIdx: idx,
                               exIdx,
-                              exerciseId: ex.exerciseId,
+                              exerciseId: ex.exerciseId || ex.id,
                               exerciseName: ex.name,
                             });
                           }}

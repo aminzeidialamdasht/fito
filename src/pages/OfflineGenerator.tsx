@@ -86,6 +86,8 @@ export default function OfflineGenerator() {
         muscle_groups: day.exercises.map((e) => e.primaryMuscle),
         exercises: day.exercises.map((ex) => ({
           id: ex.exerciseId,
+
+          exerciseId: ex.exerciseId,
           name: ex.name,
           sets: ex.sets.length,
           reps: ex.sets[0]?.targetReps || '8-12',
