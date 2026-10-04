@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { HashRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
@@ -24,11 +24,18 @@ import OfflineGenerator from './pages/OfflineGenerator';
 import GeneratorEntry from './pages/generators/GeneratorEntry';
 import Onboarding from './pages/Onboarding';
 import ProgramDetail from './pages/program/ProgramDetail';
+import Subscription from './pages/Subscription';
+import PremiumGate from './components/PremiumGate';
+import { initializeBilling } from './billing';
 
 function AppContent({ showWelcome, onContinue }: { showWelcome: boolean; onContinue: () => void }) {
   const location = useLocation();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+
+  useEffect(() => {
+    initializeBilling().catch(e => console.warn('Billing init failed:', e));
+  }, []);
 
   if (showWelcome) {
     return <Welcome onContinue={onContinue} />;
@@ -83,12 +90,13 @@ function AppContent({ showWelcome, onContinue }: { showWelcome: boolean; onConti
         <Route path="/import" element={<Layout><ProgramImport /></Layout>} />
         <Route path="/generate" element={<Navigate to="/generate/workout" replace />} />
         <Route path="/onboarding" element={<Onboarding />} />
+        <Route path="/subscription" element={<Layout><Subscription /></Layout>} />
         <Route path="/generate/:type" element={<GeneratorEntry />} />
         <Route path="/generate/:type/ready" element={<Layout><OfflineGenerator /></Layout>} />
-        <Route path="/nutrition" element={<Layout><Nutrition /></Layout>} />
-        <Route path="/nutrition-import" element={<Layout><NutritionImport /></Layout>} />
-        <Route path="/supplements" element={<Layout><Supplements /></Layout>} />
-        <Route path="/supplement-import" element={<Layout><SupplementImport /></Layout>} />
+        <Route path="/nutrition" element={<Layout><PremiumGate feature="nutrition"><Nutrition /></PremiumGate></Layout>} />
+        <Route path="/nutrition-import" element={<Layout><PremiumGate feature="nutrition"><NutritionImport /></PremiumGate></Layout>} />
+        <Route path="/supplements" element={<Layout><PremiumGate feature="supplement"><Supplements /></PremiumGate></Layout>} />
+        <Route path="/supplement-import" element={<Layout><PremiumGate feature="supplement"><SupplementImport /></PremiumGate></Layout>} />
 
         <Route path="/session/:id" element={<SessionPreview />} />
         <Route path="/tracker/:id" element={<WorkoutTracker />} />

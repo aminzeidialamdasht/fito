@@ -26,3 +26,7 @@ coachino-icon.png
 Screenshot_*.png
 Screenshot_*.jpg
 *.jpeg
+
+# Env flavors
+.env.local
+.env.*.local
