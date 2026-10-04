@@ -165,15 +165,22 @@ export default function Dashboard() {
       )}
 
       {/* Welcome Hero */}
-      <div className={`rounded-3xl p-5 border ${borderCard} ${cardBg} relative overflow-hidden`}>
+      <div
+        className="rounded-3xl p-5 relative overflow-hidden shadow-xl"
+        style={{ background: `linear-gradient(135deg, ${teal} 0%, #0d9488 50%, ${gold} 130%)` }}
+      >
+        {/* دایره‌های تزئینی */}
+        <div className="absolute -top-16 -left-16 w-48 h-48 rounded-full opacity-20 bg-white" />
+        <div className="absolute -bottom-20 -right-12 w-56 h-56 rounded-full opacity-10 bg-white" />
+        <div className="relative z-10">
         <div className="flex items-start justify-between mb-4">
           <div>
-            <p className={`text-sm font-bold ${textSub}`}>سلام، {profile?.name || 'ورزشکار'} 👋</p>
-            <h2 className={`text-xl font-black mt-1 ${textMain}`}>مربی آفلاین تو</h2>
-            <p className={`text-xs mt-1 ${textSub}`}>امروز {todayName}</p>
+            <p className="text-sm font-bold text-white/90">سلام، {profile?.name || 'ورزشکار'} 👋</p>
+            <h2 className="text-xl font-black mt-1 text-white">مربی اختصاصی تو</h2>
+            <p className="text-xs mt-1 text-white/80">امروز {todayName}</p>
           </div>
-          <div className="w-12 h-12 rounded-full flex items-center justify-center text-lg font-black"
-            style={{ background: `${teal}20`, color: teal }}>
+          <div className="w-12 h-12 rounded-full flex items-center justify-center text-lg font-black backdrop-blur-md"
+            style={{ background: 'rgba(255,255,255,0.25)', color: '#ffffff' }}>
             {profile?.name?.charAt(0) || 'ع'}
           </div>
         </div>
@@ -181,21 +188,21 @@ export default function Dashboard() {
         <div className="flex items-center gap-5">
           <div className="relative w-20 h-20 shrink-0">
             <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-              <circle cx="50" cy="50" r="42" fill="none" stroke={isDark ? '#1e293b' : '#e2e8f0'} strokeWidth="8" />
-              <circle cx="50" cy="50" r="42" fill="none" stroke={teal} strokeWidth="8" strokeLinecap="round"
+              <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="8" />
+              <circle cx="50" cy="50" r="42" fill="none" stroke="#ffffff" strokeWidth="8" strokeLinecap="round"
                 strokeDasharray={`${weeklyProgress * 2.64} 264`} className="transition-all duration-700" />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className={`text-xl font-black ${textMain}`}>{toPersianNumber(Math.round(weeklyProgress))}%</span>
+              <span className="text-xl font-black text-white">{toPersianNumber(Math.round(weeklyProgress))}%</span>
             </div>
           </div>
 
           <div className="flex-1">
-            <h3 className={`font-black text-sm ${textMain}`}>هدف هفتگی</h3>
-            <p className={`text-xs mt-1 ${textSub}`}>{toPersianNumber(weeklyCompleted)} از {toPersianNumber(weeklyGoal)} جلسه</p>
+            <h3 className="font-black text-sm text-white">هدف هفتگی</h3>
+            <p className="text-xs mt-1 text-white/80">{toPersianNumber(weeklyCompleted)} از {toPersianNumber(weeklyGoal)} جلسه</p>
           </div>
         </div>
-      </div>
+      </div></div>
 
       {/* 🎯 4 Main Generators */}
       <div>
