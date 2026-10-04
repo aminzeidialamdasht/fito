@@ -8,7 +8,7 @@ import {
   findSubstitutes,
   isExerciseAvailable,
 } from '../src/engine/core/substitutionEngine';
-import type { EquipmentType, Exercise, InjuryRiskLevel } from '../src/engine/types/exercise';
+import type { EquipmentType, Exercise } from '../src/engine/types/exercise';
 
 // ═══════════════════════════════════════════════════════════
 //  ابزار نمایش
@@ -41,6 +41,12 @@ function printScenario(
   });
 }
 
+function findOrFail(id: string): Exercise {
+  const ex = ALL_EXERCISES.find((e) => e.id === id);
+  if (!ex) throw new Error(`Exercise not found: ${id}`);
+  return ex;
+}
+
 // ═══════════════════════════════════════════════════════════
 //  شروع
 // ═══════════════════════════════════════════════════════════
@@ -59,7 +65,7 @@ Object.entries(EXERCISE_DB_STATS.byMuscle)
   });
 
 // ═══════════════════════════════════════════════════════════
-//  سناریوهای سینه
+//  تنظیمات تجهیزات
 // ═══════════════════════════════════════════════════════════
 
 const fullGym: EquipmentType[] = [
@@ -71,30 +77,25 @@ const dumbbellOnly: EquipmentType[] = ['dumbbell', 'bench', 'bodyweight'];
 const machineOnly: EquipmentType[] = ['machine', 'cable'];
 const homeGym: EquipmentType[] = ['dumbbell', 'bench', 'bodyweight', 'pull_up_bar'];
 
-printHeader('سینه — حرکت مرجع: پرس سینه هالتر');
+// ═══════════════════════════════════════════════════════════
+//  سناریوهای سینه
+// ═══════════════════════════════════════════════════════════
 
-const chestSource = ALL_EXERCISES.find((e) => e.id === 'chest_001')!;
+printHeader('سینه — حرکت مرجع: پرس سینه هالتر');
+const chestSource = findOrFail('chest_001');
 console.log(`🎯 ${chestSource.name} (${chestSource.englishName})`);
 
 printScenario('سناریو ۱: باشگاه کامل', chestSource, {
-  availableEquipment: fullGym,
-  maxResults: 5,
+  availableEquipment: fullGym, maxResults: 5,
 });
-
 printScenario('سناریو ۲: فقط دمبل و میز', chestSource, {
-  availableEquipment: dumbbellOnly,
-  maxResults: 5,
+  availableEquipment: dumbbellOnly, maxResults: 5,
 });
-
 printScenario('سناریو ۳: فقط دستگاه', chestSource, {
-  availableEquipment: machineOnly,
-  maxResults: 5,
+  availableEquipment: machineOnly, maxResults: 5,
 });
-
 printScenario('سناریو ۴: آسیب شانه', chestSource, {
-  availableEquipment: fullGym,
-  injuries: { shoulder: 'medium' },
-  maxResults: 5,
+  availableEquipment: fullGym, injuries: { shoulder: 'medium' }, maxResults: 5,
 });
 
 // ═══════════════════════════════════════════════════════════
@@ -102,29 +103,20 @@ printScenario('سناریو ۴: آسیب شانه', chestSource, {
 // ═══════════════════════════════════════════════════════════
 
 printHeader('پشت — حرکت مرجع: نشر خم هالتر');
-
-const rowSource = ALL_EXERCISES.find((e) => e.id === 'back_008')!;
+const rowSource = findOrFail('back_008');
 console.log(`🎯 ${rowSource.name} (${rowSource.englishName})`);
 
 printScenario('سناریو ۱: باشگاه کامل', rowSource, {
-  availableEquipment: fullGym,
-  maxResults: 5,
+  availableEquipment: fullGym, maxResults: 5,
 });
-
 printScenario('سناریو ۲: فقط دمبل و میز (بدون هالتر)', rowSource, {
-  availableEquipment: dumbbellOnly,
-  maxResults: 5,
+  availableEquipment: dumbbellOnly, maxResults: 5,
 });
-
 printScenario('سناریو ۳: فقط دستگاه و سیم‌کش', rowSource, {
-  availableEquipment: machineOnly,
-  maxResults: 5,
+  availableEquipment: machineOnly, maxResults: 5,
 });
-
 printScenario('سناریو ۴: آسیب کمر', rowSource, {
-  availableEquipment: fullGym,
-  injuries: { lowerBack: 'medium' },
-  maxResults: 5,
+  availableEquipment: fullGym, injuries: { lowerBack: 'medium' }, maxResults: 5,
 });
 
 // ═══════════════════════════════════════════════════════════
@@ -132,18 +124,46 @@ printScenario('سناریو ۴: آسیب کمر', rowSource, {
 // ═══════════════════════════════════════════════════════════
 
 printHeader('لت — حرکت مرجع: زیربغل سیم‌کش پهن');
-
-const latSource = ALL_EXERCISES.find((e) => e.id === 'back_001')!;
+const latSource = findOrFail('back_001');
 console.log(`🎯 ${latSource.name} (${latSource.englishName})`);
 
 printScenario('سناریو ۱: باشگاه کامل', latSource, {
-  availableEquipment: fullGym,
-  maxResults: 5,
+  availableEquipment: fullGym, maxResults: 5,
+});
+printScenario('سناریو ۲: باشگاه خانگی (دمبل + بارفیکس)', latSource, {
+  availableEquipment: homeGym, maxResults: 5,
 });
 
-printScenario('سناریو ۲: باشگاه خانگی (دمبل + بارفیکس)', latSource, {
-  availableEquipment: homeGym,
-  maxResults: 5,
+// ═══════════════════════════════════════════════════════════
+//  سناریوهای سرشانه
+// ═══════════════════════════════════════════════════════════
+
+printHeader('سرشانه — حرکت مرجع: پرس سرشانه هالتر ایستاده');
+const ohpSource = findOrFail('shoulder_001');
+console.log(`🎯 ${ohpSource.name} (${ohpSource.englishName})`);
+
+printScenario('سناریو ۱: باشگاه کامل', ohpSource, {
+  availableEquipment: fullGym, maxResults: 5,
+});
+printScenario('سناریو ۲: فقط دمبل و میز', ohpSource, {
+  availableEquipment: dumbbellOnly, maxResults: 5,
+});
+printScenario('سناریو ۳: فقط دستگاه', ohpSource, {
+  availableEquipment: machineOnly, maxResults: 5,
+});
+printScenario('سناریو ۴: آسیب شانه', ohpSource, {
+  availableEquipment: fullGym, injuries: { shoulder: 'medium' }, maxResults: 5,
+});
+
+printHeader('نشر جانب — حرکت مرجع: نشر جانب دمبل ایستاده');
+const lateralSource = findOrFail('shoulder_003');
+console.log(`🎯 ${lateralSource.name} (${lateralSource.englishName})`);
+
+printScenario('سناریو ۱: باشگاه کامل', lateralSource, {
+  availableEquipment: fullGym, maxResults: 5,
+});
+printScenario('سناریو ۲: فقط دستگاه و سیم‌کش', lateralSource, {
+  availableEquipment: machineOnly, maxResults: 5,
 });
 
 // ═══════════════════════════════════════════════════════════
@@ -152,9 +172,9 @@ printScenario('سناریو ۲: باشگاه خانگی (دمبل + بارفیک
 
 printHeader('تست isExerciseAvailable');
 
-const barRow = ALL_EXERCISES.find((e) => e.id === 'back_008')!;
-const dbRow = ALL_EXERCISES.find((e) => e.id === 'back_009')!;
-const machineRow = ALL_EXERCISES.find((e) => e.id === 'back_013')!;
+const barRow = findOrFail('back_008');
+const dbRow = findOrFail('back_009');
+const machineRow = findOrFail('back_013');
 
 console.log(`   نشر خم هالتر با دمبل‌فقط: ${isExerciseAvailable(barRow, dumbbellOnly)} (باید false)`);
 console.log(`   نشر خم دمبل با دمبل‌فقط: ${isExerciseAvailable(dbRow, dumbbellOnly)} (باید true)`);
@@ -173,5 +193,7 @@ console.log(`   پشت میانی: ${EXERCISE_DB_STATS.byMuscle['upper_back'] ??
 console.log(`   پایین پشت: ${EXERCISE_DB_STATS.byMuscle['lower_back'] ?? 0}`);
 console.log(`   سرشانه پشتی: ${EXERCISE_DB_STATS.byMuscle['rear_delts'] ?? 0}`);
 console.log(`   کول: ${EXERCISE_DB_STATS.byMuscle['traps'] ?? 0}`);
+console.log(`   سرشانه جلو: ${EXERCISE_DB_STATS.byMuscle['front_delts'] ?? 0}`);
+console.log(`   سرشانه کنار: ${EXERCISE_DB_STATS.byMuscle['side_delts'] ?? 0}`);
 
 console.log('\n✅ تست کامل شد');
