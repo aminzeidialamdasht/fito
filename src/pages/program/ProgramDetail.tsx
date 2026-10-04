@@ -16,19 +16,27 @@ import {
   CheckCircle2,
   ArrowRightLeft,
   Zap,
+  RefreshCw,
 } from 'lucide-react';
+import SubstituteModal from '../../components/SubstituteModal';
 
 const PERSIAN_WEEKDAYS = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
 
 export default function ProgramDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { programs, state, setActiveProgram } = useAppContext();
+  const { programs, state, setActiveProgram, updateProgram } = useAppContext();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
   const program = programs.find((p) => p.id === id);
   const [expandedDay, setExpandedDay] = useState<number | null>(null);
+  const [substituteTarget, setSubstituteTarget] = useState<{
+    dayIdx: number;
+    exIdx: number;
+    exerciseId: string;
+    exerciseName: string;
+  } | null>(null);
 
   const teal = isDark ? '#14b8a6' : '#0d9488';
   const gold = isDark ? '#d4af37' : '#f59e0b';
@@ -70,6 +78,28 @@ export default function ProgramDetail() {
   const handleActivate = () => {
     soundEffects.playClick();
     setActiveProgram(program.id);
+  };
+
+  const handleSubstituteSelect = (newExerciseId: string, newExerciseName: string) => {
+    if (!substituteTarget || !program) return;
+
+    const { dayIdx, exIdx } = substituteTarget;
+    const updatedProgram: any = { ...program };
+    const updatedDays = [...(updatedProgram.days || [])];
+    const updatedDay = { ...updatedDays[dayIdx] };
+    const updatedExercises = [...(updatedDay.exercises || [])];
+    const updatedExercise = { ...updatedExercises[exIdx] };
+
+    updatedExercise.exerciseId = newExerciseId;
+    updatedExercise.name = newExerciseName;
+
+    updatedExercises[exIdx] = updatedExercise;
+    updatedDay.exercises = updatedExercises;
+    updatedDays[dayIdx] = updatedDay;
+    updatedProgram.days = updatedDays;
+
+    updateProgram(updatedProgram);
+    setSubstituteTarget(null);
   };
 
   return (
@@ -194,6 +224,23 @@ export default function ProgramDetail() {
                           {ex.rest ? ` · استراحت ${toPersianNumber(ex.rest)} ثانیه` : ''}
                         </p>
                       </div>
+                      {ex.exerciseId && (
+                        <button
+                          onClick={() => {
+                            soundEffects.playClick();
+                            setSubstituteTarget({
+                              dayIdx: idx,
+                              exIdx,
+                              exerciseId: ex.exerciseId,
+                              exerciseName: ex.name,
+                            });
+                          }}
+                          className={`p-1.5 rounded-lg flex-shrink-0 ${isDark ? 'hover:bg-white/10 text-gray-400' : 'hover:bg-gray-200 text-gray-500'}`}
+                          title="تغییر حرکت"
+                        >
+                          <RefreshCw size={14} />
+                        </button>
+                      )}
                     </div>
                   ))}
 
@@ -231,6 +278,15 @@ export default function ProgramDetail() {
           </div>
         )}
       </div>
+
+      {substituteTarget && (
+        <SubstituteModal
+          exerciseId={substituteTarget.exerciseId}
+          exerciseName={substituteTarget.exerciseName}
+          onSelect={handleSubstituteSelect}
+          onClose={() => setSubstituteTarget(null)}
+        />
+      )}
     </div>
   );
 }
