@@ -122,7 +122,7 @@ export function generateWorkoutProgram(
     metadata: {
       engineVersion: ENGINE_VERSION,
       generatedFrom: 'offline_engine',
-      notes: `برنامه تولیدشده توسط موتور آفلاین کوچینو نسخه ${ENGINE_VERSION}`,
+      notes: `برنامه تولیدشده توسط موتور آفلاین فیتو نسخه ${ENGINE_VERSION}`,
     },
   };
 

@@ -97,11 +97,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </button>
             <div className="flex items-center gap-3">
               <div className={'w-10 h-10 rounded-2xl flex items-center justify-center overflow-hidden ' + (isDark ? 'bg-[#0D0D1A] shadow-lg shadow-[#d4af37]/20' : 'bg-[#0D0D1A] shadow-md')}>
-                <img src="/coachino-icon.png" alt="کوچینو" className="w-9 h-9 object-contain" />
+                <img src="/fito-icon.png" alt="فیتو" className="w-9 h-9 object-contain" />
               </div>
               <div>
-                <h1 className={'font-bold text-base sm:text-lg leading-tight ' + (isDark ? 'text-white' : 'text-[#0d9488]')}>کوچینو</h1>
-                <p className={'text-[10px] sm:text-xs ' + (isDark ? 'text-gray-500' : 'text-[#0f766e]/70')}>{APP_VERSION} · Coachino · {getPersianDate()}</p>
+                <h1 className={'font-bold text-base sm:text-lg leading-tight ' + (isDark ? 'text-white' : 'text-[#0d9488]')}>فیتو</h1>
+                <p className={'text-[10px] sm:text-xs ' + (isDark ? 'text-gray-500' : 'text-[#0f766e]/70')}>{APP_VERSION} · Fito · {getPersianDate()}</p>
               </div>
             </div>
           </div>
@@ -138,11 +138,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <aside className={'w-72 h-full p-5 flex flex-col gap-1 shadow-2xl overflow-y-auto ' + (isDark ? 'bg-[#0c0c0c]' : 'bg-white')} onClick={e => e.stopPropagation()}>
               <div className={'flex items-center gap-3 mb-6 pb-5 border-b ' + (isDark ? 'border-white/10' : 'border-[#14b8a6]/20')}>
                 <div className={'w-12 h-12 rounded-2xl flex items-center justify-center overflow-hidden ' + (isDark ? 'bg-[#0D0D1A]' : 'bg-[#0D0D1A]')}>
-                  <img src="/coachino-icon.png" alt="کوچینو" className="w-11 h-11 object-contain" />
+                  <img src="/fito-icon.png" alt="فیتو" className="w-11 h-11 object-contain" />
                 </div>
                 <div>
-                  <span className={'font-bold text-lg block ' + (isDark ? 'text-white' : 'text-[#0d9488]')}>کوچینو</span>
-                  <span className={'text-xs ' + (isDark ? 'text-gray-500' : 'text-[#0f766e]/70')}>Coachino · مربی آفلاین</span>
+                  <span className={'font-bold text-lg block ' + (isDark ? 'text-white' : 'text-[#0d9488]')}>فیتو</span>
+                  <span className={'text-xs ' + (isDark ? 'text-gray-500' : 'text-[#0f766e]/70')}>Fito · مربی هوشمند آفلاین</span>
                 </div>
               </div>
 

@@ -17,7 +17,7 @@ export interface ActiveSession {
   setsLog?: SetRecord[];
 }
 
-const STORAGE_KEY = 'coachino_active_session';
+const STORAGE_KEY = 'fito_active_session';
 
 export function useActiveWorkout() {
   const [session, setSession] = useState<ActiveSession | null>(null);

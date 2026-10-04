@@ -22,7 +22,7 @@ export default function Settings() {
         </div>
       </div>
       
-      <p className="mt-8 text-center text-xs opacity-50">Coachino v1.4.1</p>
+      <p className="mt-8 text-center text-xs opacity-50">Fito v1.4.1</p>
     </div>
   );
 }
