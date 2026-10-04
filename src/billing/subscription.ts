@@ -141,3 +141,64 @@ export function clearSubscription(state: SubscriptionState): SubscriptionState {
     purchaseToken: undefined,
   };
 }
+
+
+/**
+ * محدودیت‌های مدل 4:
+ * - کاربر رایگان: فقط ۱ برنامه + ۱ پروفایل
+ * - بعد از اشتراک: نامحدود
+ */
+export const FREE_LIMITS = {
+  programs: 1,
+  profiles: 1,
+} as const;
+
+/**
+ * آیا کاربر می‌تواند برنامه جدید بسازد؟
+ */
+export function canCreateProgram(
+  state: SubscriptionState,
+  currentProgramCount: number
+): boolean {
+  // اگر اشتراک فعال دارد، نامحدود
+  if (isSubscriptionActive(state)) return true;
+  // اگر trial فعال نیست، نه
+  if (!isTrialActive(state)) return false;
+  // در trial، فقط FREE_LIMITS.programs مجاز
+  return currentProgramCount < FREE_LIMITS.programs;
+}
+
+/**
+ * آیا کاربر می‌تواند پروفایل جدید بسازد؟
+ */
+export function canCreateProfile(
+  state: SubscriptionState,
+  currentProfileCount: number
+): boolean {
+  // اگر اشتراک فعال دارد، نامحدود
+  if (isSubscriptionActive(state)) return true;
+  // اگر trial فعال نیست، نه
+  if (!isTrialActive(state)) return false;
+  // در trial، فقط FREE_LIMITS.profiles مجاز
+  return currentProfileCount < FREE_LIMITS.profiles;
+}
+
+/**
+ * اطلاعات محدودیت برای نمایش
+ */
+export function getRemainingFree(
+  state: SubscriptionState,
+  programCount: number,
+  profileCount: number
+) {
+  const unlimited = isSubscriptionActive(state);
+  return {
+    unlimited,
+    programRemaining: unlimited
+      ? Infinity
+      : Math.max(0, FREE_LIMITS.programs - programCount),
+    profileRemaining: unlimited
+      ? Infinity
+      : Math.max(0, FREE_LIMITS.profiles - profileCount),
+  };
+}

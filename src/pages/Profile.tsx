@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
+import { useSubscription } from '../hooks/useSubscription';
 import { useTheme } from '../context/ThemeContext';
 import { soundEffects } from '../utils/sound';
 import { toPersianNumber } from '../utils/jalali';
@@ -19,6 +20,7 @@ import {
 export default function Profile() {
   const navigate = useNavigate();
   const { profiles, activeProfile, setActiveProfile, deleteProfile } = useAppContext();
+  const sub = useSubscription();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
@@ -49,6 +51,11 @@ export default function Profile() {
 
   const handleCreateNew = () => {
     soundEffects.playClick();
+    // محدودیت: ۱ پروفایل رایگان
+    if (!sub.canCreateProfile(profiles.length)) {
+      navigate('/subscription');
+      return;
+    }
     navigate('/onboarding?mode=new');
   };
 

@@ -61,14 +61,35 @@ export default function Welcome({ onContinue }: WelcomeProps) {
 
           {/* پایین */}
           <div className="space-y-3 pb-2">
-            <div className="text-center space-y-1.5">
+            <div className="text-center space-y-2">
               <h2 className="text-xl font-black leading-tight">
-                تمرین هوشمند، آفلاین و بی‌مرز
+                مربی هوشمند، آفلاین و بی‌مرز
               </h2>
               <p className="text-xs text-white/70 leading-5 px-2">
-                برنامه تمرینی اختصاصی، دقیق و همیشه در دسترس — بدون نیاز به
-                اینترنت
+                تمرین، تغذیه و مکمل — همه در یک اپلیکیشن اختصاصی
               </p>
+
+              {/* ویژگی‌ها */}
+              <div className="flex flex-wrap justify-center gap-1.5 pt-1">
+                <span
+                  className="text-[10px] font-bold px-2.5 py-1 rounded-full"
+                  style={{ background: 'rgba(167,139,250,0.25)', color: '#e9d5ff' }}
+                >
+                  🏋️ برنامه تمرینی
+                </span>
+                <span
+                  className="text-[10px] font-bold px-2.5 py-1 rounded-full"
+                  style={{ background: 'rgba(167,139,250,0.25)', color: '#e9d5ff' }}
+                >
+                  🍎 برنامه تغذیه
+                </span>
+                <span
+                  className="text-[10px] font-bold px-2.5 py-1 rounded-full"
+                  style={{ background: 'rgba(167,139,250,0.25)', color: '#e9d5ff' }}
+                >
+                  💊 برنامه مکمل
+                </span>
+              </div>
             </div>
 
             <button

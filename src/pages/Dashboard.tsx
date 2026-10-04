@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { useAppContext } from '../context/AppContext';
+import { useSubscription } from '../hooks/useSubscription';
 import { useTheme } from '../context/ThemeContext';
 import { toPersianNumber } from '../utils/jalali';
 import { soundEffects } from '../utils/sound';
@@ -18,6 +19,7 @@ type GeneratorKey = 'workout' | 'nutrition' | 'supplement' | 'compact';
 
 export default function Dashboard() {
   const { state, activeProfile, sessions, programs, profiles, setActiveProfile } = useAppContext();
+  const sub = useSubscription();
   const { theme } = useTheme();
   const navigate = useNavigate();
   const isDark = theme === 'dark';
@@ -142,6 +144,28 @@ export default function Dashboard() {
       alert(`${gen.title} به‌زودی در دسترس خواهد بود!`);
       return;
     }
+
+    // محدودیت برنامه تمرینی: ۱ برنامه رایگان
+    if (gen.key === 'workout' && !sub.canCreateProgram(programs.length)) {
+      soundEffects.playClick();
+      navigate('/subscription');
+      return;
+    }
+
+    // تغذیه: نیاز به اشتراک از ابتدا
+    if (gen.key === 'nutrition' && !sub.canAccessNutrition) {
+      soundEffects.playClick();
+      navigate('/subscription');
+      return;
+    }
+
+    // مکمل: نیاز به اشتراک از ابتدا
+    if (gen.key === 'supplement' && !sub.canAccessSupplement) {
+      soundEffects.playClick();
+      navigate('/subscription');
+      return;
+    }
+
     soundEffects.playClick();
     navigate(gen.path);
   };

@@ -7,6 +7,10 @@ import {
   canAccessNutrition,
   canAccessSupplement,
   canAccessCompact,
+  canCreateProgram,
+  canCreateProfile,
+  getRemainingFree,
+  FREE_LIMITS,
   isTrialActive,
   isSubscriptionActive,
   getRemainingTrialDays,
@@ -83,6 +87,13 @@ export function useSubscription() {
     canAccessNutrition: canAccessNutrition(state),
     canAccessSupplement: canAccessSupplement(state),
     canAccessCompact: canAccessCompact(state),
+
+    // محدودیت‌های مدل ۴
+    canCreateProgram: (count: number) => canCreateProgram(state, count),
+    canCreateProfile: (count: number) => canCreateProfile(state, count),
+    getRemainingFree: (programCount: number, profileCount: number) =>
+      getRemainingFree(state, programCount, profileCount),
+    FREE_LIMITS,
     onPurchaseSuccess,
   };
 }
