@@ -38,13 +38,17 @@ export default function OfflineGenerator() {
   const perfSummary = useMemo(() => getPerformanceSummary(performance), [performance]);
 
   // رنگ‌ها
-  const teal = isDark ? '#14b8a6' : '#0d9488';
+  const teal = isDark ? '#a78bfa' : '#8b5cf6';
   const gold = isDark ? '#d4af37' : '#f59e0b';
   const bgMain = isDark ? '#0f172a' : '#f8fafc';
-  const cardBg = isDark ? '#1e293b' : '#ffffff';
+  const cardBg = isDark
+    ? 'bg-[#1e1b4b]/50 backdrop-blur-md'
+    : 'bg-violet-50/70 backdrop-blur-md';
   const textMain = isDark ? '#ffffff' : '#0f172a';
   const textSub = isDark ? '#94a3b8' : '#64748b';
-  const borderCard = isDark ? 'border-white/5' : 'border-gray-200';
+  const borderCard = isDark
+    ? 'border-white/10'
+    : 'border-violet-200/60';
 
   const handleGenerate = () => {
     if (!activeProfile) return;
@@ -363,7 +367,7 @@ export default function OfflineGenerator() {
 
         {/* Info Footer */}
         {!generatedProgram && (
-          <div className={`rounded-2xl p-4 border ${borderCard} ${isDark ? 'bg-white/5' : 'bg-teal-50'}`}>
+          <div className={`rounded-2xl p-4 border ${borderCard} ${isDark ? 'bg-white/5' : 'bg-violet-50'}`}>
             <div className="flex items-start gap-3">
               <TrendingUp size={20} className="flex-shrink-0 mt-0.5" style={{ color: teal }} />
               <div>

@@ -86,7 +86,7 @@ export default function Calendar() {
         <CalendarIcon size={48} className="mb-4 opacity-50" />
         <h2 className="text-xl font-bold mb-2">برنامه تمرینی فعال نیست</h2>
         <p className="text-sm opacity-70 mb-6">لطفاً ابتدا یک برنامه وارد کنید یا بسازید.</p>
-        <button onClick={() => navigate('/import')} className="px-6 py-2 rounded-xl bg-teal-500 text-white font-bold">ورود برنامه</button>
+        <button onClick={() => navigate('/import')} className="px-6 py-2 rounded-xl bg-violet-500 text-white font-bold">ورود برنامه</button>
       </div>
     );
   }
@@ -95,14 +95,14 @@ export default function Calendar() {
 
   return (
     <div className={`min-h-screen pb-24 ${isDark ? 'bg-[#0f172a]' : 'bg-[#f8fafc]'}`}>
-      <div className={`sticky top-0 z-40 backdrop-blur-md border-b px-4 py-4 flex items-center justify-between ${isDark ? 'bg-[#0f172a]/90 border-white/10' : 'bg-white/90 border-gray-200'}`}>
+      <div className={`sticky top-0 z-30 backdrop-blur-md border-b px-4 py-4 flex items-center justify-between ${isDark ? 'bg-[#0f172a]/90 border-white/10' : 'bg-white/90 border-gray-200'}`}>
         <div className="flex items-center gap-3">
           <button onClick={() => navigate(-1)} className="p-2 rounded-full hover:bg-black/5">
             <ChevronLeft size={24} className={isDark ? 'text-white' : 'text-gray-800'} />
           </button>
           <div>
             <h1 className={`font-bold text-lg flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-              <CalendarIcon size={20} className="text-teal-500" /> تقویم تمرینی
+              <CalendarIcon size={20} className="text-violet-500" /> تقویم تمرینی
             </h1>
             <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{activeProgramData.name}</p>
           </div>
@@ -111,14 +111,14 @@ export default function Calendar() {
 
       <div className="p-4 space-y-4">
         {hasExercises ? (
-          <div className={`rounded-2xl p-5 border shadow-sm relative overflow-hidden ${isDark ? 'bg-[#1e293b] border-teal-500/30' : 'bg-white border-teal-200'}`}>
+          <div className={`rounded-2xl p-5 border shadow-sm relative overflow-hidden ${isDark ? 'bg-[#1e293b] border-violet-500/30' : 'bg-white border-violet-200'}`}>
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <span className={`text-xs font-bold px-2 py-1 rounded-lg ${isDark ? 'bg-teal-500/20 text-teal-400' : 'bg-teal-50 text-teal-700'}`}>امروز</span>
+                  <span className={`text-xs font-bold px-2 py-1 rounded-lg ${isDark ? 'bg-violet-500/20 text-violet-400' : 'bg-violet-50 text-violet-700'}`}>امروز</span>
                   <h2 className={`text-xl font-black mt-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>{currentDayPlan!.day}</h2>
                 </div>
-                <button onClick={handleStartSession} className="w-12 h-12 rounded-full bg-teal-500 text-white flex items-center justify-center shadow-lg shadow-teal-500/30 active:scale-95 transition-transform">
+                <button onClick={handleStartSession} className="w-12 h-12 rounded-full bg-violet-500 text-white flex items-center justify-center shadow-lg shadow-teal-500/30 active:scale-95 transition-transform">
                   <Play size={20} fill="currentColor" className="ml-0.5" />
                 </button>
               </div>
@@ -126,7 +126,7 @@ export default function Calendar() {
                 {currentDayPlan!.exercises.map((ex: any, idx: number) => (
                   <div key={idx} className={`flex items-center justify-between p-3 rounded-xl ${isDark ? 'bg-white/5' : 'bg-gray-50'}`}>
                     <div className="flex items-center gap-3">
-                      <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${isDark ? 'bg-teal-500/20 text-teal-400' : 'bg-teal-100 text-teal-700'}`}>{idx + 1}</span>
+                      <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${isDark ? 'bg-violet-500/20 text-violet-400' : 'bg-violet-100 text-violet-700'}`}>{idx + 1}</span>
                       <span className={`text-sm font-bold ${isDark ? 'text-gray-200' : 'text-gray-800'}`}>{ex.name}</span>
                     </div>
                     <span className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{ex.sets} ست × {ex.reps}</span>
@@ -161,7 +161,7 @@ export default function Calendar() {
               <div key={index} className={`rounded-xl border transition-all overflow-hidden ${isRest ? (isDark ? 'bg-[#1e293b]/50 border-white/5 opacity-60' : 'bg-gray-50 border-gray-100 opacity-60') : (isDark ? 'bg-[#1e293b] border-white/5' : 'bg-white border-gray-100')}`}>
                 <button onClick={() => !isRest && toggleDay(dayName)} disabled={isRest} className={`w-full flex items-center justify-between p-4 text-right ${isRest ? 'cursor-default' : 'cursor-pointer hover:bg-black/5 dark:hover:bg-white/5'}`}>
                   <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xs font-black shrink-0 ${isRest ? (isDark ? 'bg-gray-800 text-gray-600' : 'bg-gray-200 text-gray-400') : (isOpen ? 'bg-teal-500 text-white' : (isDark ? 'bg-teal-500/20 text-teal-400' : 'bg-teal-50 text-teal-700'))}`}>
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xs font-black shrink-0 ${isRest ? (isDark ? 'bg-gray-800 text-gray-600' : 'bg-gray-200 text-gray-400') : (isOpen ? 'bg-violet-500 text-white' : (isDark ? 'bg-violet-500/20 text-violet-400' : 'bg-violet-50 text-violet-700'))}`}>
                       {isRest ? 'R' : ((index + 1) % 7) + 1}
                     </div>
                     <div className="text-right">
@@ -172,7 +172,7 @@ export default function Calendar() {
                   {!isRest && (
                     <div className="flex items-center gap-2">
                        <button onClick={(e) => { e.stopPropagation(); handleStartSession(); }} className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-white/10 text-gray-400' : 'hover:bg-gray-100 text-gray-400'}`}><Play size={16} fill="currentColor" /></button>
-                      <ChevronDown size={20} className={`transition-transform duration-300 ${isOpen ? 'rotate-180 text-teal-500' : 'text-gray-400'}`} />
+                      <ChevronDown size={20} className={`transition-transform duration-300 ${isOpen ? 'rotate-180 text-violet-500' : 'text-gray-400'}`} />
                     </div>
                   )}
                 </button>

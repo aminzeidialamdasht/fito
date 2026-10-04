@@ -34,8 +34,8 @@ export function Input({ value, onChange, type = 'text', placeholder, isDark }: I
       placeholder={placeholder}
       className={`w-full px-4 py-3 rounded-xl border text-sm font-bold outline-none transition-colors ${
         isDark
-          ? 'bg-white/5 border-white/10 text-white focus:border-teal-500 placeholder:text-gray-600'
-          : 'bg-white border-gray-200 text-gray-900 focus:border-teal-500 placeholder:text-gray-400'
+          ? 'bg-white/5 border-white/10 text-white focus:border-violet-500 placeholder:text-gray-600'
+          : 'bg-white border-gray-200 text-gray-900 focus:border-violet-500 placeholder:text-gray-400'
       }`}
     />
   );
@@ -56,8 +56,8 @@ export function Select({ value, onChange, options, placeholder, isDark }: Select
       onChange={(e) => onChange(e.target.value)}
       className={`w-full px-4 py-3 rounded-xl border text-sm font-bold outline-none transition-colors ${
         isDark
-          ? 'bg-white/5 border-white/10 text-white focus:border-teal-500'
-          : 'bg-white border-gray-200 text-gray-900 focus:border-teal-500'
+          ? 'bg-white/5 border-white/10 text-white focus:border-violet-500'
+          : 'bg-white border-gray-200 text-gray-900 focus:border-violet-500'
       }`}
     >
       {placeholder && <option value="">{placeholder}</option>}
@@ -87,8 +87,8 @@ export function TextArea({ value, onChange, placeholder, rows = 3, isDark }: Tex
       rows={rows}
       className={`w-full px-4 py-3 rounded-xl border text-sm font-bold outline-none transition-colors resize-none ${
         isDark
-          ? 'bg-white/5 border-white/10 text-white focus:border-teal-500 placeholder:text-gray-600'
-          : 'bg-white border-gray-200 text-gray-900 focus:border-teal-500 placeholder:text-gray-400'
+          ? 'bg-white/5 border-white/10 text-white focus:border-violet-500 placeholder:text-gray-600'
+          : 'bg-white border-gray-200 text-gray-900 focus:border-violet-500 placeholder:text-gray-400'
       }`}
     />
   );
@@ -153,8 +153,8 @@ export function ArrayInput({ value, onChange, placeholder, isDark }: ArrayInputP
               key={idx}
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold ${
                 isDark
-                  ? 'bg-teal-500/20 text-teal-300 border border-teal-500/30'
-                  : 'bg-teal-50 text-teal-700 border border-teal-200'
+                  ? 'bg-violet-500/20 text-violet-300 border border-violet-500/30'
+                  : 'bg-violet-50 text-violet-700 border border-violet-200'
               }`}
             >
               {item}
@@ -181,8 +181,8 @@ export function ArrayInput({ value, onChange, placeholder, isDark }: ArrayInputP
           placeholder={placeholder}
           className={`flex-1 px-4 py-3 rounded-xl border text-sm font-bold outline-none transition-colors ${
             isDark
-              ? 'bg-white/5 border-white/10 text-white focus:border-teal-500 placeholder:text-gray-600'
-              : 'bg-white border-gray-200 text-gray-900 focus:border-teal-500 placeholder:text-gray-400'
+              ? 'bg-white/5 border-white/10 text-white focus:border-violet-500 placeholder:text-gray-600'
+              : 'bg-white border-gray-200 text-gray-900 focus:border-violet-500 placeholder:text-gray-400'
           }`}
         />
         <button
@@ -190,7 +190,7 @@ export function ArrayInput({ value, onChange, placeholder, isDark }: ArrayInputP
           onClick={commit}
           disabled={!text.trim()}
           className={`px-4 rounded-xl font-bold text-sm flex items-center gap-1 disabled:opacity-30 transition-all ${
-            isDark ? 'bg-teal-500/20 text-teal-300' : 'bg-teal-50 text-teal-700'
+            isDark ? 'bg-violet-500/20 text-violet-300' : 'bg-violet-50 text-violet-700'
           }`}
         >
           <Plus size={16} />
@@ -252,12 +252,12 @@ export function PrioritySelect({ value, onChange, options, isDark, maxItems = 5 
               <div
                 key={item}
                 className={`flex items-center gap-2 p-2 rounded-lg ${
-                  isDark ? 'bg-teal-500/10' : 'bg-teal-50'
+                  isDark ? 'bg-violet-500/10' : 'bg-violet-50'
                 }`}
               >
                 <span
                   className={`w-6 h-6 rounded-md flex items-center justify-center text-[10px] font-black ${
-                    isDark ? 'bg-teal-500/30 text-teal-200' : 'bg-teal-200 text-teal-800'
+                    isDark ? 'bg-violet-500/30 text-violet-200' : 'bg-violet-200 text-violet-800'
                   }`}
                 >
                   {idx + 1}
@@ -313,8 +313,8 @@ export function PrioritySelect({ value, onChange, options, isDark, maxItems = 5 
               onClick={() => toggle(opt)}
               className={`px-3 py-2 rounded-lg text-xs font-bold border transition-all active:scale-95 ${
                 isDark
-                  ? 'bg-white/5 border-white/10 text-gray-300 hover:border-teal-500/50 hover:text-white'
-                  : 'bg-white border-gray-200 text-gray-700 hover:border-teal-300 hover:bg-teal-50'
+                  ? 'bg-white/5 border-white/10 text-gray-300 hover:border-violet-500/50 hover:text-white'
+                  : 'bg-white border-gray-200 text-gray-700 hover:border-violet-300 hover:bg-violet-50'
               }`}
             >
               + {opt}

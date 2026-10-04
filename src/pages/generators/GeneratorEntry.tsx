@@ -18,7 +18,7 @@ import {
 type GeneratorType = 'workout' | 'nutrition' | 'supplement' | 'compact';
 
 const GENERATOR_INFO: Record<GeneratorType, { title: string; icon: any; color: string }> = {
-  workout: { title: 'برنامه تمرینی', icon: Dumbbell, color: '#14b8a6' },
+  workout: { title: 'برنامه تمرینی', icon: Dumbbell, color: '#a78bfa' },
   nutrition: { title: 'برنامه تغذیه', icon: Apple, color: '#10b981' },
   supplement: { title: 'برنامه مکمل', icon: Pill, color: '#ec4899' },
   compact: { title: 'برنامه فشرده', icon: Zap, color: '#f59e0b' },
@@ -33,13 +33,17 @@ export default function GeneratorEntry() {
 
   const [showChoice, setShowChoice] = useState(false);
 
-  const teal = isDark ? '#14b8a6' : '#0d9488';
+  const teal = isDark ? '#a78bfa' : '#8b5cf6';
   const gold = isDark ? '#d4af37' : '#f59e0b';
   const bgMain = isDark ? '#0f172a' : '#f8fafc';
-  const cardBg = isDark ? '#1e293b' : '#ffffff';
+  const cardBg = isDark
+    ? 'bg-[#1e1b4b]/50 backdrop-blur-md'
+    : 'bg-violet-50/70 backdrop-blur-md';
   const textMain = isDark ? '#ffffff' : '#0f172a';
   const textSub = isDark ? '#94a3b8' : '#64748b';
-  const borderCard = isDark ? 'border-white/5' : 'border-gray-200';
+  const borderCard = isDark
+    ? 'border-white/10'
+    : 'border-violet-200/60';
 
   const info = GENERATOR_INFO[type || 'workout'] || GENERATOR_INFO.workout;
   const Icon = info.icon;

@@ -38,13 +38,17 @@ export default function ProgramDetail() {
     exerciseName: string;
   } | null>(null);
 
-  const teal = isDark ? '#14b8a6' : '#0d9488';
+  const teal = isDark ? '#a78bfa' : '#8b5cf6';
   const gold = isDark ? '#d4af37' : '#f59e0b';
   const bgMain = isDark ? '#0f172a' : '#f8fafc';
-  const cardBg = isDark ? '#1e293b' : '#ffffff';
+  const cardBg = isDark
+    ? 'bg-[#1e1b4b]/50 backdrop-blur-md'
+    : 'bg-violet-50/70 backdrop-blur-md';
   const textMain = isDark ? '#ffffff' : '#0f172a';
   const textSub = isDark ? '#94a3b8' : '#64748b';
-  const borderCard = isDark ? 'border-white/5' : 'border-gray-200';
+  const borderCard = isDark
+    ? 'border-white/10'
+    : 'border-violet-200/60';
 
   if (!program) {
     return (
@@ -105,7 +109,7 @@ export default function ProgramDetail() {
   return (
     <div className={`min-h-screen pb-24 ${bgMain}`}>
       {/* Header */}
-      <div className={`sticky top-0 z-40 backdrop-blur-md border-b px-4 py-4 ${isDark ? 'bg-[#0f172a]/90 border-white/10' : 'bg-white/90 border-gray-200'}`}>
+      <div className={`sticky top-0 z-30 backdrop-blur-md border-b px-4 py-4 ${isDark ? 'bg-[#0f172a]/90 border-white/10' : 'bg-white/90 border-gray-200'}`}>
         <div className="flex items-center gap-3 max-w-3xl mx-auto">
           <button onClick={() => navigate(-1)} className="p-2 rounded-full hover:bg-black/5">
             <ChevronLeft size={24} className={isDark ? 'text-white' : 'text-gray-800'} />
@@ -150,7 +154,7 @@ export default function ProgramDetail() {
             </div>
           </div>
 
-          <div className={`p-3 rounded-xl text-xs leading-6 ${isDark ? 'bg-teal-500/5 text-gray-300' : 'bg-teal-50 text-gray-700'}`}>
+          <div className={`p-3 rounded-xl text-xs leading-6 ${isDark ? 'bg-violet-500/5 text-gray-300' : 'bg-violet-50 text-gray-700'}`}>
             <div className="flex items-start gap-2">
               <Zap size={14} className="flex-shrink-0 mt-0.5" style={{ color: teal }} />
               <p>

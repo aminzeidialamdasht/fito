@@ -58,11 +58,11 @@ export default function SuggestedPrograms({ isDark, isPremium }: Props) {
     <div>
       <div className="flex items-center justify-between mb-3">
         <h2 className={`font-black text-lg flex items-center gap-2 ${isDark ? 'text-white' : 'text-slate-800'}`}>
-          <Sparkles size={18} className={isDark ? 'text-[#d4af37]' : 'text-teal-500'} />
+          <Sparkles size={18} className={isDark ? 'text-[#d4af37]' : 'text-violet-500'} />
           برنامه‌های پیشنهادی
         </h2>
         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-          isDark ? 'bg-green-500/20 text-green-400' : 'bg-green-100 text-green-700'
+          isDark ? 'bg-indigo-500/20 text-indigo-400' : 'bg-indigo-100 text-indigo-700'
         }`}>رایگان</span>
       </div>
       <p className={`text-xs mb-3 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
@@ -71,11 +71,11 @@ export default function SuggestedPrograms({ isDark, isPremium }: Props) {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {/* Sample Program Card */}
         <div className={`rounded-2xl p-4 border ${
-          isDark ? 'bg-[#1a1a2e] border-white/5' : 'bg-white border-teal-100 shadow-sm'
+          isDark ? 'bg-[#1a1830] border-white/5' : 'bg-white border-violet-100 shadow-sm'
         }`}>
           <div className="flex items-start gap-3">
             <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${
-              isDark ? 'bg-[#d4af37]/15 text-[#d4af37]' : 'bg-teal-100 text-teal-700'
+              isDark ? 'bg-[#d4af37]/15 text-[#d4af37]' : 'bg-violet-100 text-violet-700'
             }`}>
               <Dumbbell size={22} />
             </div>
@@ -89,7 +89,7 @@ export default function SuggestedPrograms({ isDark, isPremium }: Props) {
               <button
                 onClick={handleStartSample}
                 className={`mt-2 text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${
-                  isDark ? 'bg-[#d4af37]/20 text-[#d4af37] hover:bg-[#d4af37]/30' : 'bg-teal-100 text-teal-700 hover:bg-teal-200'
+                  isDark ? 'bg-[#d4af37]/20 text-[#d4af37] hover:bg-[#d4af37]/30' : 'bg-violet-100 text-violet-700 hover:bg-violet-200'
                 }`}
               >
                 شروع تمرین رایگان
@@ -100,7 +100,7 @@ export default function SuggestedPrograms({ isDark, isPremium }: Props) {
 
         {/* AI Program Card */}
         <div className={`rounded-2xl p-4 border relative overflow-hidden ${
-          isDark ? 'bg-[#1a1a2e] border-[#d4af37]/20' : 'bg-white border-amber-200 shadow-sm'
+          isDark ? 'bg-[#1a1830] border-[#d4af37]/20' : 'bg-white border-amber-200 shadow-sm'
         }`}>
           <div className="flex items-start gap-3">
             <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${

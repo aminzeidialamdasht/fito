@@ -104,10 +104,10 @@ export default function NutritionImport() {
     return (
       <div className="flex flex-col items-center justify-center py-20">
         <AlertCircle size={48} className={isDark ? 'text-[#f59e0b]' : 'text-[#d97706]'} />
-        <h2 className={`text-xl font-bold mt-4 mb-2 ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>
+        <h2 className={`text-xl font-bold mt-4 mb-2 ${isDark ? 'text-white' : 'text-[#312e81]'}`}>
           پروفایل انتخاب نشده
         </h2>
-        <p className={`text-center ${isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}`}>
+        <p className={`text-center ${isDark ? 'text-gray-400' : 'text-[#7c3aed]/70'}`}>
           لطفاً ابتدا یک پروفایل را انتخاب کنید
         </p>
       </div>
@@ -116,8 +116,8 @@ export default function NutritionImport() {
 
   return (
     <div className="space-y-6">
-      <h2 className={`text-2xl font-bold flex items-center gap-2 ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>
-        <Apple size={24} className={isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'} />
+      <h2 className={`text-2xl font-bold flex items-center gap-2 ${isDark ? 'text-white' : 'text-[#312e81]'}`}>
+        <Apple size={24} className={isDark ? 'text-[#a78bfa]' : 'text-[#8b5cf6]'} />
         ورود برنامه غذایی
       </h2>
 
@@ -133,12 +133,12 @@ export default function NutritionImport() {
       )}
 
       <div className={`rounded-2xl p-5 border theme-transition ${
-        isDark ? 'bg-[#1a1a2e] border-[#14b8a6]/10' : 'bg-white border-[#14b8a6]/15'
+        isDark ? 'bg-[#1a1830] border-[#a78bfa]/10' : 'bg-white border-[#a78bfa]/15'
       }`}>
-        <h3 className={`font-bold mb-3 ${isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'}`}>
+        <h3 className={`font-bold mb-3 ${isDark ? 'text-[#a78bfa]' : 'text-[#8b5cf6]'}`}>
           JSON برنامه غذایی
         </h3>
-        <p className={`text-sm mb-3 ${isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}`}>
+        <p className={`text-sm mb-3 ${isDark ? 'text-gray-400' : 'text-[#7c3aed]/70'}`}>
           خروجی هوش مصنوعی را در قالب JSON وارد کنید:
         </p>
         <textarea
@@ -146,8 +146,8 @@ export default function NutritionImport() {
           onChange={e => { setJsonInput(e.target.value); setValidationResult(null); setShowPreview(false); }}
           className={`w-full border rounded-xl px-4 py-3 text-sm font-mono focus:outline-none resize-none ${
             isDark 
-              ? 'bg-[#0d0d1a] border-gray-700 text-white focus:border-[#14b8a6]' 
-              : 'bg-[#f0fdfa] border-[#14b8a6]/30 text-[#134e4a] focus:border-[#14b8a6]'
+              ? 'bg-[#0f0e1f] border-gray-700 text-white focus:border-[#a78bfa]' 
+              : 'bg-[#f5f3ff] border-[#a78bfa]/30 text-[#312e81] focus:border-[#a78bfa]'
           }`}
           rows={10}
           dir="ltr"
@@ -161,7 +161,7 @@ export default function NutritionImport() {
             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm transition-all ${
               isDark
                 ? 'bg-[#4a90d9] text-white hover:bg-[#6bb5ff] disabled:opacity-50'
-                : 'bg-[#14b8a6] text-white hover:bg-[#0d9488] disabled:opacity-50'
+                : 'bg-[#a78bfa] text-white hover:bg-[#8b5cf6] disabled:opacity-50'
             }`}
           >
             <Eye size={16} />
@@ -187,7 +187,7 @@ export default function NutritionImport() {
           <AlertCircle size={20} className={isDark ? 'text-[#ef4444]' : 'text-[#dc2626]'} />
           <div>
             <p className={`font-bold ${isDark ? 'text-[#ef4444]' : 'text-[#dc2626]'}`}>خطا در اعتبارسنجی</p>
-            <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}`}>
+            <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-[#7c3aed]/70'}`}>
               {validationResult.error}
             </p>
           </div>
@@ -196,7 +196,7 @@ export default function NutritionImport() {
 
       {showPreview && validationResult?.valid && (
         <div className={`rounded-2xl p-5 border animate-slide-up ${
-          isDark ? 'bg-[#1a1a2e] border-[#22c55e]/20' : 'bg-white border-[#10b981]/30'
+          isDark ? 'bg-[#1a1830] border-[#22c55e]/20' : 'bg-white border-[#10b981]/30'
         }`}>
           <div className="flex items-center justify-between mb-4">
             <h3 className={`font-bold flex items-center gap-2 ${isDark ? 'text-[#22c55e]' : 'text-[#059669]'}`}>
@@ -218,49 +218,49 @@ export default function NutritionImport() {
           
           <div className="space-y-4">
             <div className="flex items-center gap-4 text-sm">
-              <span className={isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}>نام برنامه:</span>
-              <span className={`font-bold ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>
+              <span className={isDark ? 'text-gray-400' : 'text-[#7c3aed]/70'}>نام برنامه:</span>
+              <span className={`font-bold ${isDark ? 'text-white' : 'text-[#312e81]'}`}>
                 {validationResult.data.plan_name}
               </span>
             </div>
             <div className="flex items-center gap-4 text-sm">
-              <span className={isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}>مدت:</span>
-              <span className={isDark ? 'text-white' : 'text-[#134e4a]'}>
+              <span className={isDark ? 'text-gray-400' : 'text-[#7c3aed]/70'}>مدت:</span>
+              <span className={isDark ? 'text-white' : 'text-[#312e81]'}>
                 {validationResult.data.duration}
               </span>
             </div>
             <div className="flex items-center gap-4 text-sm">
-              <span className={isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}>کالری روزانه:</span>
-              <span className={`font-bold ${isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'}`}>
+              <span className={isDark ? 'text-gray-400' : 'text-[#7c3aed]/70'}>کالری روزانه:</span>
+              <span className={`font-bold ${isDark ? 'text-[#a78bfa]' : 'text-[#8b5cf6]'}`}>
                 {toPersianNumber(validationResult.data.daily_calories)} کالری
               </span>
             </div>
             <div className="flex items-center gap-4 text-sm">
-              <span className={isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}>تعداد روزها:</span>
-              <span className={isDark ? 'text-white' : 'text-[#134e4a]'}>
+              <span className={isDark ? 'text-gray-400' : 'text-[#7c3aed]/70'}>تعداد روزها:</span>
+              <span className={isDark ? 'text-white' : 'text-[#312e81]'}>
                 {toPersianNumber(validationResult.data.days.length)} روز
               </span>
             </div>
 
-            <div className={`border-t pt-4 mt-4 ${isDark ? 'border-gray-700' : 'border-[#14b8a6]/20'}`}>
+            <div className={`border-t pt-4 mt-4 ${isDark ? 'border-gray-700' : 'border-[#a78bfa]/20'}`}>
               {validationResult.data.days.map((day: any, i: number) => (
                 <div key={i} className={`mb-4 rounded-xl p-4 ${
-                  isDark ? 'bg-[#0d0d1a]' : 'bg-[#f0fdfa]'
+                  isDark ? 'bg-[#0f0e1f]' : 'bg-[#f5f3ff]'
                 }`}>
-                  <h4 className={`font-bold mb-2 ${isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'}`}>
+                  <h4 className={`font-bold mb-2 ${isDark ? 'text-[#a78bfa]' : 'text-[#8b5cf6]'}`}>
                     {day.day}
                   </h4>
                   <div className="space-y-2">
                     {(day.meals || []).map((meal: any, j: number) => (
                       <div key={j} className={`border-b pb-2 last:border-0 ${
-                        isDark ? 'border-gray-800' : 'border-[#14b8a6]/10'
+                        isDark ? 'border-gray-800' : 'border-[#a78bfa]/10'
                       }`}>
-                        <p className={`text-sm font-bold ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>
+                        <p className={`text-sm font-bold ${isDark ? 'text-white' : 'text-[#312e81]'}`}>
                           {meal.meal_name} ({meal.time})
                         </p>
                         <div className="ml-4 mt-1">
                           {(meal.foods || []).map((food: any, k: number) => (
-                            <p key={k} className={`text-xs ${isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}`}>
+                            <p key={k} className={`text-xs ${isDark ? 'text-gray-400' : 'text-[#7c3aed]/70'}`}>
                               • {food.name} - {food.portion} ({toPersianNumber(food.calories)} کالری)
                             </p>
                           ))}

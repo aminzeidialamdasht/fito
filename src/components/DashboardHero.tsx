@@ -59,7 +59,7 @@ export default function DashboardHero({
         className={`w-full py-4 rounded-2xl font-black text-base flex items-center justify-center gap-3 shadow-lg active:scale-[0.98] transition-transform ${
           isDark
             ? 'bg-gradient-to-l from-[#d4af37] to-amber-600 text-slate-950 shadow-[#d4af37]/25'
-            : 'bg-gradient-to-l from-teal-600 to-emerald-600 text-white shadow-teal-500/30'
+            : 'bg-gradient-to-l from-violet-600 to-indigo-600 text-white shadow-teal-500/30'
         }`}
       >
         <Dumbbell size={22} />
@@ -68,21 +68,21 @@ export default function DashboardHero({
 
       <div className="grid grid-cols-2 gap-3">
         <div className={`rounded-2xl p-4 border flex flex-col items-center justify-center ${
-          isDark ? 'bg-[#1a1a2e] border-white/5' : 'bg-white border-teal-100 shadow-sm'
+          isDark ? 'bg-[#1a1830] border-white/5' : 'bg-white border-violet-100 shadow-sm'
         }`}>
           <div className="relative w-16 h-16 mb-2">
             <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
               <circle cx="18" cy="18" r="15.5" fill="none" stroke={isDark ? '#334155' : '#e2e8f0'} strokeWidth="3" />
               <circle
                 cx="18" cy="18" r="15.5" fill="none"
-                stroke={isDark ? '#d4af37' : '#0d9488'}
+                stroke={isDark ? '#d4af37' : '#8b5cf6'}
                 strokeWidth="3"
                 strokeLinecap="round"
                 strokeDasharray={`${weeklyProgress * 0.97} 100`}
               />
             </svg>
             <div className="absolute inset-0 flex items-center justify-center">
-              <span className={`text-sm font-black ${isDark ? 'text-[#d4af37]' : 'text-teal-600'}`}>
+              <span className={`text-sm font-black ${isDark ? 'text-[#d4af37]' : 'text-violet-600'}`}>
                 {toPersianNumber(weeklyCompleted)}/{toPersianNumber(weeklyGoal)}
               </span>
             </div>
@@ -91,7 +91,7 @@ export default function DashboardHero({
         </div>
 
         <div className={`rounded-2xl p-4 border flex flex-col items-center justify-center ${
-          isDark ? 'bg-[#1a1a2e] border-white/5' : 'bg-white border-orange-100 shadow-sm'
+          isDark ? 'bg-[#1a1830] border-white/5' : 'bg-white border-orange-100 shadow-sm'
         }`}>
           <Flame size={28} className={currentStreak > 0 ? 'text-orange-400 mb-1' : 'text-slate-500 mb-1'} />
           <p className={`text-2xl font-black ${isDark ? 'text-[#d4af37]' : 'text-orange-600'}`}>
@@ -103,11 +103,11 @@ export default function DashboardHero({
 
       {lastSession && (
         <div className={`rounded-2xl p-4 border ${
-          isDark ? 'bg-[#1a1a2e] border-white/5' : 'bg-white border-teal-100 shadow-sm'
+          isDark ? 'bg-[#1a1830] border-white/5' : 'bg-white border-violet-100 shadow-sm'
         }`}>
           <div className="flex items-center justify-between mb-3">
             <h3 className={`font-bold text-sm flex items-center gap-2 ${isDark ? 'text-white' : 'text-slate-800'}`}>
-              <CheckCircle2 size={16} className="text-green-400" /> آخرین جلسه
+              <CheckCircle2 size={16} className="text-indigo-400" /> آخرین جلسه
             </h3>
             <span className={`text-[10px] ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
               {lastSession.date ? new Date(lastSession.date).toLocaleDateString('fa-IR') : ''}
@@ -115,19 +115,19 @@ export default function DashboardHero({
           </div>
           <div className="grid grid-cols-3 gap-2 text-center">
             <div>
-              <p className={`text-sm font-black ${isDark ? 'text-[#d4af37]' : 'text-teal-600'}`}>
+              <p className={`text-sm font-black ${isDark ? 'text-[#d4af37]' : 'text-violet-600'}`}>
                 {toPersianNumber(Math.round(lastSession.totalVolume || 0))}
               </p>
               <p className="text-[10px] text-slate-500">حجم (kg)</p>
             </div>
             <div>
-              <p className={`text-sm font-black ${isDark ? 'text-teal-300' : 'text-teal-700'}`}>
+              <p className={`text-sm font-black ${isDark ? 'text-violet-300' : 'text-violet-700'}`}>
                 {getSessionDuration(lastSession) || '—'}
               </p>
               <p className="text-[10px] text-slate-500">مدت زمان</p>
             </div>
             <div>
-              <p className={`text-sm font-black ${isDark ? 'text-green-400' : 'text-green-600'}`}>
+              <p className={`text-sm font-black ${isDark ? 'text-indigo-400' : 'text-indigo-600'}`}>
                 {toPersianNumber((lastSession.sets || []).filter((s: any) => s.completed).length)}
               </p>
               <p className="text-[10px] text-slate-500">ست تکمیل</p>

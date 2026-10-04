@@ -32,7 +32,7 @@ export default function BottomNav() {
               to={item.path}
               className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-colors ${
                 isActive 
-                  ? 'text-teal-500' 
+                  ? 'text-violet-500' 
                   : isDark ? 'text-gray-400 hover:text-gray-200' : 'text-gray-500 hover:text-gray-800'
               }`}
             >
@@ -40,7 +40,7 @@ export default function BottomNav() {
               <span className="text-[10px] font-bold text-center leading-tight">{item.label}</span>
               
               {isActive && (
-                <div className="absolute top-0 w-12 h-0.5 bg-teal-500 rounded-b-full" />
+                <div className="absolute top-0 w-12 h-0.5 bg-violet-500 rounded-b-full" />
               )}
             </Link>
           );

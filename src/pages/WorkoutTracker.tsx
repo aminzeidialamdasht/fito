@@ -40,7 +40,9 @@ export default function WorkoutTracker() {
 
   const gold = isDark ? '#d4af37' : '#f59e0b';
   const darkBg = isDark ? '#0f172a' : '#ffffff';
-  const cardBg = isDark ? '#1e293b' : '#f8fafc';
+  const cardBg = isDark
+    ? 'bg-[#1e1b4b]/50 backdrop-blur-md'
+    : 'bg-violet-50/70 backdrop-blur-md';
   const textMain = isDark ? '#ffffff' : '#0f172a';
   const textSub = isDark ? '#94a3b8' : '#64748b';
 
@@ -256,7 +258,7 @@ export default function WorkoutTracker() {
         </div>
 
         <div className="p-4 space-y-4">
-          <div className={`rounded-2xl p-5 border ${isDark ? 'border-white/5 bg-[#1e293b]' : 'border-teal-100 bg-white shadow-sm'}`}>
+          <div className={`rounded-2xl p-5 border ${isDark ? 'border-white/5 bg-[#1e293b]' : 'border-violet-100 bg-white shadow-sm'}`}>
             <div className="flex items-center gap-3 mb-3">
               <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: `${gold}15` }}>
                 <Dumbbell size={24} style={{ color: gold }} />

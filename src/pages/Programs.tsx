@@ -26,13 +26,17 @@ export default function Programs() {
   const isDark = theme === 'dark';
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
-  const teal = isDark ? '#14b8a6' : '#0d9488';
+  const teal = isDark ? '#a78bfa' : '#8b5cf6';
   const gold = isDark ? '#d4af37' : '#f59e0b';
   const bgMain = isDark ? '#0f172a' : '#f8fafc';
-  const cardBg = isDark ? '#1e293b' : '#ffffff';
+  const cardBg = isDark
+    ? 'bg-[#1e1b4b]/50 backdrop-blur-md'
+    : 'bg-violet-50/70 backdrop-blur-md';
   const textMain = isDark ? '#ffffff' : '#0f172a';
   const textSub = isDark ? '#94a3b8' : '#64748b';
-  const borderCard = isDark ? 'border-white/5' : 'border-gray-200';
+  const borderCard = isDark
+    ? 'border-white/10'
+    : 'border-violet-200/60';
 
   const sortedPrograms = [...programs].sort((a, b) =>
     new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
@@ -46,7 +50,7 @@ export default function Programs() {
 
   return (
     <div className={`min-h-screen pb-24 ${bgMain}`}>
-      <div className={`sticky top-0 z-40 backdrop-blur-md border-b px-4 py-4 flex items-center gap-3 ${isDark ? 'bg-[#0f172a]/90 border-white/10' : 'bg-white/90 border-gray-200'}`}>
+      <div className={`sticky top-0 z-30 backdrop-blur-md border-b px-4 py-4 flex items-center gap-3 ${isDark ? 'bg-[#0f172a]/90 border-white/10' : 'bg-white/90 border-gray-200'}`}>
         <button onClick={() => navigate(-1)} className="p-2 rounded-full hover:bg-black/5">
           <ChevronLeft size={24} className={isDark ? 'text-white' : 'text-gray-800'} />
         </button>
@@ -98,7 +102,7 @@ export default function Programs() {
                   isActive
                     ? isDark
                       ? 'border-[#d4af37]/40 bg-[#d4af37]/5'
-                      : 'border-teal-300 bg-teal-50/50'
+                      : 'border-violet-300 bg-violet-50/50'
                     : `${borderCard} ${cardBg}`
                 }`}
               >

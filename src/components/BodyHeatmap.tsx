@@ -16,7 +16,7 @@ const MUSCLE_COLORS: Record<string, string> = {
   rear_delts: '#f97316',   // نارنجی پررنگ
   glutes: '#d946ef',       // ارغوانی
   hamstrings: '#6366f1',   // نیلی
-  calves: '#14b8a6',       // سبزآبی
+  calves: '#a78bfa',       // سبزآبی
 };
 
 const MUSCLE_ZONES = {
@@ -80,7 +80,7 @@ export default function BodyHeatmap() {
           <button
             onClick={() => setView('front')}
             className={`text-[10px] font-bold px-3 py-1 rounded-full transition-all ${
-              view === 'front' ? 'bg-teal-500 text-white shadow-sm' : isDark ? 'text-gray-400' : 'text-gray-500'
+              view === 'front' ? 'bg-violet-500 text-white shadow-sm' : isDark ? 'text-gray-400' : 'text-gray-500'
             }`}
           >
             روبرو
@@ -88,7 +88,7 @@ export default function BodyHeatmap() {
           <button
             onClick={() => setView('back')}
             className={`text-[10px] font-bold px-3 py-1 rounded-full transition-all ${
-              view === 'back' ? 'bg-teal-500 text-white shadow-sm' : isDark ? 'text-gray-400' : 'text-gray-500'
+              view === 'back' ? 'bg-violet-500 text-white shadow-sm' : isDark ? 'text-gray-400' : 'text-gray-500'
             }`}
           >
             پشت
@@ -113,7 +113,7 @@ export default function BodyHeatmap() {
               if (vol === 0) return null;
 
               const intensity = Math.min(1, vol / (maxVol * 0.5));
-              const color = MUSCLE_COLORS[zone.id] || '#14b8a6';
+              const color = MUSCLE_COLORS[zone.id] || '#a78bfa';
 
               return (
                 <div

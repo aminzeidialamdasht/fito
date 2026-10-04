@@ -21,7 +21,7 @@ export default function History() {
   return (
     <div className={`min-h-screen pb-24 ${isDark ? 'bg-[#0f172a]' : 'bg-[#f8fafc]'}`}>
       {/* هدر */}
-      <div className={`sticky top-0 z-40 backdrop-blur-md border-b px-4 py-4 flex items-center gap-3 ${
+      <div className={`sticky top-0 z-30 backdrop-blur-md border-b px-4 py-4 flex items-center gap-3 ${
         isDark ? 'bg-[#0f172a]/90 border-white/10' : 'bg-white/90 border-gray-200'
       }`}>
         <button onClick={() => navigate(-1)} className="p-2 rounded-full hover:bg-black/5">
@@ -55,14 +55,14 @@ export default function History() {
                 onClick={() => navigate(`/session/${session.id}`)}
                 className={`flex items-center justify-between p-4 rounded-2xl border cursor-pointer active:scale-[0.98] transition-all ${
                   isDark 
-                    ? 'bg-[#1e293b] border-white/5 hover:border-teal-500/30' 
-                    : 'bg-white border-gray-100 hover:border-teal-200 shadow-sm'
+                    ? 'bg-[#1e293b] border-white/5 hover:border-violet-500/30' 
+                    : 'bg-white border-gray-100 hover:border-violet-200 shadow-sm'
                 }`}
               >
                 <div className="flex items-center gap-4">
                   <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
                     isCompleted 
-                      ? (isDark ? 'bg-teal-500/20 text-teal-400' : 'bg-teal-50 text-teal-600')
+                      ? (isDark ? 'bg-violet-500/20 text-violet-400' : 'bg-violet-50 text-violet-600')
                       : (isDark ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500')
                   }`}>
                     {isCompleted ? <CheckCircle2 size={24} /> : <Dumbbell size={24} />}
@@ -84,7 +84,7 @@ export default function History() {
                 <div className="flex flex-col items-end gap-1">
                   <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                     isCompleted 
-                      ? (isDark ? 'bg-teal-500/20 text-teal-400' : 'bg-teal-50 text-teal-700')
+                      ? (isDark ? 'bg-violet-500/20 text-violet-400' : 'bg-violet-50 text-violet-700')
                       : (isDark ? 'bg-amber-500/20 text-amber-400' : 'bg-amber-50 text-amber-700')
                   }`}>
                     {isCompleted ? 'تکمیل شده' : `${session.sets.filter(s=>s.completed).length} / ${session.sets.length} ست`}

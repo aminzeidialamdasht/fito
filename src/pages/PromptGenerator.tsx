@@ -50,10 +50,10 @@ export default function PromptGenerator() {
     return (
       <div className="flex flex-col items-center justify-center py-20">
         <AlertTriangle size={48} className={isDark ? 'text-[#f59e0b]' : 'text-[#d97706]'} />
-        <h2 className={`text-xl font-bold mt-4 mb-2 ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>
+        <h2 className={`text-xl font-bold mt-4 mb-2 ${isDark ? 'text-white' : 'text-[#312e81]'}`}>
           پروفایل تکمیل نشده
         </h2>
-        <p className={`text-center ${isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}`}>
+        <p className={`text-center ${isDark ? 'text-gray-400' : 'text-[#7c3aed]/70'}`}>
           لطفاً ابتدا پروفایل ورزشکار را در بخش پروفایل تکمیل کنید
         </p>
       </div>
@@ -62,16 +62,16 @@ export default function PromptGenerator() {
 
   return (
     <div className="space-y-6">
-      <h2 className={`text-2xl font-bold flex items-center gap-2 ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>
-        <Brain size={24} className={isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'} />
+      <h2 className={`text-2xl font-bold flex items-center gap-2 ${isDark ? 'text-white' : 'text-[#312e81]'}`}>
+        <Brain size={24} className={isDark ? 'text-[#a78bfa]' : 'text-[#8b5cf6]'} />
         تولید پرامپت هوش مصنوعی
       </h2>
 
       {/* Prompt Type Selector */}
       <div className={`rounded-2xl p-4 border theme-transition ${
-        isDark ? 'bg-[#1a1a2e] border-[#14b8a6]/10' : 'bg-white border-[#14b8a6]/15'
+        isDark ? 'bg-[#1a1830] border-[#a78bfa]/10' : 'bg-white border-[#a78bfa]/15'
       }`}>
-        <h3 className={`font-bold mb-3 ${isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'}`}>
+        <h3 className={`font-bold mb-3 ${isDark ? 'text-[#a78bfa]' : 'text-[#8b5cf6]'}`}>
           نوع پرامپت
         </h3>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -80,11 +80,11 @@ export default function PromptGenerator() {
             className={`flex flex-col items-center gap-2 p-4 rounded-xl transition-all ${
               promptType === 'workout'
                 ? isDark
-                  ? 'bg-[#14b8a6]/20 border-2 border-[#14b8a6] text-[#14b8a6]'
-                  : 'bg-[#14b8a6]/15 border-2 border-[#14b8a6] text-[#0d9488]'
+                  ? 'bg-[#a78bfa]/20 border-2 border-[#a78bfa] text-[#a78bfa]'
+                  : 'bg-[#a78bfa]/15 border-2 border-[#a78bfa] text-[#8b5cf6]'
                 : isDark
-                  ? 'bg-[#0d0d1a] border border-gray-700 text-gray-400 hover:border-[#14b8a6]'
-                  : 'bg-[#f0fdfa] border border-[#14b8a6]/30 text-[#0f766e]/70 hover:border-[#14b8a6]'
+                  ? 'bg-[#0f0e1f] border border-gray-700 text-gray-400 hover:border-[#a78bfa]'
+                  : 'bg-[#f5f3ff] border border-[#a78bfa]/30 text-[#7c3aed]/70 hover:border-[#a78bfa]'
             }`}
           >
             <Dumbbell size={22} />
@@ -99,8 +99,8 @@ export default function PromptGenerator() {
                   ? 'bg-amber-500/20 border-2 border-amber-500 text-amber-400'
                   : 'bg-amber-100 border-2 border-amber-500 text-amber-800'
                 : isDark
-                  ? 'bg-[#0d0d1a] border border-gray-700 text-gray-400 hover:border-amber-500'
-                  : 'bg-[#f0fdfa] border border-[#14b8a6]/30 text-[#0f766e]/70 hover:border-amber-500'
+                  ? 'bg-[#0f0e1f] border border-gray-700 text-gray-400 hover:border-amber-500'
+                  : 'bg-[#f5f3ff] border border-[#a78bfa]/30 text-[#7c3aed]/70 hover:border-amber-500'
             }`}
           >
             <Zap size={22} className="text-amber-500" />
@@ -112,11 +112,11 @@ export default function PromptGenerator() {
             className={`flex flex-col items-center gap-2 p-4 rounded-xl transition-all ${
               promptType === 'nutrition'
                 ? isDark
-                  ? 'bg-[#14b8a6]/20 border-2 border-[#14b8a6] text-[#14b8a6]'
-                  : 'bg-[#14b8a6]/15 border-2 border-[#14b8a6] text-[#0d9488]'
+                  ? 'bg-[#a78bfa]/20 border-2 border-[#a78bfa] text-[#a78bfa]'
+                  : 'bg-[#a78bfa]/15 border-2 border-[#a78bfa] text-[#8b5cf6]'
                 : isDark
-                  ? 'bg-[#0d0d1a] border border-gray-700 text-gray-400 hover:border-[#14b8a6]'
-                  : 'bg-[#f0fdfa] border border-[#14b8a6]/30 text-[#0f766e]/70 hover:border-[#14b8a6]'
+                  ? 'bg-[#0f0e1f] border border-gray-700 text-gray-400 hover:border-[#a78bfa]'
+                  : 'bg-[#f5f3ff] border border-[#a78bfa]/30 text-[#7c3aed]/70 hover:border-[#a78bfa]'
             }`}
           >
             <Apple size={22} />
@@ -128,11 +128,11 @@ export default function PromptGenerator() {
             className={`flex flex-col items-center gap-2 p-4 rounded-xl transition-all ${
               promptType === 'supplement'
                 ? isDark
-                  ? 'bg-[#14b8a6]/20 border-2 border-[#14b8a6] text-[#14b8a6]'
-                  : 'bg-[#14b8a6]/15 border-2 border-[#14b8a6] text-[#0d9488]'
+                  ? 'bg-[#a78bfa]/20 border-2 border-[#a78bfa] text-[#a78bfa]'
+                  : 'bg-[#a78bfa]/15 border-2 border-[#a78bfa] text-[#8b5cf6]'
                 : isDark
-                  ? 'bg-[#0d0d1a] border border-gray-700 text-gray-400 hover:border-[#14b8a6]'
-                  : 'bg-[#f0fdfa] border border-[#14b8a6]/30 text-[#0f766e]/70 hover:border-[#14b8a6]'
+                  ? 'bg-[#0f0e1f] border border-gray-700 text-gray-400 hover:border-[#a78bfa]'
+                  : 'bg-[#f5f3ff] border border-[#a78bfa]/30 text-[#7c3aed]/70 hover:border-[#a78bfa]'
             }`}
           >
             <Pill size={22} />
@@ -163,7 +163,7 @@ export default function PromptGenerator() {
                   supersetDuration === mins
                     ? 'bg-amber-500 text-black shadow-md'
                     : isDark
-                    ? 'bg-[#0d0d1a] text-gray-300 border border-gray-700'
+                    ? 'bg-[#0f0e1f] text-gray-300 border border-gray-700'
                     : 'bg-white text-gray-700 border border-gray-300'
                 }`}
               >
@@ -176,23 +176,23 @@ export default function PromptGenerator() {
 
       {/* Profile Summary */}
       <div className={`rounded-2xl p-5 border theme-transition ${
-        isDark ? 'bg-[#1a1a2e] border-[#14b8a6]/10' : 'bg-white border-[#14b8a6]/15'
+        isDark ? 'bg-[#1a1830] border-[#a78bfa]/10' : 'bg-white border-[#a78bfa]/15'
       }`}>
-        <h3 className={`font-bold mb-3 ${isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'}`}>
+        <h3 className={`font-bold mb-3 ${isDark ? 'text-[#a78bfa]' : 'text-[#8b5cf6]'}`}>
           خلاصه اطلاعات ارسالی
         </h3>
         <div className="grid grid-cols-2 gap-3 text-sm">
-          <div className={isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}>
-            نام: <span className={isDark ? 'text-white' : 'text-[#134e4a]'}>{activeProfile.name}</span>
+          <div className={isDark ? 'text-gray-400' : 'text-[#7c3aed]/70'}>
+            نام: <span className={isDark ? 'text-white' : 'text-[#312e81]'}>{activeProfile.name}</span>
           </div>
-          <div className={isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}>
-            سن: <span className={isDark ? 'text-white' : 'text-[#134e4a]'}>{activeProfile.age} سال</span>
+          <div className={isDark ? 'text-gray-400' : 'text-[#7c3aed]/70'}>
+            سن: <span className={isDark ? 'text-white' : 'text-[#312e81]'}>{activeProfile.age} سال</span>
           </div>
-          <div className={isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}>
-            وزن: <span className={isDark ? 'text-white' : 'text-[#134e4a]'}>{activeProfile.weight} کیلو</span>
+          <div className={isDark ? 'text-gray-400' : 'text-[#7c3aed]/70'}>
+            وزن: <span className={isDark ? 'text-white' : 'text-[#312e81]'}>{activeProfile.weight} کیلو</span>
           </div>
-          <div className={isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}>
-            قد: <span className={isDark ? 'text-white' : 'text-[#134e4a]'}>{activeProfile.height} سانتی‌متر</span>
+          <div className={isDark ? 'text-gray-400' : 'text-[#7c3aed]/70'}>
+            قد: <span className={isDark ? 'text-white' : 'text-[#312e81]'}>{activeProfile.height} سانتی‌متر</span>
           </div>
         </div>
       </div>
@@ -202,8 +202,8 @@ export default function PromptGenerator() {
         onClick={handleGenerate}
         className={`w-full py-4 rounded-xl font-bold text-lg transition-all shadow-lg ${
           isDark
-            ? 'bg-gradient-to-l from-[#14b8a6] to-[#2dd4bf] text-[#0d0d1a] shadow-[#14b8a6]/20 hover:opacity-90'
-            : 'bg-gradient-to-l from-[#14b8a6] to-[#0d9488] text-white shadow-[#14b8a6]/20 hover:opacity-90'
+            ? 'bg-gradient-to-l from-[#a78bfa] to-[#c4b5fd] text-[#0f0e1f] shadow-[#a78bfa]/20 hover:opacity-90'
+            : 'bg-gradient-to-l from-[#a78bfa] to-[#8b5cf6] text-white shadow-[#a78bfa]/20 hover:opacity-90'
         }`}
       >
         🚀 تولید پرامپت حرفه‌ای
@@ -230,19 +230,19 @@ export default function PromptGenerator() {
           </div>
           
           <div className={`rounded-xl p-4 border max-h-96 overflow-y-auto ${
-            isDark ? 'bg-[#0d0d1a] border-gray-700' : 'bg-[#f0fdfa] border-[#14b8a6]/30'
+            isDark ? 'bg-[#0f0e1f] border-gray-700' : 'bg-[#f5f3ff] border-[#a78bfa]/30'
           }`}>
             <pre className={`text-sm whitespace-pre-wrap leading-7 font-vazir ${
-              isDark ? 'text-gray-300' : 'text-[#134e4a]'
+              isDark ? 'text-gray-300' : 'text-[#312e81]'
             }`}>
               {generatedPrompt}
             </pre>
           </div>
 
           <div className={`rounded-xl p-4 border ${
-            isDark ? 'bg-[#1a1a2e] border-[#14b8a6]/10' : 'bg-white border-[#14b8a6]/15'
+            isDark ? 'bg-[#1a1830] border-[#a78bfa]/10' : 'bg-white border-[#a78bfa]/15'
           }`}>
-            <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}`}>
+            <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-[#7c3aed]/70'}`}>
               💡 <strong>راهنما:</strong> پرامپت بالا را کپی کنید و در ChatGPT، Gemini یا Claude پیست کنید. 
               خروجی JSON دریافتی را می‌توانید در بخش «ورود برنامه» وارد کنید.
             </p>

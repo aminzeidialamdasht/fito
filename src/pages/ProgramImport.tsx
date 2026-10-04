@@ -253,10 +253,10 @@ export default function ProgramImport() {
     return (
       <div className="flex flex-col items-center justify-center py-20">
         <AlertCircle size={48} className={isDark ? 'text-[#f59e0b]' : 'text-[#d97706]'} />
-        <h2 className={`text-xl font-bold mt-4 mb-2 ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>
+        <h2 className={`text-xl font-bold mt-4 mb-2 ${isDark ? 'text-white' : 'text-[#312e81]'}`}>
           پروفایل انتخاب نشده
         </h2>
-        <p className={`text-center ${isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}`}>
+        <p className={`text-center ${isDark ? 'text-gray-400' : 'text-[#7c3aed]/70'}`}>
           لطفاً ابتدا یک پروفایل را انتخاب کنید
         </p>
       </div>
@@ -265,10 +265,10 @@ export default function ProgramImport() {
 
   return (
     <div className="space-y-6">
-      <h2 className={'text-xl font-bold flex items-center gap-2 ' + (isDark ? 'text-white' : 'text-[#134e4a]')}>
+      <h2 className={'text-xl font-bold flex items-center gap-2 ' + (isDark ? 'text-white' : 'text-[#312e81]')}>
         <ImportIcon size={22} className={isDark ? 'text-[#22c55e]' : 'text-[#059669]'} />
         ورود برنامه تمرینی
-        <span className={'text-sm font-normal ' + (isDark ? 'text-gray-400' : 'text-[#0f766e]/70')}>
+        <span className={'text-sm font-normal ' + (isDark ? 'text-gray-400' : 'text-[#7c3aed]/70')}>
           — {activeProfile.name}
         </span>
       </h2>
@@ -286,7 +286,7 @@ export default function ProgramImport() {
 
       {isStoreBuild && (
         <div className={`rounded-2xl p-5 border theme-transition ${
-          isDark ? 'bg-[#1a1a2e] border-[#d4af37]/25' : 'bg-white border-amber-200'
+          isDark ? 'bg-[#1a1830] border-[#d4af37]/25' : 'bg-white border-amber-200'
         }`}>
           <div className="flex items-start gap-3 mb-4">
             <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${
@@ -298,14 +298,14 @@ export default function ProgramImport() {
               <h3 className={'font-bold ' + (isDark ? 'text-[#d4af37]' : 'text-amber-800')}>
                 برنامه پیش‌فرض رایگان
               </h3>
-              <p className={'text-sm mt-1 leading-6 ' + (isDark ? 'text-gray-400' : 'text-[#0f766e]/70')}>
+              <p className={'text-sm mt-1 leading-6 ' + (isDark ? 'text-gray-400' : 'text-[#7c3aed]/70')}>
                 برنامه فول‌بادی ۳ روزه برای فرد مبتدی (~۲۵ ساله): شنبه، دوشنبه و چهارشنبه.
                 بدون نیاز به اشتراک می‌توانید همین الان فعال کنید.
               </p>
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            <label className={'text-xs ' + (isDark ? 'text-gray-400' : 'text-[#0f766e]/70')}>
+            <label className={'text-xs ' + (isDark ? 'text-gray-400' : 'text-[#7c3aed]/70')}>
               تاریخ شروع:
             </label>
             <input
@@ -313,7 +313,7 @@ export default function ProgramImport() {
               value={startDate}
               onChange={e => setStartDate(e.target.value)}
               className={`rounded-lg px-3 py-1.5 text-xs font-bold border focus:outline-none ${
-                isDark ? 'bg-[#0d0d1a] border-gray-700 text-white' : 'bg-[#f0fdfa] border-[#14b8a6]/30 text-[#134e4a]'
+                isDark ? 'bg-[#0f0e1f] border-gray-700 text-white' : 'bg-[#f5f3ff] border-[#a78bfa]/30 text-[#312e81]'
               }`}
             />
             <button
@@ -332,15 +332,15 @@ export default function ProgramImport() {
       )}
 
       <div className={`rounded-2xl p-5 border theme-transition ${
-        isDark ? 'bg-[#1a1a2e] border-[#14b8a6]/10' : 'bg-white border-[#14b8a6]/15'
+        isDark ? 'bg-[#1a1830] border-[#a78bfa]/10' : 'bg-white border-[#a78bfa]/15'
       }`}>
-        <h3 className={'font-bold mb-3 flex items-center gap-2 ' + (isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]')}>
+        <h3 className={'font-bold mb-3 flex items-center gap-2 ' + (isDark ? 'text-[#a78bfa]' : 'text-[#8b5cf6]')}>
           JSON برنامه تمرینی
         </h3>
 
                 {(
           <>
-            <p className={'text-sm mb-3 ' + (isDark ? 'text-gray-400' : 'text-[#0f766e]/70')}>
+            <p className={'text-sm mb-3 ' + (isDark ? 'text-gray-400' : 'text-[#7c3aed]/70')}>
               خروجی هوش مصنوعی را در قالب JSON وارد کنید.
               سیستم بررسی می‌کند که تعداد روزهای برنامه دقیقاً با پروفایل کاربر مطابقت داشته باشد.
             </p>
@@ -354,8 +354,8 @@ export default function ProgramImport() {
               }}
               className={`w-full border rounded-xl px-4 py-3 text-sm font-mono focus:outline-none resize-none ${
                 isDark
-                  ? 'bg-[#0d0d1a] border-gray-700 text-white focus:border-[#14b8a6]'
-                  : 'bg-[#f0fdfa] border-[#14b8a6]/30 text-[#134e4a] focus:border-[#14b8a6]'
+                  ? 'bg-[#0f0e1f] border-gray-700 text-white focus:border-[#a78bfa]'
+                  : 'bg-[#f5f3ff] border-[#a78bfa]/30 text-[#312e81] focus:border-[#a78bfa]'
               }`}
               rows={10}
               dir="ltr"
@@ -369,7 +369,7 @@ export default function ProgramImport() {
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm transition-all ${
                   isDark
                     ? 'bg-[#4a90d9] text-white hover:bg-[#6bb5ff] disabled:opacity-50'
-                    : 'bg-[#14b8a6] text-white hover:bg-[#0d9488] disabled:opacity-50'
+                    : 'bg-[#a78bfa] text-white hover:bg-[#8b5cf6] disabled:opacity-50'
                 }`}
               >
                 <Eye size={16} />
@@ -398,7 +398,7 @@ export default function ProgramImport() {
           <AlertCircle size={20} className={isDark ? 'text-[#ef4444]' : 'text-[#dc2626]'} />
           <div>
             <p className={`font-bold ${isDark ? 'text-[#ef4444]' : 'text-[#dc2626]'}`}>خطا در اعتبارسنجی</p>
-            <p className={'text-sm mt-1 ' + (isDark ? 'text-gray-400' : 'text-[#0f766e]/70')}>
+            <p className={'text-sm mt-1 ' + (isDark ? 'text-gray-400' : 'text-[#7c3aed]/70')}>
               {validationResult.error}
             </p>
           </div>
@@ -407,7 +407,7 @@ export default function ProgramImport() {
 
       {canUseJsonImport && showPreview && validationResult?.valid && (
         <div className={`rounded-2xl p-5 border animate-slide-up ${
-          isDark ? 'bg-[#1a1a2e] border-[#22c55e]/20' : 'bg-white border-[#10b981]/30'
+          isDark ? 'bg-[#1a1830] border-[#22c55e]/20' : 'bg-white border-[#10b981]/30'
         }`}>
           <div className="flex items-center justify-between mb-4">
             <h3 className={'font-bold flex items-center gap-2 ' + (isDark ? 'text-[#22c55e]' : 'text-[#059669]')}>
@@ -430,63 +430,63 @@ export default function ProgramImport() {
 
           <div className="space-y-4">
             <div className="flex items-center gap-4 text-sm">
-              <span className={isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}>نام برنامه:</span>
-              <span className={'font-bold ' + (isDark ? 'text-white' : 'text-[#134e4a]')}>
+              <span className={isDark ? 'text-gray-400' : 'text-[#7c3aed]/70'}>نام برنامه:</span>
+              <span className={'font-bold ' + (isDark ? 'text-white' : 'text-[#312e81]')}>
                 {validationResult.data.program_name}
               </span>
             </div>
 
             <div className="flex items-center gap-4 text-sm">
-              <span className={isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}>مدت:</span>
-              <span className={isDark ? 'text-white' : 'text-[#134e4a]'}>
+              <span className={isDark ? 'text-gray-400' : 'text-[#7c3aed]/70'}>مدت:</span>
+              <span className={isDark ? 'text-white' : 'text-[#312e81]'}>
                 {validationResult.data.duration}
               </span>
             </div>
 
             <div className="flex items-center gap-4 text-sm">
-              <span className={isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}>تاریخ شروع برنامه:</span>
+              <span className={isDark ? 'text-gray-400' : 'text-[#7c3aed]/70'}>تاریخ شروع برنامه:</span>
               <input
                 type="date"
                 value={startDate}
                 onChange={e => setStartDate(e.target.value)}
                 className={`rounded-lg px-3 py-1.5 text-xs font-bold border focus:outline-none ${
-                  isDark ? 'bg-[#0d0d1a] border-gray-700 text-white' : 'bg-[#f0fdfa] border-[#14b8a6]/30 text-[#134e4a]'
+                  isDark ? 'bg-[#0f0e1f] border-gray-700 text-white' : 'bg-[#f5f3ff] border-[#a78bfa]/30 text-[#312e81]'
                 }`}
               />
             </div>
 
             <div className="flex items-center gap-4 text-sm">
-              <span className={isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}>تعداد روزهای پروفایل:</span>
-              <span className={isDark ? 'text-white' : 'text-[#134e4a]'}>
+              <span className={isDark ? 'text-gray-400' : 'text-[#7c3aed]/70'}>تعداد روزهای پروفایل:</span>
+              <span className={isDark ? 'text-white' : 'text-[#312e81]'}>
                 {toPersianNumber(activeProfile.trainingDays)} روز
               </span>
             </div>
 
             <div className="flex items-center gap-4 text-sm">
-              <span className={isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}>تعداد روزهای JSON:</span>
-              <span className={isDark ? 'text-white' : 'text-[#134e4a]'}>
+              <span className={isDark ? 'text-gray-400' : 'text-[#7c3aed]/70'}>تعداد روزهای JSON:</span>
+              <span className={isDark ? 'text-white' : 'text-[#312e81]'}>
                 {toPersianNumber(validationResult.data.days.length)} روز
               </span>
             </div>
 
             {Array.isArray(validationResult.data.rest_days) && validationResult.data.rest_days.length > 0 && (
               <div className="flex items-center gap-4 text-sm">
-                <span className={isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}>روزهای استراحت:</span>
-                <span className={isDark ? 'text-white' : 'text-[#134e4a]'}>
+                <span className={isDark ? 'text-gray-400' : 'text-[#7c3aed]/70'}>روزهای استراحت:</span>
+                <span className={isDark ? 'text-white' : 'text-[#312e81]'}>
                   {(validationResult.data.rest_days as string[]).join('، ')}
                 </span>
               </div>
             )}
 
-            <div className={`border-t pt-4 mt-4 ${isDark ? 'border-gray-700' : 'border-[#14b8a6]/20'}`}>
+            <div className={`border-t pt-4 mt-4 ${isDark ? 'border-gray-700' : 'border-[#a78bfa]/20'}`}>
               {validationResult.data.days.map((day: any, i: number) => (
                 <div key={i} className={`mb-4 rounded-xl p-4 ${
-                  isDark ? 'bg-[#0d0d1a]' : 'bg-[#f0fdfa]'
+                  isDark ? 'bg-[#0f0e1f]' : 'bg-[#f5f3ff]'
                 }`}>
-                  <h4 className={'font-bold mb-2 flex items-center gap-2 ' + (isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]')}>
+                  <h4 className={'font-bold mb-2 flex items-center gap-2 ' + (isDark ? 'text-[#a78bfa]' : 'text-[#8b5cf6]')}>
                     {day.weekday ? (
                       <span className={`px-2 py-0.5 rounded-lg text-xs ${
-                        isDark ? 'bg-[#14b8a6]/20 text-[#14b8a6]' : 'bg-[#14b8a6]/15 text-[#0d9488]'
+                        isDark ? 'bg-[#a78bfa]/20 text-[#a78bfa]' : 'bg-[#a78bfa]/15 text-[#8b5cf6]'
                       }`}>
                         {day.weekday}
                       </span>
@@ -497,7 +497,7 @@ export default function ProgramImport() {
                   <div className="flex flex-wrap gap-1 mb-3">
                     {(day.muscle_groups || []).map((mg: string, j: number) => (
                       <span key={j} className={`px-2 py-0.5 rounded text-xs ${
-                        isDark ? 'bg-[#4a90d9]/20 text-[#4a90d9]' : 'bg-[#14b8a6]/15 text-[#0d9488]'
+                        isDark ? 'bg-[#4a90d9]/20 text-[#4a90d9]' : 'bg-[#a78bfa]/15 text-[#8b5cf6]'
                       }`}>
                         {mg}
                       </span>
@@ -507,10 +507,10 @@ export default function ProgramImport() {
                   <div className="space-y-2">
                     {(day.exercises || []).map((ex: any, k: number) => (
                       <div key={k} className={`flex items-center justify-between text-sm border-b pb-2 ${
-                        isDark ? 'border-gray-800' : 'border-[#14b8a6]/10'
+                        isDark ? 'border-gray-800' : 'border-[#a78bfa]/10'
                       }`}>
-                        <span className={isDark ? 'text-white' : 'text-[#134e4a]'}>{ex.name}</span>
-                        <span className={isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}>
+                        <span className={isDark ? 'text-white' : 'text-[#312e81]'}>{ex.name}</span>
+                        <span className={isDark ? 'text-gray-400' : 'text-[#7c3aed]/70'}>
                           {toPersianNumber(ex.sets)}×{ex.reps} | استراحت: {toPersianNumber(ex.rest)}ث
                         </span>
                       </div>
@@ -524,14 +524,14 @@ export default function ProgramImport() {
       )}
 
       <div className={`rounded-2xl p-5 border theme-transition ${
-        isDark ? 'bg-[#1a1a2e] border-[#14b8a6]/10' : 'bg-white border-[#14b8a6]/15'
+        isDark ? 'bg-[#1a1830] border-[#a78bfa]/10' : 'bg-white border-[#a78bfa]/15'
       }`}>
-        <h3 className={'font-bold mb-4 ' + (isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]')}>
+        <h3 className={'font-bold mb-4 ' + (isDark ? 'text-[#a78bfa]' : 'text-[#8b5cf6]')}>
           برنامه‌های ذخیره‌شده
         </h3>
 
         {programs.length === 0 ? (
-          <p className={'text-sm text-center py-6 ' + (isDark ? 'text-gray-500' : 'text-[#0f766e]/60')}>
+          <p className={'text-sm text-center py-6 ' + (isDark ? 'text-gray-500' : 'text-[#7c3aed]/60')}>
             هنوز برنامه‌ای ذخیره نشده است
           </p>
         ) : (
@@ -548,24 +548,24 @@ export default function ProgramImport() {
                   className={`rounded-xl p-4 border ${
                     state.activeProgram === program.id
                       ? (isDark ? 'border-[#22c55e]/40 bg-[#22c55e]/5' : 'border-[#10b981]/40 bg-[#10b981]/5')
-                      : (isDark ? 'border-gray-700 bg-[#0d0d1a]' : 'border-[#14b8a6]/15 bg-[#f0fdfa]')
+                      : (isDark ? 'border-gray-700 bg-[#0f0e1f]' : 'border-[#a78bfa]/15 bg-[#f5f3ff]')
                   }`}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
-                      <p className={'font-bold text-sm truncate ' + (isDark ? 'text-white' : 'text-[#134e4a]')}>
+                      <p className={'font-bold text-sm truncate ' + (isDark ? 'text-white' : 'text-[#312e81]')}>
                         {program.name}
                       </p>
                       <div className="mt-1 flex flex-wrap items-center gap-2 text-xs">
-                        <span className={isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}>
+                        <span className={isDark ? 'text-gray-400' : 'text-[#7c3aed]/70'}>
                           {program.duration}
                         </span>
                         <span className={isDark ? 'text-gray-600' : 'text-gray-300'}>|</span>
-                        <span className={isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}>
+                        <span className={isDark ? 'text-gray-400' : 'text-[#7c3aed]/70'}>
                           {toPersianNumber(program.days?.length || 0)} روز تمرین
                         </span>
                         <span className={isDark ? 'text-gray-600' : 'text-gray-300'}>|</span>
-                        <CalendarIcon size={12} className={isDark ? 'text-gray-400' : 'text-[#0f766e]/70'} />
+                        <CalendarIcon size={12} className={isDark ? 'text-gray-400' : 'text-[#7c3aed]/70'} />
                         <input
                           type="date"
                           value={program.startDate || ''}
@@ -582,9 +582,9 @@ export default function ProgramImport() {
                       <div className="mt-2 flex items-center gap-2 text-xs">
                         <Clock
                           size={14}
-                          className={timeline.isAlarmRequired ? 'text-amber-500 animate-pulse' : (isDark ? 'text-gray-400' : 'text-[#0f766e]/70')}
+                          className={timeline.isAlarmRequired ? 'text-amber-500 animate-pulse' : (isDark ? 'text-gray-400' : 'text-[#7c3aed]/70')}
                         />
-                        <span className={timeline.isAlarmRequired ? 'text-amber-500 font-bold' : (isDark ? 'text-gray-400' : 'text-[#0f766e]/70')}>
+                        <span className={timeline.isAlarmRequired ? 'text-amber-500 font-bold' : (isDark ? 'text-gray-400' : 'text-[#7c3aed]/70')}>
                           {timeline.daysRemaining > 0
                             ? `${toPersianNumber(timeline.daysRemaining)} روز باقی مانده`
                             : timeline.daysRemaining === 0
@@ -607,7 +607,7 @@ export default function ProgramImport() {
                           className={`text-xs px-3 py-1.5 rounded-full font-bold transition-all ${
                             isDark
                               ? 'bg-[#4a90d9]/20 text-[#4a90d9] hover:bg-[#4a90d9]/30'
-                              : 'bg-[#14b8a6]/15 text-[#0d9488] hover:bg-[#14b8a6]/25'
+                              : 'bg-[#a78bfa]/15 text-[#8b5cf6] hover:bg-[#a78bfa]/25'
                           }`}
                         >
                           فعال‌سازی

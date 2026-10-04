@@ -11,7 +11,7 @@ const MUSCLE_COLORS: Record<string, string> = {
   forearms: '#eab308',     // زرد
   abs: '#10b981',          // سبز زمردی
   quads: '#8b5cf6',        // بنفش
-  calves: '#14b8a6',       // فیروزه‌ای
+  calves: '#a78bfa',       // فیروزه‌ای
   traps: '#ec4899',        // صورتی
   lats: '#06b6d4',         // آبی آسمانی
   glutes: '#d946ef',       // ارغوانی
@@ -78,7 +78,7 @@ export default function AnatomySVG() {
           <button
             onClick={() => setView('front')}
             className={`text-[10px] font-bold px-3 py-1 rounded-full transition-all ${
-              view === 'front' ? 'bg-teal-500 text-white shadow-sm' : isDark ? 'text-gray-400' : 'text-gray-500'
+              view === 'front' ? 'bg-violet-500 text-white shadow-sm' : isDark ? 'text-gray-400' : 'text-gray-500'
             }`}
           >
             روبرو
@@ -86,7 +86,7 @@ export default function AnatomySVG() {
           <button
             onClick={() => setView('back')}
             className={`text-[10px] font-bold px-3 py-1 rounded-full transition-all ${
-              view === 'back' ? 'bg-teal-500 text-white shadow-sm' : isDark ? 'text-gray-400' : 'text-gray-500'
+              view === 'back' ? 'bg-violet-500 text-white shadow-sm' : isDark ? 'text-gray-400' : 'text-gray-500'
             }`}
           >
             پشت

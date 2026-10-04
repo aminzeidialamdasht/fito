@@ -37,7 +37,7 @@ interface StepInfo {
 }
 
 const STEPS: StepInfo[] = [
-  { key: 'basic', title: 'مشخصات پایه', subtitle: 'اطلاعات شخصی', icon: User, color: '#14b8a6' },
+  { key: 'basic', title: 'مشخصات پایه', subtitle: 'اطلاعات شخصی', icon: User, color: '#a78bfa' },
   { key: 'body', title: 'اطلاعات بدنی', subtitle: 'سایزبندی و ترکیب بدن', icon: Target, color: '#0ea5e9' },
   { key: 'training', title: 'اهداف تمرینی', subtitle: 'برنامه و تجهیزات', icon: Dumbbell, color: '#8b5cf6' },
   { key: 'nutrition', title: 'اهداف تغذیه', subtitle: 'رژیم و غذاها', icon: Apple, color: '#10b981' },
@@ -114,13 +114,17 @@ export default function Onboarding() {
     competitionDate: '',
   });
 
-  const teal = isDark ? '#14b8a6' : '#0d9488';
+  const teal = isDark ? '#a78bfa' : '#8b5cf6';
   const gold = isDark ? '#d4af37' : '#f59e0b';
   const bgMain = isDark ? '#0f172a' : '#f8fafc';
-  const cardBg = isDark ? '#1e293b' : '#ffffff';
+  const cardBg = isDark
+    ? 'bg-[#1e1b4b]/50 backdrop-blur-md'
+    : 'bg-violet-50/70 backdrop-blur-md';
   const textMain = isDark ? '#ffffff' : '#0f172a';
   const textSub = isDark ? '#94a3b8' : '#64748b';
-  const borderCard = isDark ? 'border-white/5' : 'border-gray-200';
+  const borderCard = isDark
+    ? 'border-white/10'
+    : 'border-violet-200/60';
 
   const updateForm = (key: keyof AthleteProfile, value: any) => {
     setForm((prev) => ({ ...prev, [key]: value }));

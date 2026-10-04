@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { HashRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
-import { ThemeProvider } from './context/ThemeContext';
+import { ThemeProvider, useTheme } from './context/ThemeContext';
 import Layout from './components/Layout';
 import BottomNav from './components/BottomNav';
 import Welcome from './pages/Welcome';
@@ -27,6 +27,8 @@ import ProgramDetail from './pages/program/ProgramDetail';
 
 function AppContent({ showWelcome, onContinue }: { showWelcome: boolean; onContinue: () => void }) {
   const location = useLocation();
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
 
   if (showWelcome) {
     return <Welcome onContinue={onContinue} />;
@@ -41,8 +43,29 @@ function AppContent({ showWelcome, onContinue }: { showWelcome: boolean; onConti
   const isFullScreen = location.pathname.startsWith('/onboarding');
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <Routes>
+    <div className="relative flex flex-col min-h-screen">
+        {/* پس‌زمینه سراسری اپلیکیشن */}
+        <div
+          className="fixed inset-0 -z-10 bg-cover bg-center bg-no-repeat pointer-events-none"
+          style={{
+            backgroundImage: isDark
+              ? "url('/bg-dark.png')"
+              : "url('/bg-light.png')",
+            filter: isDark
+              ? 'blur(0.5px) brightness(0.7)'
+              : 'blur(0.5px) brightness(1.05)',
+          }}
+        />
+        {/* Overlay نیمه‌شفاف برای خوانایی */}
+        <div
+          className="fixed inset-0 -z-10 pointer-events-none"
+          style={{
+            background: isDark
+              ? 'rgba(8, 8, 12, 0.55)'
+              : 'rgba(248, 250, 252, 0.5)',
+          }}
+        />
+        <Routes>
         {/* ریدایرکت مسیر غلط به مسیر صحیح */}
         
         <Route path="/" element={<Layout><Dashboard /></Layout>} />

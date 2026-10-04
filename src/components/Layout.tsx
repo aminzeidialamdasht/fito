@@ -64,10 +64,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           compact ? 'px-4 py-3.5' : 'px-4 py-3'
         } ${
           isActive
-            ? isDark ? 'bg-[#d4af37]/15 text-[#d4af37] font-bold' : 'bg-[#14b8a6]/15 text-[#0d9488] font-bold'
+            ? isDark ? 'bg-[#d4af37]/15 text-[#d4af37] font-bold' : 'bg-[#a78bfa]/15 text-[#8b5cf6] font-bold'
             : isDisabled
             ? isDark ? 'text-gray-600 cursor-not-allowed' : 'text-gray-400 cursor-not-allowed'
-            : isDark ? 'text-gray-400 hover:text-white hover:bg-white/5' : 'text-[#0f766e]/70 hover:text-[#0d9488] hover:bg-[#f0fdfa]'
+            : isDark ? 'text-gray-400 hover:text-white hover:bg-white/5' : 'text-[#7c3aed]/70 hover:text-[#8b5cf6] hover:bg-[#f5f3ff]'
         }`}
       >
         <Icon size={compact ? 20 : 18} />
@@ -85,28 +85,28 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className={'min-h-screen flex flex-col theme-transition ' + (
-      isDark ? 'bg-[#080808]' : 'bg-gradient-to-br from-[#f0fdfa] via-[#ffffff] to-[#ecfdf5]'
+      isDark ? 'bg-transparent' : 'bg-transparent'
     )}>
       <header className={'fixed top-0 left-0 right-0 z-50 backdrop-blur-xl border-b theme-transition ' + (
-        isDark ? 'bg-[#0c0c0c]/90 border-white/5' : 'bg-white/95 border-[#14b8a6]/20'
+        isDark ? 'bg-[#0c0c0c]/70 border-white/5' : 'bg-white/70 border-[#a78bfa]/20'
       )}>
         <div className="px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <button onClick={() => setMenuOpen(!menuOpen)} className={'lg:hidden p-2 rounded-xl transition-all ' + (isDark ? 'text-[#d4af37] hover:bg-[#d4af37]/10' : 'text-[#0d9488] hover:bg-[#14b8a6]/10')}>
+            <button onClick={() => setMenuOpen(!menuOpen)} className={'lg:hidden p-2 rounded-xl transition-all ' + (isDark ? 'text-[#d4af37] hover:bg-[#d4af37]/10' : 'text-[#8b5cf6] hover:bg-[#a78bfa]/10')}>
               {menuOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
             <div className="flex items-center gap-3">
-              <div className={'w-10 h-10 rounded-2xl flex items-center justify-center overflow-hidden ' + (isDark ? 'bg-[#0D0D1A] shadow-lg shadow-[#d4af37]/20' : 'bg-[#0D0D1A] shadow-md')}>
+              <div className={'w-10 h-10 rounded-2xl flex items-center justify-center overflow-hidden ' + (isDark ? 'bg-[#0f0e1f] shadow-lg shadow-[#d4af37]/20' : 'bg-[#0f0e1f] shadow-md')}>
                 <img src="/fito-icon.png" alt="فیتو" className="w-9 h-9 object-contain" />
               </div>
               <div>
-                <h1 className={'font-bold text-base sm:text-lg leading-tight ' + (isDark ? 'text-white' : 'text-[#0d9488]')}>فیتو</h1>
-                <p className={'text-[10px] sm:text-xs ' + (isDark ? 'text-gray-500' : 'text-[#0f766e]/70')}>{APP_VERSION} · Fito · {getPersianDate()}</p>
+                <h1 className={'font-bold text-base sm:text-lg leading-tight ' + (isDark ? 'text-white' : 'text-[#312e81]')}>فیتو</h1>
+                <p className={'text-[10px] sm:text-xs ' + (isDark ? 'text-gray-500' : 'text-[#7c3aed]/70')}>{APP_VERSION} · Fito · {getPersianDate()}</p>
               </div>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={toggleTheme} className={'p-2 rounded-xl transition-all ' + (isDark ? 'bg-white/5 border border-white/10 text-[#d4af37]' : 'bg-[#f0fdfa] border border-[#14b8a6]/30 text-[#0d9488]')} title={isDark ? 'تم روشن' : 'تم تاریک'}>
+            <button onClick={toggleTheme} className={'p-2 rounded-xl transition-all ' + (isDark ? 'bg-white/5 border border-white/10 text-[#d4af37]' : 'bg-[#f5f3ff] border border-[#a78bfa]/30 text-[#8b5cf6]')} title={isDark ? 'تم روشن' : 'تم تاریک'}>
               {isDark ? <Sun size={18} /> : <Moon size={18} />}
             </button>
           </div>
@@ -116,9 +116,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <div className="h-16 lg:h-[68px] flex-shrink-0" />
 
       <div className="flex flex-1">
-        <aside className={'hidden lg:flex flex-col w-60 border-l p-4 gap-1 sticky top-[68px] h-[calc(100vh-68px)] overflow-y-auto theme-transition ' + (isDark ? 'bg-[#0c0c0c] border-white/5' : 'bg-white/50 border-[#14b8a6]/10')}>
+        <aside className={'hidden lg:flex flex-col w-60 border-l p-4 gap-1 sticky top-[68px] h-[calc(100vh-68px)] overflow-y-auto theme-transition ' + (isDark ? 'bg-[#0c0c0c]/60 border-white/5 backdrop-blur-xl' : 'bg-white/60 border-[#a78bfa]/10 backdrop-blur-xl')}>
           <div className="mb-2 px-3">
-            <p className={'text-xs font-bold ' + (isDark ? 'text-gray-500' : 'text-[#0f766e]/70')}>منوی اصلی</p>
+            <p className={'text-xs font-bold ' + (isDark ? 'text-gray-500' : 'text-[#7c3aed]/70')}>منوی اصلی</p>
           </div>
           {mainItems.map(item => renderNavItem(item, false))}
 
@@ -127,22 +127,22 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="mb-2 px-3 flex items-center gap-2">
-            <Sparkles size={12} className={isDark ? 'text-[#d4af37]' : 'text-[#0d9488]'} />
-            <p className={'text-xs font-bold ' + (isDark ? 'text-gray-500' : 'text-[#0f766e]/70')}>تولید برنامه</p>
+            <Sparkles size={12} className={isDark ? 'text-[#d4af37]' : 'text-[#8b5cf6]'} />
+            <p className={'text-xs font-bold ' + (isDark ? 'text-gray-500' : 'text-[#7c3aed]/70')}>تولید برنامه</p>
           </div>
           {generatorItems.map(item => renderNavItem(item, false))}
         </aside>
 
         {menuOpen && (
-          <div className="lg:hidden fixed inset-0 z-40 bg-black/70 backdrop-blur-sm" onClick={() => setMenuOpen(false)}>
+          <div className="lg:hidden fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm" onClick={() => setMenuOpen(false)}>
             <aside className={'w-72 h-full p-5 flex flex-col gap-1 shadow-2xl overflow-y-auto ' + (isDark ? 'bg-[#0c0c0c]' : 'bg-white')} onClick={e => e.stopPropagation()}>
-              <div className={'flex items-center gap-3 mb-6 pb-5 border-b ' + (isDark ? 'border-white/10' : 'border-[#14b8a6]/20')}>
-                <div className={'w-12 h-12 rounded-2xl flex items-center justify-center overflow-hidden ' + (isDark ? 'bg-[#0D0D1A]' : 'bg-[#0D0D1A]')}>
+              <div className={'flex items-center gap-3 mb-6 pb-5 border-b ' + (isDark ? 'border-white/10' : 'border-[#a78bfa]/20')}>
+                <div className={'w-12 h-12 rounded-2xl flex items-center justify-center overflow-hidden ' + (isDark ? 'bg-[#0f0e1f]' : 'bg-[#0f0e1f]')}>
                   <img src="/fito-icon.png" alt="فیتو" className="w-11 h-11 object-contain" />
                 </div>
                 <div>
-                  <span className={'font-bold text-lg block ' + (isDark ? 'text-white' : 'text-[#0d9488]')}>فیتو</span>
-                  <span className={'text-xs ' + (isDark ? 'text-gray-500' : 'text-[#0f766e]/70')}>Fito · مربی هوشمند آفلاین</span>
+                  <span className={'font-bold text-lg block ' + (isDark ? 'text-white' : 'text-[#312e81]')}>فیتو</span>
+                  <span className={'text-xs ' + (isDark ? 'text-gray-500' : 'text-[#7c3aed]/70')}>Fito · مربی هوشمند آفلاین</span>
                 </div>
               </div>
 
@@ -153,8 +153,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               </div>
 
               <div className="mb-2 flex items-center gap-2 px-2">
-                <Sparkles size={14} className={isDark ? 'text-[#d4af37]' : 'text-[#0d9488]'} />
-                <p className={'text-xs font-bold ' + (isDark ? 'text-gray-500' : 'text-[#0f766e]/70')}>تولید برنامه</p>
+                <Sparkles size={14} className={isDark ? 'text-[#d4af37]' : 'text-[#8b5cf6]'} />
+                <p className={'text-xs font-bold ' + (isDark ? 'text-gray-500' : 'text-[#7c3aed]/70')}>تولید برنامه</p>
               </div>
               {generatorItems.map(item => renderNavItem(item, true))}
             </aside>
@@ -166,14 +166,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </main>
       </div>
 
-      <nav className={'lg:hidden fixed bottom-0 left-0 right-0 z-50 theme-transition ' + (isDark ? 'bg-[#0c0c0c]/95 backdrop-blur-xl border-t border-white/5' : 'bg-white/95 backdrop-blur-xl border-t border-[#14b8a6]/20')}>
+      <nav className={'lg:hidden fixed bottom-0 left-0 right-0 z-50 theme-transition ' + (isDark ? 'bg-[#0c0c0c]/70 backdrop-blur-2xl border-t border-white/5' : 'bg-white/70 backdrop-blur-2xl border-t border-[#a78bfa]/20')}>
         <div className="flex justify-around items-center py-2 px-1">
           {bottomNavItems.map(item => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path));
             return (
-              <button key={item.path} onClick={() => navigate(item.path)} className={'relative flex flex-col items-center gap-0.5 min-w-[56px] px-1 py-1 rounded-2xl transition-all ' + (isActive ? (isDark ? 'text-[#d4af37]' : 'text-[#0d9488]') : (isDark ? 'text-gray-500' : 'text-[#0f766e]/50'))}>
-                <div className={'w-11 h-11 rounded-2xl flex items-center justify-center transition-all ' + (isActive ? (isDark ? 'bg-[#d4af37]/15 shadow-lg shadow-[#d4af37]/10' : 'bg-[#14b8a6]/15') : '')}>
+              <button key={item.path} onClick={() => navigate(item.path)} className={'relative flex flex-col items-center gap-0.5 min-w-[56px] px-1 py-1 rounded-2xl transition-all ' + (isActive ? (isDark ? 'text-[#d4af37]' : 'text-[#8b5cf6]') : (isDark ? 'text-gray-500' : 'text-[#7c3aed]/50'))}>
+                <div className={'w-11 h-11 rounded-2xl flex items-center justify-center transition-all ' + (isActive ? (isDark ? 'bg-[#d4af37]/15 shadow-lg shadow-[#d4af37]/10' : 'bg-[#a78bfa]/15') : '')}>
                   <Icon size={22} strokeWidth={isActive ? 2.5 : 1.8} />
                 </div>
                 <span className={'text-[10px] ' + (isActive ? 'font-bold' : 'font-medium')}>{item.label}</span>

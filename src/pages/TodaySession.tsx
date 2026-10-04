@@ -91,7 +91,7 @@ export default function TodaySession() {
         <p className="text-sm opacity-70 mb-6">
           {!activeProgramData ? 'لطفاً ابتدا یک برنامه وارد کنید.' : 'بدن شما برای رشد نیاز به ریکاوری دارد.'}
         </p>
-        <button onClick={() => navigate('/')} className="px-6 py-2 rounded-xl bg-teal-500 text-white font-bold">بازگشت به داشبورد</button>
+        <button onClick={() => navigate('/')} className="px-6 py-2 rounded-xl bg-violet-500 text-white font-bold">بازگشت به داشبورد</button>
       </div>
     );
   }
@@ -116,10 +116,10 @@ export default function TodaySession() {
       </div>
 
       <div className="p-4 space-y-4 max-w-2xl mx-auto">
-        <div className={`rounded-2xl p-5 border shadow-sm ${isDark ? 'bg-[#1e293b] border-white/5' : 'bg-white border-teal-100'}`}>
+        <div className={`rounded-2xl p-5 border shadow-sm ${isDark ? 'bg-[#1e293b] border-white/5' : 'bg-white border-violet-100'}`}>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${isDark ? 'bg-teal-500/20 text-teal-400' : 'bg-teal-50 text-teal-600'}`}>
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${isDark ? 'bg-violet-500/20 text-violet-400' : 'bg-violet-50 text-violet-600'}`}>
                 <Dumbbell size={24} />
               </div>
               <div>
@@ -152,7 +152,7 @@ export default function TodaySession() {
 
       <div className={`fixed bottom-[70px] left-0 right-0 p-4 pt-2 border-t backdrop-blur-xl z-30 ${isDark ? 'bg-[#0f172a]/95 border-white/10' : 'bg-white/95 border-gray-200'}`}>
         <div className="max-w-2xl mx-auto">
-          <button onClick={handleStart} className="w-full py-4 rounded-2xl font-black text-base text-white shadow-lg shadow-teal-500/20 active:scale-[0.98] transition-transform flex items-center justify-center gap-2" style={{ background: 'linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)' }}>
+          <button onClick={handleStart} className="w-full py-4 rounded-2xl font-black text-base text-white shadow-lg shadow-teal-500/20 active:scale-[0.98] transition-transform flex items-center justify-center gap-2" style={{ background: 'linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%)' }}>
             <Play size={20} fill="currentColor" />
             شروع جلسه تمرینی
           </button>

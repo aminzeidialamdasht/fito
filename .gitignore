@@ -21,3 +21,8 @@ coachino-icon.png
 
 # Backups
 *.bak
+
+# Screenshots
+Screenshot_*.png
+Screenshot_*.jpg
+*.jpeg

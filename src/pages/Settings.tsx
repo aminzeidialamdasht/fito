@@ -14,7 +14,7 @@ export default function Settings() {
           <button 
             onClick={toggleTheme}
             className={`px-4 py-2 rounded-xl font-bold text-sm transition-colors ${
-              isDark ? 'bg-teal-500 text-black' : 'bg-gray-200 text-gray-800'
+              isDark ? 'bg-violet-500 text-black' : 'bg-gray-200 text-gray-800'
             }`}
           >
             {isDark ? 'روشن' : 'تاریک'}

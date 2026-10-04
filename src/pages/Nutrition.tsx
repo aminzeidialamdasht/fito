@@ -17,14 +17,14 @@ export default function Nutrition() {
     return (
       <div className="flex flex-col items-center justify-center py-20">
         <div className={`w-24 h-24 rounded-full flex items-center justify-center mb-6 ${
-          isDark ? 'bg-[#14b8a6]/10' : 'bg-[#14b8a6]/10'
+          isDark ? 'bg-[#a78bfa]/10' : 'bg-[#a78bfa]/10'
         }`}>
-          <Apple size={48} className={isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'} />
+          <Apple size={48} className={isDark ? 'text-[#a78bfa]' : 'text-[#8b5cf6]'} />
         </div>
-        <h2 className={`text-2xl font-bold mb-3 ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>
+        <h2 className={`text-2xl font-bold mb-3 ${isDark ? 'text-white' : 'text-[#312e81]'}`}>
           پروفایل انتخاب نشده
         </h2>
-        <p className={`text-center max-w-md ${isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}`}>
+        <p className={`text-center max-w-md ${isDark ? 'text-gray-400' : 'text-[#7c3aed]/70'}`}>
           لطفاً ابتدا یک پروفایل را از داشبورد انتخاب کنید
         </p>
       </div>
@@ -44,8 +44,8 @@ export default function Nutrition() {
 
   return (
     <div className="space-y-6">
-      <h2 className={`text-2xl font-bold flex items-center gap-2 ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>
-        <Apple size={24} className={isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'} />
+      <h2 className={`text-2xl font-bold flex items-center gap-2 ${isDark ? 'text-white' : 'text-[#312e81]'}`}>
+        <Apple size={24} className={isDark ? 'text-[#a78bfa]' : 'text-[#8b5cf6]'} />
         تغذیه و رژیم غذایی
       </h2>
 
@@ -53,27 +53,27 @@ export default function Nutrition() {
       {activeProgram && todayMeals && (
         <div className={`rounded-2xl p-5 border theme-transition ${
           isDark 
-            ? 'bg-gradient-to-l from-[#1a1a2e] to-[#16213e] border-[#14b8a6]/20' 
-            : 'bg-gradient-to-l from-white to-[#f0fdfa] border-[#14b8a6]/30'
+            ? 'bg-gradient-to-l from-[#1a1830] to-[#16213e] border-[#a78bfa]/20' 
+            : 'bg-gradient-to-l from-white to-[#f5f3ff] border-[#a78bfa]/30'
         }`}>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${
-                isDark ? 'bg-[#14b8a6]/20' : 'bg-[#14b8a6]/15'
+                isDark ? 'bg-[#a78bfa]/20' : 'bg-[#a78bfa]/15'
               }`}>
-                <Utensils size={20} className={isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'} />
+                <Utensils size={20} className={isDark ? 'text-[#a78bfa]' : 'text-[#8b5cf6]'} />
               </div>
               <div>
-                <h3 className={`font-bold ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>
+                <h3 className={`font-bold ${isDark ? 'text-white' : 'text-[#312e81]'}`}>
                   برنامه غذایی امروز
                 </h3>
-                <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}`}>
+                <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-[#7c3aed]/70'}`}>
                   {todayMeals.day} • {activeProgram.plan_name}
                 </p>
               </div>
             </div>
             <div className={`px-3 py-1 rounded-full text-xs font-bold ${
-              isDark ? 'bg-[#14b8a6]/20 text-[#14b8a6]' : 'bg-[#14b8a6]/15 text-[#0d9488]'
+              isDark ? 'bg-[#a78bfa]/20 text-[#a78bfa]' : 'bg-[#a78bfa]/15 text-[#8b5cf6]'
             }`}>
               {toPersianNumber(todayMeals.total_calories)} کالری
             </div>
@@ -82,14 +82,14 @@ export default function Nutrition() {
           <div className="space-y-3">
             {(todayMeals.meals || []).map((meal, idx) => (
               <div key={idx} className={`rounded-xl p-4 ${
-                isDark ? 'bg-[#0d0d1a]/70' : 'bg-white/80'
+                isDark ? 'bg-[#0f0e1f]/70' : 'bg-white/80'
               }`}>
                 <div className="flex items-center justify-between mb-2">
-                  <h4 className={`font-bold text-sm ${isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'}`}>
+                  <h4 className={`font-bold text-sm ${isDark ? 'text-[#a78bfa]' : 'text-[#8b5cf6]'}`}>
                     {meal.meal_name}
                   </h4>
                   {meal.time && (
-                    <span className={`flex items-center gap-1 text-xs ${isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}`}>
+                    <span className={`flex items-center gap-1 text-xs ${isDark ? 'text-gray-400' : 'text-[#7c3aed]/70'}`}>
                       <Clock size={12} />
                       {meal.time}
                     </span>
@@ -98,17 +98,17 @@ export default function Nutrition() {
                 <div className="space-y-1.5">
                   {(meal.foods || []).map((food, fi) => (
                     <div key={fi} className="flex items-center justify-between text-xs">
-                      <span className={isDark ? 'text-gray-300' : 'text-[#134e4a]'}>
-                        • {food.name} <span className={isDark ? 'text-gray-500' : 'text-[#0f766e]/60'}>({food.portion})</span>
+                      <span className={isDark ? 'text-gray-300' : 'text-[#312e81]'}>
+                        • {food.name} <span className={isDark ? 'text-gray-500' : 'text-[#7c3aed]/60'}>({food.portion})</span>
                       </span>
-                      <span className={`font-bold ${isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'}`}>
+                      <span className={`font-bold ${isDark ? 'text-[#a78bfa]' : 'text-[#8b5cf6]'}`}>
                         {toPersianNumber(food.calories)} کال
                       </span>
                     </div>
                   ))}
                 </div>
                 {meal.preparation && (
-                  <p className={`text-[11px] mt-2 ${isDark ? 'text-gray-500' : 'text-[#0f766e]/50'}`}>
+                  <p className={`text-[11px] mt-2 ${isDark ? 'text-gray-500' : 'text-[#7c3aed]/50'}`}>
                     📝 {meal.preparation}
                   </p>
                 )}
@@ -117,17 +117,17 @@ export default function Nutrition() {
           </div>
 
           {todayMeals.notes && (
-            <p className={`text-xs mt-3 ${isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}`}>
+            <p className={`text-xs mt-3 ${isDark ? 'text-gray-400' : 'text-[#7c3aed]/70'}`}>
               💡 {todayMeals.notes}
             </p>
           )}
 
           {activeProgram.hydration && (
             <div className={`flex items-center gap-2 mt-3 pt-3 border-t ${
-              isDark ? 'border-gray-700' : 'border-[#14b8a6]/20'
+              isDark ? 'border-gray-700' : 'border-[#a78bfa]/20'
             }`}>
-              <Droplets size={14} className={isDark ? 'text-[#4a90d9]' : 'text-[#0d9488]'} />
-              <span className={`text-xs ${isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}`}>
+              <Droplets size={14} className={isDark ? 'text-[#4a90d9]' : 'text-[#8b5cf6]'} />
+              <span className={`text-xs ${isDark ? 'text-gray-400' : 'text-[#7c3aed]/70'}`}>
                 {activeProgram.hydration}
               </span>
             </div>
@@ -138,29 +138,29 @@ export default function Nutrition() {
       {/* Full Program Days */}
       {activeProgram && activeProgram.days && activeProgram.days.length > 0 && (
         <div className={`rounded-2xl p-5 border theme-transition ${
-          isDark ? 'bg-[#1a1a2e] border-[#14b8a6]/10' : 'bg-white border-[#14b8a6]/15'
+          isDark ? 'bg-[#1a1830] border-[#a78bfa]/10' : 'bg-white border-[#a78bfa]/15'
         }`}>
-          <h3 className={`font-bold mb-4 flex items-center gap-2 ${isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'}`}>
+          <h3 className={`font-bold mb-4 flex items-center gap-2 ${isDark ? 'text-[#a78bfa]' : 'text-[#8b5cf6]'}`}>
             <Utensils size={18} />
             برنامه کامل — {activeProgram.plan_name}
           </h3>
 
           <div className="grid grid-cols-3 gap-2 mb-4 text-center">
-            <div className={`rounded-xl p-3 ${isDark ? 'bg-[#0d0d1a]' : 'bg-[#f0fdfa]'}`}>
-              <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-[#0f766e]/60'}`}>کالری روزانه</p>
-              <p className={`font-bold ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>
+            <div className={`rounded-xl p-3 ${isDark ? 'bg-[#0f0e1f]' : 'bg-[#f5f3ff]'}`}>
+              <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-[#7c3aed]/60'}`}>کالری روزانه</p>
+              <p className={`font-bold ${isDark ? 'text-white' : 'text-[#312e81]'}`}>
                 {toPersianNumber(activeProgram.daily_calories)}
               </p>
             </div>
-            <div className={`rounded-xl p-3 ${isDark ? 'bg-[#0d0d1a]' : 'bg-[#f0fdfa]'}`}>
-              <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-[#0f766e]/60'}`}>پروتئین</p>
-              <p className={`font-bold ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>
+            <div className={`rounded-xl p-3 ${isDark ? 'bg-[#0f0e1f]' : 'bg-[#f5f3ff]'}`}>
+              <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-[#7c3aed]/60'}`}>پروتئین</p>
+              <p className={`font-bold ${isDark ? 'text-white' : 'text-[#312e81]'}`}>
                 {toPersianNumber(activeProgram.macros.protein)}g
               </p>
             </div>
-            <div className={`rounded-xl p-3 ${isDark ? 'bg-[#0d0d1a]' : 'bg-[#f0fdfa]'}`}>
-              <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-[#0f766e]/60'}`}>کربوهیدرات</p>
-              <p className={`font-bold ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>
+            <div className={`rounded-xl p-3 ${isDark ? 'bg-[#0f0e1f]' : 'bg-[#f5f3ff]'}`}>
+              <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-[#7c3aed]/60'}`}>کربوهیدرات</p>
+              <p className={`font-bold ${isDark ? 'text-white' : 'text-[#312e81]'}`}>
                 {toPersianNumber(activeProgram.macros.carbs)}g
               </p>
             </div>
@@ -169,25 +169,25 @@ export default function Nutrition() {
           <div className="space-y-4">
             {activeProgram.days.map((day, di) => (
               <div key={di} className={`rounded-xl p-4 border ${
-                isDark ? 'bg-[#0d0d1a] border-gray-800' : 'bg-[#f0fdfa] border-[#14b8a6]/20'
+                isDark ? 'bg-[#0f0e1f] border-gray-800' : 'bg-[#f5f3ff] border-[#a78bfa]/20'
               }`}>
                 <div className="flex items-center justify-between mb-3">
-                  <h4 className={`font-bold ${isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'}`}>
+                  <h4 className={`font-bold ${isDark ? 'text-[#a78bfa]' : 'text-[#8b5cf6]'}`}>
                     {day.day}
                   </h4>
-                  <span className={`text-xs font-bold ${isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}`}>
+                  <span className={`text-xs font-bold ${isDark ? 'text-gray-400' : 'text-[#7c3aed]/70'}`}>
                     {toPersianNumber(day.total_calories)} کالری
                   </span>
                 </div>
                 {(day.meals || []).map((meal, mi) => (
                   <div key={mi} className={`mb-3 last:mb-0 pb-3 last:pb-0 border-b last:border-0 ${
-                    isDark ? 'border-gray-800' : 'border-[#14b8a6]/10'
+                    isDark ? 'border-gray-800' : 'border-[#a78bfa]/10'
                   }`}>
-                    <p className={`text-sm font-bold mb-1 ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>
-                      {meal.meal_name} {meal.time && <span className={`font-normal text-xs ${isDark ? 'text-gray-500' : 'text-[#0f766e]/50'}`}>({meal.time})</span>}
+                    <p className={`text-sm font-bold mb-1 ${isDark ? 'text-white' : 'text-[#312e81]'}`}>
+                      {meal.meal_name} {meal.time && <span className={`font-normal text-xs ${isDark ? 'text-gray-500' : 'text-[#7c3aed]/50'}`}>({meal.time})</span>}
                     </p>
                     {(meal.foods || []).map((food, fi) => (
-                      <p key={fi} className={`text-xs ${isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}`}>
+                      <p key={fi} className={`text-xs ${isDark ? 'text-gray-400' : 'text-[#7c3aed]/70'}`}>
                         • {food.name} — {food.portion} ({toPersianNumber(food.calories)} کالری | P:{toPersianNumber(food.protein)} C:{toPersianNumber(food.carbs)} F:{toPersianNumber(food.fats)})
                       </p>
                     ))}
@@ -202,20 +202,20 @@ export default function Nutrition() {
       {/* Nutrition Summary (profile info) */}
       <div className={`rounded-2xl p-6 border theme-transition ${
         isDark 
-          ? 'bg-gradient-to-l from-[#1a1a2e] to-[#16213e] border-[#14b8a6]/20' 
-          : 'bg-gradient-to-l from-white to-[#f0fdfa] border-[#14b8a6]/30'
+          ? 'bg-gradient-to-l from-[#1a1830] to-[#16213e] border-[#a78bfa]/20' 
+          : 'bg-gradient-to-l from-white to-[#f5f3ff] border-[#a78bfa]/30'
       }`}>
         <div className="flex items-center gap-3 mb-4">
           <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-            isDark ? 'bg-[#14b8a6]/20' : 'bg-[#14b8a6]/15'
+            isDark ? 'bg-[#a78bfa]/20' : 'bg-[#a78bfa]/15'
           }`}>
-            <Target size={24} className={isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'} />
+            <Target size={24} className={isDark ? 'text-[#a78bfa]' : 'text-[#8b5cf6]'} />
           </div>
           <div>
-            <h3 className={`font-bold text-lg ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>
+            <h3 className={`font-bold text-lg ${isDark ? 'text-white' : 'text-[#312e81]'}`}>
               خلاصه تغذیه پروفایل
             </h3>
-            <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}`}>
+            <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-[#7c3aed]/70'}`}>
               {profile.name}
             </p>
           </div>
@@ -223,13 +223,13 @@ export default function Nutrition() {
 
         {!hasNutritionInfo ? (
           <div className={`rounded-xl p-4 text-center ${
-            isDark ? 'bg-[#0d0d1a]/50' : 'bg-[#f0fdfa]'
+            isDark ? 'bg-[#0f0e1f]/50' : 'bg-[#f5f3ff]'
           }`}>
             <AlertTriangle size={32} className={`mx-auto mb-2 ${isDark ? 'text-[#f59e0b]' : 'text-[#d97706]'}`} />
-            <p className={`font-bold mb-1 ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>
+            <p className={`font-bold mb-1 ${isDark ? 'text-white' : 'text-[#312e81]'}`}>
               اطلاعات تغذیه تکمیل نشده
             </p>
-            <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}`}>
+            <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-[#7c3aed]/70'}`}>
               لطفاً به بخش پروفایل رفته و اطلاعات تغذیه را تکمیل کنید
             </p>
           </div>
@@ -252,9 +252,9 @@ export default function Nutrition() {
       {/* Favorite / Disliked / Allergies */}
       {profile.favoriteFoods.length > 0 && (
         <div className={`rounded-2xl p-5 border theme-transition ${
-          isDark ? 'bg-[#1a1a2e] border-[#14b8a6]/10' : 'bg-white border-[#14b8a6]/15'
+          isDark ? 'bg-[#1a1830] border-[#a78bfa]/10' : 'bg-white border-[#a78bfa]/15'
         }`}>
-          <h3 className={`font-bold mb-3 flex items-center gap-2 ${isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'}`}>
+          <h3 className={`font-bold mb-3 flex items-center gap-2 ${isDark ? 'text-[#a78bfa]' : 'text-[#8b5cf6]'}`}>
             <Utensils size={18} />
             غذاهای مورد علاقه
           </h3>
@@ -272,7 +272,7 @@ export default function Nutrition() {
 
       {profile.dislikedFoods.length > 0 && (
         <div className={`rounded-2xl p-5 border theme-transition ${
-          isDark ? 'bg-[#1a1a2e] border-[#14b8a6]/10' : 'bg-white border-[#14b8a6]/15'
+          isDark ? 'bg-[#1a1830] border-[#a78bfa]/10' : 'bg-white border-[#a78bfa]/15'
         }`}>
           <h3 className={`font-bold mb-3 flex items-center gap-2 ${isDark ? 'text-[#ef4444]' : 'text-[#dc2626]'}`}>
             <AlertTriangle size={18} />
@@ -292,7 +292,7 @@ export default function Nutrition() {
 
       {profile.foodAllergies.length > 0 && (
         <div className={`rounded-2xl p-5 border theme-transition ${
-          isDark ? 'bg-[#1a1a2e] border-[#ef4444]/20' : 'bg-white border-red-200'
+          isDark ? 'bg-[#1a1830] border-[#ef4444]/20' : 'bg-white border-red-200'
         }`}>
           <h3 className={`font-bold mb-3 flex items-center gap-2 ${isDark ? 'text-[#ef4444]' : 'text-[#dc2626]'}`}>
             <AlertTriangle size={18} />
@@ -312,10 +312,10 @@ export default function Nutrition() {
 
       {/* Nutrition Programs List */}
       <div className={`rounded-2xl p-5 border theme-transition ${
-        isDark ? 'bg-[#1a1a2e] border-[#14b8a6]/10' : 'bg-white border-[#14b8a6]/15'
+        isDark ? 'bg-[#1a1830] border-[#a78bfa]/10' : 'bg-white border-[#a78bfa]/15'
       }`}>
         <div className="flex items-center justify-between mb-4">
-          <h3 className={`font-bold flex items-center gap-2 ${isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'}`}>
+          <h3 className={`font-bold flex items-center gap-2 ${isDark ? 'text-[#a78bfa]' : 'text-[#8b5cf6]'}`}>
             <Utensils size={18} />
             برنامه‌های غذایی
           </h3>
@@ -323,8 +323,8 @@ export default function Nutrition() {
             onClick={() => navigate('/nutrition-import')}
             className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-bold transition-all ${
               isDark
-                ? 'bg-[#14b8a6]/20 text-[#14b8a6] hover:bg-[#14b8a6]/30'
-                : 'bg-[#14b8a6]/15 text-[#0d9488] hover:bg-[#14b8a6]/25'
+                ? 'bg-[#a78bfa]/20 text-[#a78bfa] hover:bg-[#a78bfa]/30'
+                : 'bg-[#a78bfa]/15 text-[#8b5cf6] hover:bg-[#a78bfa]/25'
             }`}
           >
             <Plus size={14} />
@@ -333,7 +333,7 @@ export default function Nutrition() {
         </div>
 
         {nutritionPrograms.length === 0 ? (
-          <p className={`text-sm text-center py-4 ${isDark ? 'text-gray-500' : 'text-[#0f766e]/50'}`}>
+          <p className={`text-sm text-center py-4 ${isDark ? 'text-gray-500' : 'text-[#7c3aed]/50'}`}>
             هنوز برنامه غذایی وارد نشده است
           </p>
         ) : (
@@ -345,19 +345,19 @@ export default function Nutrition() {
                 className={`rounded-xl p-4 border cursor-pointer transition-all ${
                   program.id === (state.activeNutritionProgram || nutritionPrograms[0]?.id)
                     ? isDark
-                      ? 'bg-[#14b8a6]/10 border-[#14b8a6]/40'
-                      : 'bg-[#14b8a6]/10 border-[#14b8a6]/40'
+                      ? 'bg-[#a78bfa]/10 border-[#a78bfa]/40'
+                      : 'bg-[#a78bfa]/10 border-[#a78bfa]/40'
                     : isDark
-                      ? 'bg-[#0d0d1a] border-gray-800 hover:border-gray-600'
-                      : 'bg-[#f0fdfa] border-[#14b8a6]/20 hover:border-[#14b8a6]/40'
+                      ? 'bg-[#0f0e1f] border-gray-800 hover:border-gray-600'
+                      : 'bg-[#f5f3ff] border-[#a78bfa]/20 hover:border-[#a78bfa]/40'
                 }`}
               >
                 <div className="flex items-center justify-between mb-2">
-                  <h4 className={`font-bold ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>
+                  <h4 className={`font-bold ${isDark ? 'text-white' : 'text-[#312e81]'}`}>
                     {program.plan_name}
                     {program.id === (state.activeNutritionProgram || nutritionPrograms[0]?.id) && (
                       <span className={`mr-2 text-[10px] px-2 py-0.5 rounded-full ${
-                        isDark ? 'bg-[#14b8a6]/30 text-[#14b8a6]' : 'bg-[#14b8a6]/20 text-[#0d9488]'
+                        isDark ? 'bg-[#a78bfa]/30 text-[#a78bfa]' : 'bg-[#a78bfa]/20 text-[#8b5cf6]'
                       }`}>
                         فعال
                       </span>
@@ -375,22 +375,22 @@ export default function Nutrition() {
                     <Trash2 size={16} />
                   </button>
                 </div>
-                <p className={`text-xs mb-2 ${isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}`}>
+                <p className={`text-xs mb-2 ${isDark ? 'text-gray-400' : 'text-[#7c3aed]/70'}`}>
                   {program.duration}
                 </p>
                 <div className="grid grid-cols-3 gap-2 text-xs">
-                  <div className={isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}>
-                    کالری: <span className={`font-bold ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>
+                  <div className={isDark ? 'text-gray-400' : 'text-[#7c3aed]/70'}>
+                    کالری: <span className={`font-bold ${isDark ? 'text-white' : 'text-[#312e81]'}`}>
                       {toPersianNumber(program.daily_calories)}
                     </span>
                   </div>
-                  <div className={isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}>
-                    پروتئین: <span className={`font-bold ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>
+                  <div className={isDark ? 'text-gray-400' : 'text-[#7c3aed]/70'}>
+                    پروتئین: <span className={`font-bold ${isDark ? 'text-white' : 'text-[#312e81]'}`}>
                       {toPersianNumber(program.macros.protein)}g
                     </span>
                   </div>
-                  <div className={isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}>
-                    روزها: <span className={`font-bold ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>
+                  <div className={isDark ? 'text-gray-400' : 'text-[#7c3aed]/70'}>
+                    روزها: <span className={`font-bold ${isDark ? 'text-white' : 'text-[#312e81]'}`}>
                       {toPersianNumber(program.days.length)}
                     </span>
                   </div>
@@ -406,9 +406,9 @@ export default function Nutrition() {
 
 function InfoCard({ label, value, isDark }: { label: string; value: string; isDark: boolean }) {
   return (
-    <div className={`rounded-xl p-3 ${isDark ? 'bg-[#0d0d1a]' : 'bg-[#f0fdfa]'}`}>
-      <p className={`text-xs mb-1 ${isDark ? 'text-gray-500' : 'text-[#0f766e]/60'}`}>{label}</p>
-      <p className={`text-sm font-bold ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>{value}</p>
+    <div className={`rounded-xl p-3 ${isDark ? 'bg-[#0f0e1f]' : 'bg-[#f5f3ff]'}`}>
+      <p className={`text-xs mb-1 ${isDark ? 'text-gray-500' : 'text-[#7c3aed]/60'}`}>{label}</p>
+      <p className={`text-sm font-bold ${isDark ? 'text-white' : 'text-[#312e81]'}`}>{value}</p>
     </div>
   );
 }

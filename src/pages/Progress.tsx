@@ -33,12 +33,16 @@ export default function Progress() {
   const isDark = theme === 'dark';
 
   const gold = isDark ? '#d4af37' : '#f59e0b';
-  const teal = isDark ? '#14b8a6' : '#0d9488';
+  const teal = isDark ? '#a78bfa' : '#8b5cf6';
   const bgMain = isDark ? '#0f172a' : '#ffffff';
-  const cardBg = isDark ? '#1e293b' : '#f8fafc';
+  const cardBg = isDark
+    ? 'bg-[#1e1b4b]/50 backdrop-blur-md'
+    : 'bg-white/70 backdrop-blur-md shadow-sm';
   const textMain = isDark ? '#ffffff' : '#0f172a';
   const textSub = isDark ? '#94a3b8' : '#64748b';
-  const borderCard = isDark ? 'border-white/5' : 'border-teal-100';
+  const borderCard = isDark
+    ? 'border-white/10'
+    : 'border-violet-200/60';
 
   const activeProgram = programs.find(p => p.id === state.activeProgram);
   const activeProgramTimeline = activeProgram
@@ -139,7 +143,7 @@ export default function Progress() {
                 <h3 className={`text-lg font-bold ${textMain}`}>{activeProgram.name}</h3>
               </div>
             </div>
-            <button onClick={() => navigate('/import')} className={`text-xs font-bold px-3 py-1.5 rounded-lg border ${isDark ? 'border-gray-700 text-gray-300' : 'border-teal-200 text-[#0d9488]'}`}>
+            <button onClick={() => navigate('/import')} className={`text-xs font-bold px-3 py-1.5 rounded-lg border ${isDark ? 'border-gray-700 text-gray-300' : 'border-violet-200 text-[#8b5cf6]'}`}>
               تغییر برنامه
             </button>
           </div>
@@ -196,7 +200,7 @@ export default function Progress() {
               <label key={key} className={`text-xs ${textSub}`}>
                 {label} ({unit})
                 <input type="number" value={(form as any)[key] || ''} onChange={e => setForm({ ...form, [key]: Number(e.target.value) })}
-                  className={`mt-1 w-full rounded-lg px-3 py-2 outline-none focus:ring-2 ${isDark ? 'bg-[#0f172a] text-white border border-white/10 focus:ring-teal-500/50' : 'bg-white border border-gray-200 focus:ring-teal-500/30'}`} />
+                  className={`mt-1 w-full rounded-lg px-3 py-2 outline-none focus:ring-2 ${isDark ? 'bg-[#0f172a] text-white border border-white/10 focus:ring-violet-500/50' : 'bg-white border border-gray-200 focus:ring-violet-500/30'}`} />
               </label>
             ))}
           </div>
@@ -284,7 +288,7 @@ export default function Progress() {
         ) : (
           <div className="space-y-2">
             {[...sortedProgress].reverse().slice(0, 6).map(entry => (
-              <div key={entry.id} className={`flex items-center justify-between p-3 rounded-xl transition-colors ${isDark ? 'bg-[#0f172a] hover:bg-[#1e293b]' : 'bg-[#f0fdfa] hover:bg-[#ccfbf1]'}`}>
+              <div key={entry.id} className={`flex items-center justify-between p-3 rounded-xl transition-colors ${isDark ? 'bg-[#0f172a] hover:bg-[#1e293b]' : 'bg-[#f5f3ff] hover:bg-[#ccfbf1]'}`}>
                 <div className="flex items-center gap-3">
                   <div className={`w-9 h-9 rounded-lg flex items-center justify-center`} style={{ background: `${gold}15`, color: gold }}>
                     <Scale size={16} />

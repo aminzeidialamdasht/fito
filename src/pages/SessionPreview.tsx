@@ -45,10 +45,10 @@ export default function SessionPreview() {
 
       <div className="p-4 space-y-4">
         {/* کارت خلاصه جلسه */}
-        <div className={`rounded-2xl p-5 border ${isDark ? 'bg-[#1e293b] border-white/5' : 'bg-white border-teal-100'}`}>
+        <div className={`rounded-2xl p-5 border ${isDark ? 'bg-[#1e293b] border-white/5' : 'bg-white border-violet-100'}`}>
           <div className="grid grid-cols-3 gap-4 text-center mb-4">
             <div>
-              <div className="flex items-center justify-center gap-1 mb-1 text-teal-500">
+              <div className="flex items-center justify-center gap-1 mb-1 text-violet-500">
                 <Layers size={16} />
                 <span className="text-xs font-bold">حرکات</span>
               </div>
@@ -79,7 +79,7 @@ export default function SessionPreview() {
           {completedSets > 0 && (
             <div className="w-full h-2 rounded-full bg-gray-200 overflow-hidden">
               <div 
-                className="h-full bg-teal-500 transition-all duration-500"
+                className="h-full bg-violet-500 transition-all duration-500"
                 style={{ width: `${(completedSets / totalSets) * 100}%` }}
               />
             </div>
@@ -95,7 +95,7 @@ export default function SessionPreview() {
             }`}>
               <div className="flex items-center gap-3">
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold ${
-                  isDark ? 'bg-teal-500/20 text-teal-400' : 'bg-teal-50 text-teal-700'
+                  isDark ? 'bg-violet-500/20 text-violet-400' : 'bg-violet-50 text-violet-700'
                 }`}>
                   {idx + 1}
                 </div>
@@ -124,7 +124,7 @@ export default function SessionPreview() {
         <button 
           onClick={handleStart}
           className="w-full py-4 rounded-2xl font-black text-lg text-white shadow-lg active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
-          style={{ background: 'linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)' }}
+          style={{ background: 'linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%)' }}
         >
           <Play size={20} fill="currentColor" />
           شروع جلسه تمرینی

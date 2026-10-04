@@ -29,10 +29,14 @@ export default function Dashboard() {
   const tealLight = isDark ? '#c4b5fd' : '#8b5cf6'; // یاسی روشن
   const gold = isDark ? '#fbbf24' : '#f59e0b';      // طلایی ملایم
   const bgMain = isDark ? '#0f172a' : '#f8fafc';
-  const cardBg = isDark ? '#1e293b' : '#ffffff';
+  const cardBg = isDark
+    ? 'bg-[#1e1b4b]/50 backdrop-blur-md'
+    : 'bg-white/70 backdrop-blur-md shadow-sm';
   const textMain = isDark ? '#ffffff' : '#0f172a';
   const textSub = isDark ? '#94a3b8' : '#64748b';
-  const borderCard = isDark ? 'border-white/5' : 'border-gray-200';
+  const borderCard = isDark
+    ? 'border-white/10'
+    : 'border-violet-200/60';
 
   // آمار
   const completedSessions = sessions.filter(s => s.completed);
@@ -127,7 +131,7 @@ export default function Dashboard() {
       title: 'برنامه فشرده',
       subtitle: FEATURE_FLAGS.compactWorkout ? 'تک‌جلسه‌ای' : 'به‌زودی',
       enabled: FEATURE_FLAGS.compactWorkout,
-      gradient: 'from-cyan-500 via-blue-600 to-indigo-700',
+      gradient: 'from-violet-500 via-blue-600 to-indigo-700',
       path: '/generate/compact',
     },
   ];
@@ -154,7 +158,7 @@ export default function Dashboard() {
               {profiles.map(p => (
                 <button key={p.id} onClick={() => { soundEffects.playClick(); setActiveProfile(p.id); }}
                   className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all ${p.id === profile?.id
-                    ? `text-black shadow-md` : isDark ? 'bg-slate-900 text-slate-400 hover:text-white' : 'bg-teal-50 text-teal-800 hover:bg-teal-100'}`}
+                    ? `text-black shadow-md` : isDark ? 'bg-slate-900 text-slate-400 hover:text-white' : 'bg-violet-50 text-violet-800 hover:bg-violet-100'}`}
                   style={p.id === profile?.id ? { background: `linear-gradient(to left, ${teal}, ${tealLight})` } : {}}>
                   {p.name}
                 </button>
@@ -172,13 +176,27 @@ export default function Dashboard() {
         {/* دایره‌های تزئینی */}
         <div className="absolute -top-16 -left-16 w-48 h-48 rounded-full opacity-20 bg-white" />
         <div className="absolute -bottom-20 -right-12 w-56 h-56 rounded-full opacity-10 bg-white" />
+
+        {/* واترمارک لوگوی Fito در وسط و بزرگ */}
+        <img
+          src="/fito-logo-transparent.png"
+          alt=""
+          aria-hidden="true"
+          className="absolute pointer-events-none select-none"
+          style={{
+            top: '50%',
+            left: '50%',
+            width: '85%',
+            height: '85%',
+            maxWidth: '320px',
+            maxHeight: '320px',
+            transform: 'translate(-50%, -50%)',
+            opacity: 0.12,
+            filter: 'brightness(1.5)',
+          }}
+        />
         <div className="relative z-10">
         <div className="flex items-center gap-4 mb-4">
-          {/* لوگوی Fito */}
-          <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-lg"
-            style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.2)' }}>
-            <img src="/fito-icon.png" alt="Fito" className="w-10 h-10 object-contain" />
-          </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-bold text-white/90">سلام، {profile?.name || 'ورزشکار'} 👋</p>
             <h2 className="text-xl font-black mt-1 text-white">مربی اختصاصی تو</h2>

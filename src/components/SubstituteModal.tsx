@@ -33,7 +33,7 @@ export default function SubstituteModal({
   const [showOnlySafe, setShowOnlySafe] = useState(true);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const teal = isDark ? '#14b8a6' : '#0d9488';
+  const teal = isDark ? '#a78bfa' : '#8b5cf6';
   const gold = isDark ? '#d4af37' : '#f59e0b';
   const bgCard = isDark ? '#1e293b' : '#ffffff';
   const bgMain = isDark ? '#0f172a' : '#f8fafc';

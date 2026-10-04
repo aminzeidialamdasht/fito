@@ -15,14 +15,14 @@ export default function Supplements() {
     return (
       <div className="flex flex-col items-center justify-center py-20">
         <div className={`w-24 h-24 rounded-full flex items-center justify-center mb-6 ${
-          isDark ? 'bg-[#14b8a6]/10' : 'bg-[#14b8a6]/10'
+          isDark ? 'bg-[#a78bfa]/10' : 'bg-[#a78bfa]/10'
         }`}>
-          <Pill size={48} className={isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'} />
+          <Pill size={48} className={isDark ? 'text-[#a78bfa]' : 'text-[#8b5cf6]'} />
         </div>
-        <h2 className={`text-2xl font-bold mb-3 ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>
+        <h2 className={`text-2xl font-bold mb-3 ${isDark ? 'text-white' : 'text-[#312e81]'}`}>
           پروفایل انتخاب نشده
         </h2>
-        <p className={`text-center max-w-md ${isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}`}>
+        <p className={`text-center max-w-md ${isDark ? 'text-gray-400' : 'text-[#7c3aed]/70'}`}>
           لطفاً ابتدا یک پروفایل را از داشبورد انتخاب کنید
         </p>
       </div>
@@ -33,8 +33,8 @@ export default function Supplements() {
 
   return (
     <div className="space-y-6">
-      <h2 className={`text-2xl font-bold flex items-center gap-2 ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>
-        <Pill size={24} className={isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'} />
+      <h2 className={`text-2xl font-bold flex items-center gap-2 ${isDark ? 'text-white' : 'text-[#312e81]'}`}>
+        <Pill size={24} className={isDark ? 'text-[#a78bfa]' : 'text-[#8b5cf6]'} />
         مکمل‌های ورزشی
       </h2>
 
@@ -42,27 +42,27 @@ export default function Supplements() {
       {activeProgram && activeProgram.supplements && activeProgram.supplements.length > 0 && (
         <div className={`rounded-2xl p-5 border theme-transition ${
           isDark 
-            ? 'bg-gradient-to-l from-[#1a1a2e] to-[#16213e] border-[#14b8a6]/20' 
-            : 'bg-gradient-to-l from-white to-[#f0fdfa] border-[#14b8a6]/30'
+            ? 'bg-gradient-to-l from-[#1a1830] to-[#16213e] border-[#a78bfa]/20' 
+            : 'bg-gradient-to-l from-white to-[#f5f3ff] border-[#a78bfa]/30'
         }`}>
           <div className="flex items-center gap-3 mb-4">
             <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${
-              isDark ? 'bg-[#14b8a6]/20' : 'bg-[#14b8a6]/15'
+              isDark ? 'bg-[#a78bfa]/20' : 'bg-[#a78bfa]/15'
             }`}>
-              <Pill size={20} className={isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'} />
+              <Pill size={20} className={isDark ? 'text-[#a78bfa]' : 'text-[#8b5cf6]'} />
             </div>
             <div>
-              <h3 className={`font-bold ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>
+              <h3 className={`font-bold ${isDark ? 'text-white' : 'text-[#312e81]'}`}>
                 مصرف روزانه مکمل‌ها
               </h3>
-              <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}`}>
+              <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-[#7c3aed]/70'}`}>
                 {activeProgram.recommendation_title}
               </p>
             </div>
           </div>
 
           {activeProgram.summary && (
-            <p className={`text-sm mb-4 ${isDark ? 'text-gray-300' : 'text-[#0f766e]/80'}`}>
+            <p className={`text-sm mb-4 ${isDark ? 'text-gray-300' : 'text-[#7c3aed]/80'}`}>
               {activeProgram.summary}
             </p>
           )}
@@ -70,15 +70,15 @@ export default function Supplements() {
           <div className="space-y-3">
             {activeProgram.supplements.map((supp, idx) => (
               <div key={idx} className={`rounded-xl p-4 ${
-                isDark ? 'bg-[#0d0d1a]/70' : 'bg-white/80'
+                isDark ? 'bg-[#0f0e1f]/70' : 'bg-white/80'
               }`}>
                 <div className="flex items-center justify-between mb-2">
                   <div>
-                    <h4 className={`font-bold text-sm ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>
+                    <h4 className={`font-bold text-sm ${isDark ? 'text-white' : 'text-[#312e81]'}`}>
                       {supp.name}
                     </h4>
                     {supp.english_name && (
-                      <p className={`text-[11px] ${isDark ? 'text-gray-500' : 'text-[#0f766e]/50'}`}>
+                      <p className={`text-[11px] ${isDark ? 'text-gray-500' : 'text-[#7c3aed]/50'}`}>
                         {supp.english_name}
                       </p>
                     )}
@@ -93,23 +93,23 @@ export default function Supplements() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div className={`flex items-center gap-1.5 ${isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}`}>
+                  <div className={`flex items-center gap-1.5 ${isDark ? 'text-gray-400' : 'text-[#7c3aed]/70'}`}>
                     <Clock size={12} />
                     <span>{supp.timing || supp.dosage}</span>
                   </div>
-                  <div className={`flex items-center gap-1.5 ${isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}`}>
+                  <div className={`flex items-center gap-1.5 ${isDark ? 'text-gray-400' : 'text-[#7c3aed]/70'}`}>
                     <Pill size={12} />
                     <span>{supp.dosage}</span>
                   </div>
                 </div>
 
                 {supp.benefits && (
-                  <p className={`text-[11px] mt-2 ${isDark ? 'text-gray-500' : 'text-[#0f766e]/50'}`}>
+                  <p className={`text-[11px] mt-2 ${isDark ? 'text-gray-500' : 'text-[#7c3aed]/50'}`}>
                     ✅ {supp.benefits}
                   </p>
                 )}
                 {supp.notes && (
-                  <p className={`text-[11px] mt-1 ${isDark ? 'text-gray-500' : 'text-[#0f766e]/50'}`}>
+                  <p className={`text-[11px] mt-1 ${isDark ? 'text-gray-500' : 'text-[#7c3aed]/50'}`}>
                     📝 {supp.notes}
                   </p>
                 )}
@@ -119,10 +119,10 @@ export default function Supplements() {
 
           {activeProgram.total_estimated_cost && (
             <div className={`flex items-center gap-2 mt-4 pt-3 border-t ${
-              isDark ? 'border-gray-700' : 'border-[#14b8a6]/20'
+              isDark ? 'border-gray-700' : 'border-[#a78bfa]/20'
             }`}>
-              <DollarSign size={14} className={isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'} />
-              <span className={`text-xs font-bold ${isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'}`}>
+              <DollarSign size={14} className={isDark ? 'text-[#a78bfa]' : 'text-[#8b5cf6]'} />
+              <span className={`text-xs font-bold ${isDark ? 'text-[#a78bfa]' : 'text-[#8b5cf6]'}`}>
                 هزینه ماهانه: {activeProgram.total_estimated_cost}
               </span>
             </div>
@@ -154,24 +154,24 @@ export default function Supplements() {
       {/* Detailed Supplement Cards */}
       {activeProgram && activeProgram.supplements && activeProgram.supplements.length > 0 && (
         <div className={`rounded-2xl p-5 border theme-transition ${
-          isDark ? 'bg-[#1a1a2e] border-[#14b8a6]/10' : 'bg-white border-[#14b8a6]/15'
+          isDark ? 'bg-[#1a1830] border-[#a78bfa]/10' : 'bg-white border-[#a78bfa]/15'
         }`}>
-          <h3 className={`font-bold mb-4 flex items-center gap-2 ${isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'}`}>
+          <h3 className={`font-bold mb-4 flex items-center gap-2 ${isDark ? 'text-[#a78bfa]' : 'text-[#8b5cf6]'}`}>
             <Pill size={18} />
             جزئیات مکمل‌ها
           </h3>
           <div className="space-y-4">
             {activeProgram.supplements.map((supp, idx) => (
               <div key={idx} className={`rounded-xl p-4 border ${
-                isDark ? 'bg-[#0d0d1a] border-gray-800' : 'bg-[#f0fdfa] border-[#14b8a6]/20'
+                isDark ? 'bg-[#0f0e1f] border-gray-800' : 'bg-[#f5f3ff] border-[#a78bfa]/20'
               }`}>
                 <div className="flex items-center justify-between mb-3">
                   <div>
-                    <h4 className={`font-bold ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>
+                    <h4 className={`font-bold ${isDark ? 'text-white' : 'text-[#312e81]'}`}>
                       {supp.name}
                     </h4>
                     {supp.english_name && (
-                      <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-[#0f766e]/50'}`}>
+                      <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-[#7c3aed]/50'}`}>
                         {supp.english_name}
                       </p>
                     )}
@@ -187,29 +187,29 @@ export default function Supplements() {
 
                 <div className="grid grid-cols-2 gap-3 text-xs mb-3">
                   <div>
-                    <p className={isDark ? 'text-gray-500' : 'text-[#0f766e]/50'}>دوز مصرف</p>
-                    <p className={`font-bold ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>{supp.dosage}</p>
+                    <p className={isDark ? 'text-gray-500' : 'text-[#7c3aed]/50'}>دوز مصرف</p>
+                    <p className={`font-bold ${isDark ? 'text-white' : 'text-[#312e81]'}`}>{supp.dosage}</p>
                   </div>
                   <div>
-                    <p className={isDark ? 'text-gray-500' : 'text-[#0f766e]/50'}>زمان مصرف</p>
-                    <p className={`font-bold ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>{supp.timing}</p>
+                    <p className={isDark ? 'text-gray-500' : 'text-[#7c3aed]/50'}>زمان مصرف</p>
+                    <p className={`font-bold ${isDark ? 'text-white' : 'text-[#312e81]'}`}>{supp.timing}</p>
                   </div>
                   {supp.estimated_cost && (
                     <div>
-                      <p className={isDark ? 'text-gray-500' : 'text-[#0f766e]/50'}>هزینه تقریبی</p>
-                      <p className={`font-bold ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>{supp.estimated_cost}</p>
+                      <p className={isDark ? 'text-gray-500' : 'text-[#7c3aed]/50'}>هزینه تقریبی</p>
+                      <p className={`font-bold ${isDark ? 'text-white' : 'text-[#312e81]'}`}>{supp.estimated_cost}</p>
                     </div>
                   )}
                   {supp.recommended_brands && (
                     <div>
-                      <p className={isDark ? 'text-gray-500' : 'text-[#0f766e]/50'}>برندهای پیشنهادی</p>
-                      <p className={`font-bold ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>{supp.recommended_brands}</p>
+                      <p className={isDark ? 'text-gray-500' : 'text-[#7c3aed]/50'}>برندهای پیشنهادی</p>
+                      <p className={`font-bold ${isDark ? 'text-white' : 'text-[#312e81]'}`}>{supp.recommended_brands}</p>
                     </div>
                   )}
                 </div>
 
                 {supp.benefits && (
-                  <p className={`text-xs mb-1 ${isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}`}>
+                  <p className={`text-xs mb-1 ${isDark ? 'text-gray-400' : 'text-[#7c3aed]/70'}`}>
                     <span className="font-bold">فواید:</span> {supp.benefits}
                   </p>
                 )}
@@ -219,7 +219,7 @@ export default function Supplements() {
                   </p>
                 )}
                 {supp.notes && (
-                  <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-[#0f766e]/50'}`}>
+                  <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-[#7c3aed]/50'}`}>
                     <span className="font-bold">نکته:</span> {supp.notes}
                   </p>
                 )}
@@ -232,20 +232,20 @@ export default function Supplements() {
       {/* Supplement Info from Profile */}
       <div className={`rounded-2xl p-6 border theme-transition ${
         isDark 
-          ? 'bg-gradient-to-l from-[#1a1a2e] to-[#16213e] border-[#14b8a6]/20' 
-          : 'bg-gradient-to-l from-white to-[#f0fdfa] border-[#14b8a6]/30'
+          ? 'bg-gradient-to-l from-[#1a1830] to-[#16213e] border-[#a78bfa]/20' 
+          : 'bg-gradient-to-l from-white to-[#f5f3ff] border-[#a78bfa]/30'
       }`}>
         <div className="flex items-center gap-3 mb-4">
           <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-            isDark ? 'bg-[#14b8a6]/20' : 'bg-[#14b8a6]/15'
+            isDark ? 'bg-[#a78bfa]/20' : 'bg-[#a78bfa]/15'
           }`}>
-            <Pill size={24} className={isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'} />
+            <Pill size={24} className={isDark ? 'text-[#a78bfa]' : 'text-[#8b5cf6]'} />
           </div>
           <div>
-            <h3 className={`font-bold text-lg ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>
+            <h3 className={`font-bold text-lg ${isDark ? 'text-white' : 'text-[#312e81]'}`}>
               اطلاعات مکمل پروفایل
             </h3>
-            <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}`}>
+            <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-[#7c3aed]/70'}`}>
               {profile.name}
             </p>
           </div>
@@ -271,15 +271,15 @@ export default function Supplements() {
       {/* Current Supplements */}
       {profile.currentSupplements.length > 0 && (
         <div className={`rounded-2xl p-5 border theme-transition ${
-          isDark ? 'bg-[#1a1a2e] border-[#14b8a6]/10' : 'bg-white border-[#14b8a6]/15'
+          isDark ? 'bg-[#1a1830] border-[#a78bfa]/10' : 'bg-white border-[#a78bfa]/15'
         }`}>
-          <h3 className={`font-bold mb-3 flex items-center gap-2 ${isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'}`}>
+          <h3 className={`font-bold mb-3 flex items-center gap-2 ${isDark ? 'text-[#a78bfa]' : 'text-[#8b5cf6]'}`}>
             مکمل‌های فعلی
           </h3>
           <div className="flex flex-wrap gap-2">
             {profile.currentSupplements.map((supp: string, idx: number) => (
               <span key={idx} className={`px-3 py-1.5 rounded-lg text-sm ${
-                isDark ? 'bg-[#4a90d9]/20 text-[#6bb5ff]' : 'bg-[#14b8a6]/15 text-[#0d9488]'
+                isDark ? 'bg-[#4a90d9]/20 text-[#6bb5ff]' : 'bg-[#a78bfa]/15 text-[#8b5cf6]'
               }`}>
                 {supp}
               </span>
@@ -291,7 +291,7 @@ export default function Supplements() {
       {/* Health Conditions */}
       {profile.healthConditions.length > 0 && (
         <div className={`rounded-2xl p-5 border theme-transition ${
-          isDark ? 'bg-[#1a1a2e] border-[#ef4444]/20' : 'bg-white border-red-200'
+          isDark ? 'bg-[#1a1830] border-[#ef4444]/20' : 'bg-white border-red-200'
         }`}>
           <h3 className={`font-bold mb-3 flex items-center gap-2 ${isDark ? 'text-[#ef4444]' : 'text-[#dc2626]'}`}>
             <AlertTriangle size={18} />
@@ -311,10 +311,10 @@ export default function Supplements() {
 
       {/* Supplement Programs List */}
       <div className={`rounded-2xl p-5 border theme-transition ${
-        isDark ? 'bg-[#1a1a2e] border-[#14b8a6]/10' : 'bg-white border-[#14b8a6]/15'
+        isDark ? 'bg-[#1a1830] border-[#a78bfa]/10' : 'bg-white border-[#a78bfa]/15'
       }`}>
         <div className="flex items-center justify-between mb-4">
-          <h3 className={`font-bold flex items-center gap-2 ${isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]'}`}>
+          <h3 className={`font-bold flex items-center gap-2 ${isDark ? 'text-[#a78bfa]' : 'text-[#8b5cf6]'}`}>
             <Pill size={18} />
             برنامه‌های مکمل
           </h3>
@@ -322,8 +322,8 @@ export default function Supplements() {
             onClick={() => navigate('/supplement-import')}
             className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-bold transition-all ${
               isDark
-                ? 'bg-[#14b8a6]/20 text-[#14b8a6] hover:bg-[#14b8a6]/30'
-                : 'bg-[#14b8a6]/15 text-[#0d9488] hover:bg-[#14b8a6]/25'
+                ? 'bg-[#a78bfa]/20 text-[#a78bfa] hover:bg-[#a78bfa]/30'
+                : 'bg-[#a78bfa]/15 text-[#8b5cf6] hover:bg-[#a78bfa]/25'
             }`}
           >
             <Plus size={14} />
@@ -332,7 +332,7 @@ export default function Supplements() {
         </div>
 
         {supplementPrograms.length === 0 ? (
-          <p className={`text-sm text-center py-4 ${isDark ? 'text-gray-500' : 'text-[#0f766e]/50'}`}>
+          <p className={`text-sm text-center py-4 ${isDark ? 'text-gray-500' : 'text-[#7c3aed]/50'}`}>
             هنوز برنامه مکملی وارد نشده است
           </p>
         ) : (
@@ -344,19 +344,19 @@ export default function Supplements() {
                 className={`rounded-xl p-4 border cursor-pointer transition-all ${
                   program.id === (state.activeSupplementProgram || supplementPrograms[0]?.id)
                     ? isDark
-                      ? 'bg-[#14b8a6]/10 border-[#14b8a6]/40'
-                      : 'bg-[#14b8a6]/10 border-[#14b8a6]/40'
+                      ? 'bg-[#a78bfa]/10 border-[#a78bfa]/40'
+                      : 'bg-[#a78bfa]/10 border-[#a78bfa]/40'
                     : isDark
-                      ? 'bg-[#0d0d1a] border-gray-800 hover:border-gray-600'
-                      : 'bg-[#f0fdfa] border-[#14b8a6]/20 hover:border-[#14b8a6]/40'
+                      ? 'bg-[#0f0e1f] border-gray-800 hover:border-gray-600'
+                      : 'bg-[#f5f3ff] border-[#a78bfa]/20 hover:border-[#a78bfa]/40'
                 }`}
               >
                 <div className="flex items-center justify-between mb-2">
-                  <h4 className={`font-bold ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>
+                  <h4 className={`font-bold ${isDark ? 'text-white' : 'text-[#312e81]'}`}>
                     {program.recommendation_title}
                     {program.id === (state.activeSupplementProgram || supplementPrograms[0]?.id) && (
                       <span className={`mr-2 text-[10px] px-2 py-0.5 rounded-full ${
-                        isDark ? 'bg-[#14b8a6]/30 text-[#14b8a6]' : 'bg-[#14b8a6]/20 text-[#0d9488]'
+                        isDark ? 'bg-[#a78bfa]/30 text-[#a78bfa]' : 'bg-[#a78bfa]/20 text-[#8b5cf6]'
                       }`}>
                         فعال
                       </span>
@@ -374,17 +374,17 @@ export default function Supplements() {
                     <Trash2 size={16} />
                   </button>
                 </div>
-                <p className={`text-xs mb-2 ${isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}`}>
+                <p className={`text-xs mb-2 ${isDark ? 'text-gray-400' : 'text-[#7c3aed]/70'}`}>
                   {program.summary}
                 </p>
                 <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div className={isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}>
-                    تعداد مکمل: <span className={`font-bold ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>
+                  <div className={isDark ? 'text-gray-400' : 'text-[#7c3aed]/70'}>
+                    تعداد مکمل: <span className={`font-bold ${isDark ? 'text-white' : 'text-[#312e81]'}`}>
                       {toPersianNumber(program.supplements.length)}
                     </span>
                   </div>
-                  <div className={isDark ? 'text-gray-400' : 'text-[#0f766e]/70'}>
-                    هزینه ماهانه: <span className={`font-bold ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>
+                  <div className={isDark ? 'text-gray-400' : 'text-[#7c3aed]/70'}>
+                    هزینه ماهانه: <span className={`font-bold ${isDark ? 'text-white' : 'text-[#312e81]'}`}>
                       {program.total_estimated_cost}
                     </span>
                   </div>
@@ -400,9 +400,9 @@ export default function Supplements() {
 
 function InfoCard({ label, value, isDark }: { label: string; value: string; isDark: boolean }) {
   return (
-    <div className={`rounded-xl p-3 ${isDark ? 'bg-[#0d0d1a]' : 'bg-[#f0fdfa]'}`}>
-      <p className={`text-xs mb-1 ${isDark ? 'text-gray-500' : 'text-[#0f766e]/60'}`}>{label}</p>
-      <p className={`text-sm font-bold ${isDark ? 'text-white' : 'text-[#134e4a]'}`}>{value}</p>
+    <div className={`rounded-xl p-3 ${isDark ? 'bg-[#0f0e1f]' : 'bg-[#f5f3ff]'}`}>
+      <p className={`text-xs mb-1 ${isDark ? 'text-gray-500' : 'text-[#7c3aed]/60'}`}>{label}</p>
+      <p className={`text-sm font-bold ${isDark ? 'text-white' : 'text-[#312e81]'}`}>{value}</p>
     </div>
   );
 }
