@@ -7,7 +7,8 @@
     "build": "vite build",
     "typecheck": "tsc --noEmit",
     "sync": "npx cap sync android",
-    "android": "npm run build && npm run sync && npx cap open android"
+    "android": "npm run build && npm run sync && npx cap open android",
+    "test:engine": "tsx scripts/test-substitution.ts"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.2",
@@ -38,6 +39,7 @@
     "cross-env": "^10.1.0",
     "sharp": "^0.35.5",
     "tailwindcss": "^4.1.7",
+    "tsx": "^4.23.15",
     "typescript": "^5.7.0",
     "vite": "^6.3.5"
   },

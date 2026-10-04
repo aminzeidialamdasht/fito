@@ -38,6 +38,10 @@ export type MovementPattern =
 
 export type ExerciseType = 'compound' | 'isolation';
 
+/**
+ * دسته‌بندی کلی تجهیزات (نه دستگاه خاص)
+ * این برای فیلتر سطح بالا در UI استفاده می‌شود
+ */
 export type EquipmentType =
   | 'barbell'
   | 'dumbbell'
@@ -52,6 +56,49 @@ export type EquipmentType =
   | 'pull_up_bar'
   | 'dip_station'
   | 'trx';
+
+/**
+ * نوع مکانیزم دستگاه (برای جایگزینی هوشمند)
+ * pin_loaded: دستگاه با پین و صفحات وزنه
+ * plate_loaded: دستگاه با صفحات جداگانه
+ * lever: دستگاه اهرمی (مثل هامر)
+ * cable: دستگاه کابلی
+ * smith: اسمیت
+ */
+export type MachineType =
+  | 'pin_loaded'
+  | 'plate_loaded'
+  | 'lever'
+  | 'cable'
+  | 'smith';
+
+/**
+ * جزئیات تجهیزات برای یک حرکت خاص
+ * variant برای تشخیص حالت: تخت/شیب‌دار/زیرسینه/ایستاده/نشسته
+ */
+export type EquipmentVariant =
+  | 'flat'
+  | 'incline'
+  | 'decline'
+  | 'seated'
+  | 'standing'
+  | 'lying'
+  | 'kneeling'
+  | 'bent_over'
+  | 'high'
+  | 'low'
+  | 'neutral'
+  | 'wide'
+  | 'close'
+  | 'unilateral'
+  | 'bilateral';
+
+export interface EquipmentDetails {
+  primary: EquipmentType;
+  support?: EquipmentType[];
+  machineType?: MachineType;
+  variant?: EquipmentVariant;
+}
 
 export type DifficultyLevel = 1 | 2 | 3;
 
@@ -82,6 +129,7 @@ export interface Exercise {
   type: ExerciseType;
   movementPattern: MovementPattern;
   equipment: EquipmentType[];
+  equipmentDetails?: EquipmentDetails;
   difficulty: DifficultyLevel;
   injuryRisk: InjuryRisk;
   substitutes: string[];
@@ -105,4 +153,29 @@ export interface Exercise {
   imageUrl?: string;
   videoUrl?: string;
   tags: string[];
+}
+
+/**
+ * گزینه‌های جایگزینی هوشمند
+ */
+export interface SubstituteOptions {
+  /** تجهیزات موجود کاربر */
+  availableEquipment: EquipmentType[];
+  /** آسیب‌های کاربر */
+  injuries?: Partial<InjuryRisk>;
+  /** حداکثر تعداد جایگزین */
+  maxResults?: number;
+  /** IDهایی که نباید جایگزین شوند */
+  excludeIds?: string[];
+  /** آیا فقط حرکات هم‌سطح (difficulty) برگردانده شوند */
+  sameDifficultyOnly?: boolean;
+}
+
+/**
+ * نتیجه جایگزینی با امتیاز
+ */
+export interface SubstituteCandidate {
+  exercise: Exercise;
+  score: number;
+  reasons: string[];
 }
