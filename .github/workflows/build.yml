@@ -50,6 +50,9 @@ jobs:
       - name: Patch Android Repositories (JitPack + Myket)
         run: node scripts/patch-android-repos.mjs
 
+      - name: Patch Android Manifest Placeholders (FLAVOR)
+        run: FLAVOR=${{ env.FLAVOR || 'myket' }} node scripts/patch-android-manifest.mjs
+
       - name: Apply Fito Launcher Icons
         run: |
           RES=android/app/src/main/res
