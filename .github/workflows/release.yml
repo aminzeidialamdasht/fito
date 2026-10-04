@@ -60,6 +60,8 @@ jobs:
         run: npm ci
 
       - name: Build Web Application (${{ env.FLAVOR }} flavor)
+        env:
+          VERSION_OVERRIDE: ${{ env.CLEAN_VERSION }}
         run: npm run build:${{ env.FLAVOR }}
 
       - name: Add Android Platform
