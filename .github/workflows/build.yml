@@ -1,51 +1,27 @@
-name: Build Coachino APK
+name: Build Fito APK
 
 on:
   push:
-    branches: [ main, master, develop, 'feature/**', 'myket' ]
+    branches: [ main, 'feature/**' ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ main ]
   workflow_dispatch:
-    inputs:
-      flavor:
-        description: 'Build flavor'
-        required: true
-        default: 'bazaar'
-        type: choice
-        options:
-          - bazaar
-          - myket
-          - personal
 
 env:
-  APP_NAME: Coachino
+  APP_NAME: Fito
 
 jobs:
   build:
-    name: Build Coachino Debug APK
+    name: Build Fito Debug APK
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Determine Flavor
-        id: flavor
-        run: |
-          # اگر workflow_dispatch بود، از ورودی استفاده کن
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            FLAVOR="${{ github.event.inputs.flavor }}"
-          elif [ "${{ github.ref_name }}" = "myket" ]; then
-            FLAVOR="myket"
-          else
-            FLAVOR="bazaar"
-          fi
-          echo "FLAVOR=$FLAVOR" >> $GITHUB_ENV
-          echo "✅ Flavor: $FLAVOR"
-
-      - name: Setup Node.js 24
+      - name: Setup Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: '22'
           cache: 'npm'
 
       - name: Setup Java JDK 21
@@ -56,10 +32,8 @@ jobs:
 
       - name: Configure Android SDK
         run: |
-          echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
-          echo "ANDROID_SDK_ROOT=$ANDROID_HOME" >> $GITHUB_ENV
           yes | sdkmanager --licenses > /dev/null 2>&1 || true
-          sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0" 2>/dev/null || true
+          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0" 2>/dev/null || true
 
       - name: Install Dependencies
         run: npm ci
@@ -68,61 +42,55 @@ jobs:
         run: npm run typecheck
 
       - name: Build Web Application
-        run: npm run build:${{ env.FLAVOR }}
+        run: npm run build
 
       - name: Add Android Platform
+        run: npx cap add android
+
+      - name: Apply Fito Launcher Icons
         run: |
-          rm -rf android
-          npx cap add android
-
-      - name: Patch Bazaar billing
-        if: env.FLAVOR == 'bazaar'
-        env:
-          BAZAAR_RSA_KEY: ${{ secrets.BAZAAR_RSA_KEY }}
-        run: python3 scripts/patch-android-billing.py
-
-      - name: Patch Myket billing
-        if: env.FLAVOR == 'myket'
-        env:
-          MYKET_RSA_KEY: MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCbnTpfFZryXfIBZxfCK6o/W5HcS1rzbPf6Byjx0Tr10sktsjjsr+H6G6y3PFC9Rh2A56ni76KVyUttt+7lH6FjtLZZ0FXVkSa/x2JkNUWKuyLPBZqr9xzZxiQgSLDUdopSF5vQMMkT+0Iocm5Dv4rxblv6atbINVf60FJ8SXTUbQIDAQAB
-        run: python3 scripts/patch-android-billing-myket.py
+          RES=android/app/src/main/res
+          mkdir -p "$RES/drawable" "$RES/mipmap-anydpi-v26" "$RES/values" "$RES/xml"
+          rm -f "$RES/values/ic_launcher_background.xml"
+          for D in mdpi hdpi xhdpi xxhdpi xxxhdpi; do
+            mkdir -p "$RES/drawable-$D"
+            cp -f native-assets/android/drawable-$D/* "$RES/drawable-$D/" 2>/dev/null || true
+          done
+          for D in mdpi hdpi xhdpi xxhdpi xxxhdpi; do
+            mkdir -p "$RES/mipmap-$D"
+            cp -f native-assets/android/mipmap-$D/* "$RES/mipmap-$D/" 2>/dev/null || true
+          done
+          cp -f native-assets/android/mipmap-anydpi-v26/* "$RES/mipmap-anydpi-v26/" 2>/dev/null || true
+          cp -f native-assets/android/values/ic_launcher_colors.xml "$RES/values/" 2>/dev/null || true
+          cp -f native-assets/android/xml/config.xml "$RES/xml/" 2>/dev/null || true
+          echo "✅ Fito launcher icons applied"
 
       - name: Sync Capacitor
         run: npx cap sync android
 
-      - name: Apply Coachino launcher icons
-        run: |
-          RES=android/app/src/main/res
-          mkdir -p "$RES/drawable" "$RES/mipmap-anydpi-v26" "$RES/values"
-          rm -f "$RES/values/ic_launcher_background.xml"
-          for D in mdpi hdpi xhdpi xxhdpi xxxhdpi; do mkdir -p "$RES/drawable-$D"; cp -f native-assets/android/drawable-$D/* "$RES/drawable-$D/"; done
-          for D in mdpi hdpi xhdpi xxhdpi xxxhdpi; do mkdir -p "$RES/mipmap-$D"; cp -f native-assets/android/mipmap-$D/* "$RES/mipmap-$D/"; done
-          cp -f native-assets/android/mipmap-anydpi-v26/* "$RES/mipmap-anydpi-v26/"
-          cp -f native-assets/android/values/ic_launcher_colors.xml "$RES/values/"
-          echo "✅ Coachino launcher icons applied"
-
-      - name: Update Gradle Wrapper
-        run: |
-          cd android
-          sed -i 's|gradle-[0-9.]*-bin.zip|gradle-8.13-bin.zip|g' gradle/wrapper/gradle-wrapper.properties
-
       - name: Build Debug APK
         run: |
           cd android
+          chmod +x gradlew
           ./gradlew assembleDebug --no-daemon --stacktrace
-          cp app/build/outputs/apk/debug/app-debug.apk "app/build/outputs/apk/debug/کوچینو (Coachino)-${{ env.FLAVOR }}.apk"
 
-      - name: Upload Coachino APK
+      - name: Rename APK
+        run: |
+          mkdir -p release
+          cp android/app/build/outputs/apk/debug/app-debug.apk "release/Fito-v2.0.0-debug.apk"
+          ls -la release/
+
+      - name: Upload Fito APK
         uses: actions/upload-artifact@v4
         with:
-          name: کوچینو (Coachino)-${{ env.FLAVOR }}-Debug
-          path: android/app/build/outputs/apk/debug/کوچینو (Coachino)-${{ env.FLAVOR }}.apk
+          name: Fito-Debug-APK
+          path: release/Fito-v2.0.0-debug.apk
           retention-days: 30
 
       - name: Build Summary
         if: always()
         run: |
-          echo "## کوچینو (Coachino) — ${{ env.FLAVOR }} Debug Build" >> $GITHUB_STEP_SUMMARY
-          echo "- Branch: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Flavor: ${{ env.FLAVOR }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Commit: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "## 🏋️ Fito Debug Build" >> $GITHUB_STEP_SUMMARY
+          echo "- Branch: \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Commit: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- APK: \`Fito-v2.0.0-debug.apk\`" >> $GITHUB_STEP_SUMMARY

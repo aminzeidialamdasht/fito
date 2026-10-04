@@ -1,4 +1,4 @@
-name: Create Release
+name: Release Fito APK
 
 on:
   push:
@@ -14,46 +14,24 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Determine Build Flavor from Tag
-        id: flavor
+      - name: Determine Version from Tag
+        id: version
         run: |
           TAG=${GITHUB_REF#refs/tags/}
-          if [[ "$TAG" == *"-myket" ]]; then
-            FLAVOR="myket"
-            APK_PREFIX="کوچینو (Coachino)-Myket"
-            CLEAN_VERSION="${TAG%-myket}"
-          elif [[ "$TAG" == *"-bazaar" ]]; then
-            FLAVOR="bazaar"
-            APK_PREFIX="کوچینو (Coachino)-Bazaar"
-            CLEAN_VERSION="${TAG%-bazaar}"
-          else
-            FLAVOR="personal"
-            APK_PREFIX="AI-Fitness-Personal"
-            CLEAN_VERSION="${TAG}"
-          fi
-
-          CLEAN_VERSION="${CLEAN_VERSION#v}"
-
+          CLEAN_VERSION="${TAG#v}"
           IFS='.' read -r MAJOR MINOR PATCH <<< "$CLEAN_VERSION"
           MAJOR=${MAJOR:-0}
           MINOR=${MINOR:-0}
           PATCH=${PATCH:-0}
           VERSION_CODE=$((MAJOR * 10000 + MINOR * 100 + PATCH))
-
-          echo "FLAVOR=$FLAVOR" >> $GITHUB_ENV
-          echo "APP_NAME=Coachino" >> $GITHUB_ENV
-          echo "APK_PREFIX=$APK_PREFIX" >> $GITHUB_ENV
           echo "CLEAN_VERSION=$CLEAN_VERSION" >> $GITHUB_ENV
           echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
+          echo "✅ Version: $CLEAN_VERSION (code=$VERSION_CODE)"
 
-          echo "✅ Flavor: $FLAVOR"
-          echo "✅ Version: $CLEAN_VERSION"
-          echo "✅ VersionCode: $VERSION_CODE"
-
-      - name: Setup Node.js 24
+      - name: Setup Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: '22'
           cache: 'npm'
 
       - name: Setup Java JDK 21
@@ -64,63 +42,42 @@ jobs:
 
       - name: Configure Android SDK
         run: |
-          echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
-          echo "ANDROID_SDK_ROOT=$ANDROID_HOME" >> $GITHUB_ENV
           yes | sdkmanager --licenses > /dev/null 2>&1 || true
-          sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0" 2>/dev/null || true
+          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0" 2>/dev/null || true
 
       - name: Install Dependencies
         run: npm ci
 
       - name: Build Web Application
-        run: npm run build:${{ env.FLAVOR }}
+        run: npm run build
 
       - name: Add Android Platform
-        env:
-          VITE_APP_FLAVOR: ${{ env.FLAVOR }}
+        run: npx cap add android
+
+      - name: Apply Fito Launcher Icons
         run: |
-          rm -rf android
-          npx cap add android
+          RES=android/app/src/main/res
+          mkdir -p "$RES/drawable" "$RES/mipmap-anydpi-v26" "$RES/values" "$RES/xml"
+          rm -f "$RES/values/ic_launcher_background.xml"
+          for D in mdpi hdpi xhdpi xxhdpi xxxhdpi; do
+            mkdir -p "$RES/drawable-$D"
+            cp -f native-assets/android/drawable-$D/* "$RES/drawable-$D/" 2>/dev/null || true
+          done
+          for D in mdpi hdpi xhdpi xxhdpi xxxhdpi; do
+            mkdir -p "$RES/mipmap-$D"
+            cp -f native-assets/android/mipmap-$D/* "$RES/mipmap-$D/" 2>/dev/null || true
+          done
+          cp -f native-assets/android/mipmap-anydpi-v26/* "$RES/mipmap-anydpi-v26/" 2>/dev/null || true
+          cp -f native-assets/android/values/ic_launcher_colors.xml "$RES/values/" 2>/dev/null || true
+          cp -f native-assets/android/xml/config.xml "$RES/xml/" 2>/dev/null || true
+          echo "✅ Fito launcher icons applied"
 
-      - name: Patch Bazaar billing
-        if: env.FLAVOR == 'bazaar'
-        env:
-          BAZAAR_RSA_KEY: ${{ secrets.BAZAAR_RSA_KEY }}
-          VERSION_CODE: ${{ env.VERSION_CODE }}
-          VERSION_NAME: ${{ env.CLEAN_VERSION }}
-        run: python3 scripts/patch-android-billing.py
-
-      - name: Patch Myket billing
-        if: env.FLAVOR == 'myket'
-        env:
-          MYKET_RSA_KEY: ${{ secrets.MYKET_RSA_KEY }}
-          VERSION_CODE: ${{ env.VERSION_CODE }}
-          VERSION_NAME: ${{ env.CLEAN_VERSION }}
-        run: python3 scripts/patch-android-billing-myket.py
+      - name: Sync Capacitor
+        run: npx cap sync android
 
       - name: Decode signing keystore
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/release-key.jks"
-
-      - name: Sync Capacitor
-        env:
-          VITE_APP_FLAVOR: ${{ env.FLAVOR }}
-        run: npm run sync:${{ env.FLAVOR }}
-
-      - name: Apply Launcher Icons
-        run: |
-          RES=android/app/src/main/res
-          mkdir -p "$RES/drawable" "$RES/mipmap-anydpi-v26" "$RES/values"
-          rm -f "$RES/values/ic_launcher_background.xml"
-          for D in mdpi hdpi xhdpi xxhdpi xxxhdpi; do mkdir -p "$RES/drawable-$D"; cp -f native-assets/android/drawable-$D/* "$RES/drawable-$D/"; done
-          for D in mdpi hdpi xhdpi xxhdpi xxxhdpi; do mkdir -p "$RES/mipmap-$D"; cp -f native-assets/android/mipmap-$D/* "$RES/mipmap-$D/"; done
-          cp -f native-assets/android/mipmap-anydpi-v26/* "$RES/mipmap-anydpi-v26/"
-          cp -f native-assets/android/values/ic_launcher_colors.xml "$RES/values/"
-
-      - name: Update Gradle Wrapper
-        run: |
-          cd android
-          sed -i 's|gradle-[0-9.]*-bin.zip|gradle-8.13-bin.zip|g' gradle/wrapper/gradle-wrapper.properties
 
       - name: Patch Android Signing Config
         run: |
@@ -158,6 +115,7 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           cd android
+          chmod +x gradlew
           ./gradlew :app:assembleRelease --no-daemon --stacktrace
           APK_PATH="$(find app/build/outputs/apk/release -maxdepth 1 -type f -name '*.apk' ! -name '*-unaligned.apk' | head -n 1)"
           if [ -z "$APK_PATH" ]; then
@@ -169,25 +127,26 @@ jobs:
       - name: Rename APK
         run: |
           mkdir -p release
-          cp "$APK_PATH" "release/${{ env.APK_PREFIX }}-v${{ env.CLEAN_VERSION }}.apk"
+          cp "$APK_PATH" "release/Fito-v${{ env.CLEAN_VERSION }}.apk"
           ls -la release/
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           files: release/*.apk
-          name: "${{ env.APK_PREFIX }} v${{ env.CLEAN_VERSION }}"
+          name: "Fito v${{ env.CLEAN_VERSION }}"
           body: |
-            ## 🏋️ انتشار نسخه ${{ env.CLEAN_VERSION }} (${{ env.FLAVOR }})
+            ## 🏋️ Fito v${{ env.CLEAN_VERSION }}
+
+            اپ فیتنس کاملاً آفلاین — نسخه رسمی
 
             ### 📱 اطلاعات بیلد:
-            - **فروشگاه:** ${{ env.FLAVOR == 'myket' && 'مایکت' || env.FLAVOR == 'bazaar' && 'کافه‌بازار' || 'نسخه شخصی' }}
-            - **نسخه:** ${{ env.CLEAN_VERSION }}
+            - **App ID:** `com.fito.app`
+            - **Version:** ${{ env.CLEAN_VERSION }}
             - **VersionCode:** ${{ env.VERSION_CODE }}
-            - **App ID:** ${{ env.FLAVOR == 'personal' && 'com.amin.aifitness.personal' || env.FLAVOR == 'myket' && 'com.coachino.myket' || 'com.aifitness.coach' }}
 
             ---
-            **ساخته شده با ❤️ برای جامعه بدنسازی ایران**
+            ساخته شده با ❤️ برای جامعه بدنسازی ایران
           draft: false
           prerelease: false
         env:
@@ -196,8 +155,7 @@ jobs:
       - name: Build Summary
         if: always()
         run: |
-          echo "## 🎉 Release Build Complete!" >> $GITHUB_STEP_SUMMARY
-          echo "- **Flavor:** ${{ env.FLAVOR }}" >> $GITHUB_STEP_SUMMARY
+          echo "## 🎉 Fito Release Complete!" >> $GITHUB_STEP_SUMMARY
           echo "- **Version:** ${{ env.CLEAN_VERSION }}" >> $GITHUB_STEP_SUMMARY
           echo "- **VersionCode:** ${{ env.VERSION_CODE }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **APK:** ${{ env.APK_PREFIX }}-v${{ env.CLEAN_VERSION }}.apk" >> $GITHUB_STEP_SUMMARY
+          echo "- **APK:** \`Fito-v${{ env.CLEAN_VERSION }}.apk\`" >> $GITHUB_STEP_SUMMARY
