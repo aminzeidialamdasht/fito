@@ -1,99 +1,177 @@
 /**
- * تست موتور جایگزینی هوشمند
- * اجرا: npx tsx scripts/test-substitution.ts
+ * تست موتور جایگزینی هوشمند Fito
+ * اجرا: npm run test:engine
  */
 
-import { CHEST_EXERCISES } from '../src/engine/data/exercises/chest';
+import { ALL_EXERCISES, EXERCISE_DB_STATS } from '../src/engine/data/exercises/index';
 import {
   findSubstitutes,
   isExerciseAvailable,
 } from '../src/engine/core/substitutionEngine';
-import type { EquipmentType } from '../src/engine/types/exercise';
+import type { EquipmentType, Exercise, InjuryRiskLevel } from '../src/engine/types/exercise';
 
-console.log('═══════════════════════════════════════════════');
-console.log('  تست موتور جایگزینی هوشمند Fito');
-console.log('═══════════════════════════════════════════════\n');
+// ═══════════════════════════════════════════════════════════
+//  ابزار نمایش
+// ═══════════════════════════════════════════════════════════
 
-const ALL = CHEST_EXERCISES;
+function printHeader(title: string): void {
+  console.log('\n═══════════════════════════════════════════════');
+  console.log(`  ${title}`);
+  console.log('═══════════════════════════════════════════════');
+}
 
-// انتخاب حرکت مرجع
-const source = ALL.find((e) => e.id === 'chest_001')!; // پرس سینه هالتر
-console.log(`🎯 حرکت مرجع: ${source.name} (${source.englishName})`);
-console.log(`   ID: ${source.id}`);
-console.log(`   تجهیزات: ${source.equipment.join(', ')}\n`);
+function printScenario(
+  name: string,
+  source: Exercise,
+  options: Parameters<typeof findSubstitutes>[2]
+): void {
+  console.log(`\n📋 ${name}`);
+  const results = findSubstitutes(source, ALL_EXERCISES, options);
 
-// ═══ سناریو ۱: باشگاه کامل ═══
-console.log('📋 سناریو ۱: باشگاه کامل (همه تجهیزات)');
+  if (results.length === 0) {
+    console.log('   ⚠️  هیچ جایگزینی یافت نشد');
+    return;
+  }
+
+  console.log(`   نتایج (${results.length}):`);
+  results.forEach((c, i) => {
+    const eq = c.exercise.equipmentDetails?.primary ?? c.exercise.equipment[0];
+    console.log(`   ${i + 1}. ${c.exercise.name} [${eq}] — امتیاز: ${c.score}`);
+    console.log(`      ${c.reasons.join(' + ')}`);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+//  شروع
+// ═══════════════════════════════════════════════════════════
+
+printHeader('تست موتور جایگزینی هوشمند Fito');
+
+console.log(`\n📊 دیتابیس فعلی:`);
+console.log(`   کل حرکات: ${EXERCISE_DB_STATS.total}`);
+console.log(`   ترکیبی: ${EXERCISE_DB_STATS.compound}`);
+console.log(`   ایزوله: ${EXERCISE_DB_STATS.isolation}`);
+console.log(`\n   به تفکیک عضله:`);
+Object.entries(EXERCISE_DB_STATS.byMuscle)
+  .sort(([, a], [, b]) => b - a)
+  .forEach(([muscle, count]) => {
+    console.log(`     ${muscle}: ${count}`);
+  });
+
+// ═══════════════════════════════════════════════════════════
+//  سناریوهای سینه
+// ═══════════════════════════════════════════════════════════
+
 const fullGym: EquipmentType[] = [
   'barbell', 'dumbbell', 'machine', 'cable', 'bodyweight',
   'bench', 'pull_up_bar', 'dip_station', 'smith_machine',
 ];
 
-const scenario1 = findSubstitutes(source, ALL, {
+const dumbbellOnly: EquipmentType[] = ['dumbbell', 'bench', 'bodyweight'];
+const machineOnly: EquipmentType[] = ['machine', 'cable'];
+const homeGym: EquipmentType[] = ['dumbbell', 'bench', 'bodyweight', 'pull_up_bar'];
+
+printHeader('سینه — حرکت مرجع: پرس سینه هالتر');
+
+const chestSource = ALL_EXERCISES.find((e) => e.id === 'chest_001')!;
+console.log(`🎯 ${chestSource.name} (${chestSource.englishName})`);
+
+printScenario('سناریو ۱: باشگاه کامل', chestSource, {
   availableEquipment: fullGym,
   maxResults: 5,
 });
 
-console.log(`   نتایج (${scenario1.length}):`);
-scenario1.forEach((c, i) => {
-  console.log(`   ${i + 1}. ${c.exercise.name} — امتیاز: ${c.score}`);
-  console.log(`      دلایل: ${c.reasons.join(' + ')}`);
-});
-
-// ═══ سناریو ۲: فقط دمبل و میز ═══
-console.log('\n📋 سناریو ۲: فقط دمبل و میز (بدون هالتر)');
-const dumbbellOnly: EquipmentType[] = ['dumbbell', 'bench', 'bodyweight'];
-
-const scenario2 = findSubstitutes(source, ALL, {
+printScenario('سناریو ۲: فقط دمبل و میز', chestSource, {
   availableEquipment: dumbbellOnly,
   maxResults: 5,
 });
 
-console.log(`   نتایج (${scenario2.length}):`);
-scenario2.forEach((c, i) => {
-  console.log(`   ${i + 1}. ${c.exercise.name} — امتیاز: ${c.score}`);
-});
-
-// ═══ سناریو ۳: فقط دستگاه ═══
-console.log('\n📋 سناریو ۳: فقط دستگاه (بدون وزنه آزاد)');
-const machineOnly: EquipmentType[] = ['machine', 'cable'];
-
-const scenario3 = findSubstitutes(source, ALL, {
+printScenario('سناریو ۳: فقط دستگاه', chestSource, {
   availableEquipment: machineOnly,
   maxResults: 5,
 });
 
-console.log(`   نتایج (${scenario3.length}):`);
-scenario3.forEach((c, i) => {
-  console.log(`   ${i + 1}. ${c.exercise.name} — امتیاز: ${c.score}`);
-});
-
-// ═══ سناریو ۴: با آسیب شانه ═══
-console.log('\n📋 سناریو ۴: باشگاه کامل ولی آسیب شانه');
-const scenario4 = findSubstitutes(source, ALL, {
+printScenario('سناریو ۴: آسیب شانه', chestSource, {
   availableEquipment: fullGym,
   injuries: { shoulder: 'medium' },
   maxResults: 5,
 });
 
-console.log(`   نتایج (${scenario4.length}):`);
-scenario4.forEach((c, i) => {
-  console.log(`   ${i + 1}. ${c.exercise.name} — امتیاز: ${c.score}`);
-  const risk = c.exercise.injuryRisk.shoulder ?? 'none';
-  console.log(`      ریسک شانه: ${risk}`);
+// ═══════════════════════════════════════════════════════════
+//  سناریوهای پشت
+// ═══════════════════════════════════════════════════════════
+
+printHeader('پشت — حرکت مرجع: نشر خم هالتر');
+
+const rowSource = ALL_EXERCISES.find((e) => e.id === 'back_008')!;
+console.log(`🎯 ${rowSource.name} (${rowSource.englishName})`);
+
+printScenario('سناریو ۱: باشگاه کامل', rowSource, {
+  availableEquipment: fullGym,
+  maxResults: 5,
 });
 
-// ═══ تست isExerciseAvailable ═══
-console.log('\n📋 تست isExerciseAvailable:');
-const barbellPress = ALL.find((e) => e.id === 'chest_001')!;
-const dumbbellPress = ALL.find((e) => e.id === 'chest_002')!;
-const machinePress = ALL.find((e) => e.id === 'chest_007')!;
+printScenario('سناریو ۲: فقط دمبل و میز (بدون هالتر)', rowSource, {
+  availableEquipment: dumbbellOnly,
+  maxResults: 5,
+});
 
-console.log(`   پرس هالتر با دمبل‌فقط: ${isExerciseAvailable(barbellPress, dumbbellOnly)} (باید false)`);
-console.log(`   پرس دمبل با دمبل‌فقط: ${isExerciseAvailable(dumbbellPress, dumbbellOnly)} (باید true)`);
-console.log(`   پرس دستگاه با machineOnly: ${isExerciseAvailable(machinePress, machineOnly)} (باید true)`);
+printScenario('سناریو ۳: فقط دستگاه و سیم‌کش', rowSource, {
+  availableEquipment: machineOnly,
+  maxResults: 5,
+});
 
-// ═══ شمارش کل ═══
-console.log('\n═══════════════════════════════════════════════');
-console.log(`📊 آمار: ${ALL.length} حرکت سینه، ${scenario1.length} جایگزین یافت شد`);
-console.log('═══════════════════════════════════════════════');
+printScenario('سناریو ۴: آسیب کمر', rowSource, {
+  availableEquipment: fullGym,
+  injuries: { lowerBack: 'medium' },
+  maxResults: 5,
+});
+
+// ═══════════════════════════════════════════════════════════
+//  سناریوهای لت
+// ═══════════════════════════════════════════════════════════
+
+printHeader('لت — حرکت مرجع: زیربغل سیم‌کش پهن');
+
+const latSource = ALL_EXERCISES.find((e) => e.id === 'back_001')!;
+console.log(`🎯 ${latSource.name} (${latSource.englishName})`);
+
+printScenario('سناریو ۱: باشگاه کامل', latSource, {
+  availableEquipment: fullGym,
+  maxResults: 5,
+});
+
+printScenario('سناریو ۲: باشگاه خانگی (دمبل + بارفیکس)', latSource, {
+  availableEquipment: homeGym,
+  maxResults: 5,
+});
+
+// ═══════════════════════════════════════════════════════════
+//  تست isExerciseAvailable
+// ═══════════════════════════════════════════════════════════
+
+printHeader('تست isExerciseAvailable');
+
+const barRow = ALL_EXERCISES.find((e) => e.id === 'back_008')!;
+const dbRow = ALL_EXERCISES.find((e) => e.id === 'back_009')!;
+const machineRow = ALL_EXERCISES.find((e) => e.id === 'back_013')!;
+
+console.log(`   نشر خم هالتر با دمبل‌فقط: ${isExerciseAvailable(barRow, dumbbellOnly)} (باید false)`);
+console.log(`   نشر خم دمبل با دمبل‌فقط: ${isExerciseAvailable(dbRow, dumbbellOnly)} (باید true)`);
+console.log(`   قایقی دستگاه با machineOnly: ${isExerciseAvailable(machineRow, machineOnly)} (باید true)`);
+
+// ═══════════════════════════════════════════════════════════
+//  آمار نهایی
+// ═══════════════════════════════════════════════════════════
+
+printHeader('خلاصه');
+
+console.log(`📊 کل دیتابیس: ${ALL_EXERCISES.length} حرکت`);
+console.log(`   سینه: ${EXERCISE_DB_STATS.byMuscle['chest'] ?? 0}`);
+console.log(`   لت: ${EXERCISE_DB_STATS.byMuscle['lats'] ?? 0}`);
+console.log(`   پشت میانی: ${EXERCISE_DB_STATS.byMuscle['upper_back'] ?? 0}`);
+console.log(`   پایین پشت: ${EXERCISE_DB_STATS.byMuscle['lower_back'] ?? 0}`);
+console.log(`   سرشانه پشتی: ${EXERCISE_DB_STATS.byMuscle['rear_delts'] ?? 0}`);
+console.log(`   کول: ${EXERCISE_DB_STATS.byMuscle['traps'] ?? 0}`);
+
+console.log('\n✅ تست کامل شد');

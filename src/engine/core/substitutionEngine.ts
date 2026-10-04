@@ -57,11 +57,18 @@ function hasInjuryConflict(
   const riskKeys: (keyof typeof exercise.injuryRisk)[] = [
     'shoulder',
     'lowerBack',
+    'upperBack',
+    'neck',
     'knee',
     'hip',
+    'hamstring',
+    'quad',
+    'glute',
     'elbow',
     'wrist',
     'ankle',
+    'biceps',
+    'triceps',
   ];
 
   for (const key of riskKeys) {

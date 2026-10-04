@@ -107,11 +107,18 @@ export type InjuryRiskLevel = 'low' | 'medium' | 'high';
 export interface InjuryRisk {
   shoulder?: InjuryRiskLevel;
   lowerBack?: InjuryRiskLevel;
+  upperBack?: InjuryRiskLevel;
+  neck?: InjuryRiskLevel;
   knee?: InjuryRiskLevel;
   hip?: InjuryRiskLevel;
+  hamstring?: InjuryRiskLevel;
+  quad?: InjuryRiskLevel;
+  glute?: InjuryRiskLevel;
   elbow?: InjuryRiskLevel;
   wrist?: InjuryRiskLevel;
   ankle?: InjuryRiskLevel;
+  biceps?: InjuryRiskLevel;
+  triceps?: InjuryRiskLevel;
 }
 
 export interface RepRange {
