@@ -1,31 +1,42 @@
-name: Release Fito APK
+name: Release Fito APK (Multi-Flavor)
 
 on:
   push:
     tags:
-      - 'v*'
+      - 'v*-myket'
+      - 'v*-bazaar'
+      - 'v*-personal'
 
 jobs:
   release:
-    name: Build and Release APK
+    name: Build & Release APK
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Determine Version from Tag
+      - name: Determine Flavor & Version from Tag
         id: version
         run: |
           TAG=${GITHUB_REF#refs/tags/}
+          # استخراج flavor از انتهای tag
+          FLAVOR="${TAG##*-}"
+          # استخراج نسخه (حذف v و -flavor)
           CLEAN_VERSION="${TAG#v}"
+          CLEAN_VERSION="${CLEAN_VERSION%-$FLAVOR}"
+
           IFS='.' read -r MAJOR MINOR PATCH <<< "$CLEAN_VERSION"
           MAJOR=${MAJOR:-0}
           MINOR=${MINOR:-0}
           PATCH=${PATCH:-0}
           VERSION_CODE=$((MAJOR * 10000 + MINOR * 100 + PATCH))
+
+          echo "FLAVOR=$FLAVOR" >> $GITHUB_ENV
           echo "CLEAN_VERSION=$CLEAN_VERSION" >> $GITHUB_ENV
           echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
+          echo "✅ Tag: $TAG"
+          echo "✅ Flavor: $FLAVOR"
           echo "✅ Version: $CLEAN_VERSION (code=$VERSION_CODE)"
 
       - name: Setup Node.js 22
@@ -48,8 +59,8 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Build Web Application
-        run: npm run build
+      - name: Build Web Application (${{ env.FLAVOR }} flavor)
+        run: npm run build:${{ env.FLAVOR }}
 
       - name: Add Android Platform
         run: npx cap add android
@@ -127,20 +138,21 @@ jobs:
       - name: Rename APK
         run: |
           mkdir -p release
-          cp "$APK_PATH" "release/Fito-v${{ env.CLEAN_VERSION }}.apk"
+          cp "$APK_PATH" "release/Fito-v${{ env.CLEAN_VERSION }}-${{ env.FLAVOR }}.apk"
           ls -la release/
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           files: release/*.apk
-          name: "Fito v${{ env.CLEAN_VERSION }}"
+          name: "Fito v${{ env.CLEAN_VERSION }} (${{ env.FLAVOR }})"
           body: |
-            ## 🏋️ Fito v${{ env.CLEAN_VERSION }}
+            ## 🏋️ Fito v${{ env.CLEAN_VERSION }} — ${{ env.FLAVOR }}
 
-            اپ فیتنس کاملاً آفلاین — نسخه رسمی
+            اپ فیتنس کاملاً آفلاین
 
             ### 📱 اطلاعات بیلد:
+            - **Flavor:** `${{ env.FLAVOR }}`
             - **App ID:** `com.fito.app`
             - **Version:** ${{ env.CLEAN_VERSION }}
             - **VersionCode:** ${{ env.VERSION_CODE }}
@@ -156,6 +168,7 @@ jobs:
         if: always()
         run: |
           echo "## 🎉 Fito Release Complete!" >> $GITHUB_STEP_SUMMARY
+          echo "- **Flavor:** ${{ env.FLAVOR }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Version:** ${{ env.CLEAN_VERSION }}" >> $GITHUB_STEP_SUMMARY
           echo "- **VersionCode:** ${{ env.VERSION_CODE }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **APK:** \`Fito-v${{ env.CLEAN_VERSION }}.apk\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **APK:** \`Fito-v${{ env.CLEAN_VERSION }}-${{ env.FLAVOR }}.apk\`" >> $GITHUB_STEP_SUMMARY

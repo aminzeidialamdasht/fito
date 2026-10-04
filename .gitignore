@@ -30,3 +30,8 @@ Screenshot_*.jpg
 # Env flavors
 .env.local
 .env.*.local
+
+# Keystore (NEVER commit)
+keystore/
+*.jks
+*.keystore
