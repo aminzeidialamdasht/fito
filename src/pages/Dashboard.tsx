@@ -25,9 +25,9 @@ export default function Dashboard() {
   const profile = activeProfile;
 
   // رنگ‌ها
-  const teal = isDark ? '#14b8a6' : '#0d9488';
-  const tealLight = isDark ? '#2dd4bf' : '#14b8a6';
-  const gold = isDark ? '#d4af37' : '#f59e0b';
+  const teal = isDark ? '#a78bfa' : '#7c3aed';      // یاسی اصلی
+  const tealLight = isDark ? '#c4b5fd' : '#8b5cf6'; // یاسی روشن
+  const gold = isDark ? '#fbbf24' : '#f59e0b';      // طلایی ملایم
   const bgMain = isDark ? '#0f172a' : '#f8fafc';
   const cardBg = isDark ? '#1e293b' : '#ffffff';
   const textMain = isDark ? '#ffffff' : '#0f172a';
@@ -100,7 +100,7 @@ export default function Dashboard() {
       title: 'برنامه تمرینی',
       subtitle: 'تولید خودکار آفلاین',
       enabled: FEATURE_FLAGS.offlineWorkout,
-      gradient: 'from-teal-500 to-emerald-600',
+      gradient: 'from-indigo-600 via-violet-600 to-purple-600',
       path: '/generate/workout',
     },
     {
@@ -109,7 +109,7 @@ export default function Dashboard() {
       title: 'برنامه تغذیه',
       subtitle: FEATURE_FLAGS.offlineNutrition ? 'تولید خودکار' : 'به‌زودی',
       enabled: FEATURE_FLAGS.offlineNutrition,
-      gradient: 'from-emerald-500 to-green-600',
+      gradient: 'from-amber-500 via-orange-500 to-rose-500',
       path: '/generate/nutrition',
     },
     {
@@ -118,7 +118,7 @@ export default function Dashboard() {
       title: 'برنامه مکمل',
       subtitle: FEATURE_FLAGS.offlineSupplements ? 'تولید خودکار' : 'به‌زودی',
       enabled: FEATURE_FLAGS.offlineSupplements,
-      gradient: 'from-pink-500 to-rose-600',
+      gradient: 'from-violet-600 via-fuchsia-500 to-pink-500',
       path: '/generate/supplement',
     },
     {
@@ -127,7 +127,7 @@ export default function Dashboard() {
       title: 'برنامه فشرده',
       subtitle: FEATURE_FLAGS.compactWorkout ? 'تک‌جلسه‌ای' : 'به‌زودی',
       enabled: FEATURE_FLAGS.compactWorkout,
-      gradient: 'from-orange-500 to-amber-600',
+      gradient: 'from-cyan-500 via-blue-600 to-indigo-700',
       path: '/generate/compact',
     },
   ];
@@ -167,19 +167,24 @@ export default function Dashboard() {
       {/* Welcome Hero */}
       <div
         className="rounded-3xl p-5 relative overflow-hidden shadow-xl"
-        style={{ background: `linear-gradient(135deg, ${teal}cc 0%, #14b8a6aa 55%, ${gold}99 130%), linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%)` }}
+        style={{ background: `linear-gradient(135deg, #1e1b4b 0%, #312e81 35%, #6d28d9 75%, #a78bfa 130%)` }}
       >
         {/* دایره‌های تزئینی */}
         <div className="absolute -top-16 -left-16 w-48 h-48 rounded-full opacity-20 bg-white" />
         <div className="absolute -bottom-20 -right-12 w-56 h-56 rounded-full opacity-10 bg-white" />
         <div className="relative z-10">
-        <div className="flex items-start justify-between mb-4">
-          <div>
+        <div className="flex items-center gap-4 mb-4">
+          {/* لوگوی Fito */}
+          <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-lg"
+            style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.2)' }}>
+            <img src="/fito-icon.png" alt="Fito" className="w-10 h-10 object-contain" />
+          </div>
+          <div className="flex-1 min-w-0">
             <p className="text-sm font-bold text-white/90">سلام، {profile?.name || 'ورزشکار'} 👋</p>
             <h2 className="text-xl font-black mt-1 text-white">مربی اختصاصی تو</h2>
             <p className="text-xs mt-1 text-white/80">امروز {todayName}</p>
           </div>
-          <div className="w-12 h-12 rounded-full flex items-center justify-center text-lg font-black backdrop-blur-md"
+          <div className="w-12 h-12 rounded-full flex items-center justify-center text-lg font-black backdrop-blur-md shrink-0"
             style={{ background: 'rgba(255,255,255,0.25)', color: '#ffffff' }}>
             {profile?.name?.charAt(0) || 'ع'}
           </div>
