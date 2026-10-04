@@ -3,7 +3,7 @@
  * ترکیب تمام ماژول‌ها برای تولید JSON نهایی سازگار با اپ
  */
 
-import type { AthleteProfile } from '../../types';
+import type { AthleteProfile, WorkoutSession } from '../../types';
 import type {
   GeneratedProgram,
   GeneratedDay,
@@ -16,6 +16,7 @@ import { analyzeProfile, type ProfileAnalysis } from '../core/profileAnalyzer';
 import { selectSplit, getSplitName, type SplitPlan } from '../core/splitSelector';
 import { selectExercisesForSession } from '../core/exerciseSelector';
 import { getTargetWeeklyVolume, MAX_VOLUME_PER_SESSION } from '../data/rules/volumeRules';
+import { analyzePerformance, type PerformanceAnalysis } from '../core/performanceAnalyzer';
 
 export const ENGINE_VERSION = '1.0.0';
 
@@ -53,9 +54,21 @@ const MUSCLE_TO_PERSIAN: Record<MuscleGroup, string> = {
 /**
  * تولید برنامه تمرینی کامل
  */
-export function generateWorkoutProgram(profile: AthleteProfile): GeneratedProgram {
+export function generateWorkoutProgram(
+  profile: AthleteProfile,
+  sessions: WorkoutSession[] = []
+): GeneratedProgram {
   // ۱. تحلیل پروفایل
   const analysis = analyzeProfile(profile);
+
+  // ۲. تحلیل عملکرد از تاریخچه تمرینات
+  const performance = analyzePerformance(sessions);
+
+  // تنظیم سطح تجربه بر اساس خستگی
+  if (performance.fatigue.needsDeload) {
+    // کاهش حجم در صورت خستگی بالا
+    analysis.fatigueDetected = true;
+  }
 
   // ۲. انتخاب Split
   const split = selectSplit(analysis.weeklyTrainingDays, analysis.experience, analysis.goal);
@@ -76,7 +89,8 @@ export function generateWorkoutProgram(profile: AthleteProfile): GeneratedProgra
       session.muscleGroups as MuscleGroup[],
       analysis,
       allSelectedIds,
-      weeklyVolume
+      weeklyVolume,
+      performance
     );
 
     days.push(day);
@@ -124,7 +138,8 @@ function generateDay(
   muscleGroups: MuscleGroup[],
   analysis: ProfileAnalysis,
   allSelectedIds: string[],
-  weeklyVolume: Partial<Record<MuscleGroup, number>>
+  weeklyVolume: Partial<Record<MuscleGroup, number>>,
+  performance: PerformanceAnalysis
 ): GeneratedDay {
   // تعداد حرکات بر اساس مدت جلسه
   const exerciseCount = calculateExerciseCount(analysis.sessionMinutes, analysis.experience);
@@ -139,7 +154,7 @@ function generateDay(
 
   // تبدیل به GeneratedExercise
   const generatedExercises: GeneratedExercise[] = selectedExercises.map((ex) => {
-    const sets = generateSets(ex, analysis);
+    const sets = generateSets(ex, analysis, performance);
 
     // ثبت حجم هفتگی
     weeklyVolume[ex.primaryMuscle] = (weeklyVolume[ex.primaryMuscle] || 0) + sets.length;
@@ -197,8 +212,12 @@ function calculateExerciseCount(sessionMinutes: number, experience: string): num
 /**
  * تولید ست‌ها برای یک حرکت
  */
-function generateSets(exercise: Exercise, analysis: ProfileAnalysis): GeneratedSet[] {
-  const setCount = calculateSetCount(exercise, analysis);
+function generateSets(
+  exercise: Exercise,
+  analysis: ProfileAnalysis,
+  performance: PerformanceAnalysis
+): GeneratedSet[] {
+  const setCount = calculateSetCount(exercise, analysis, performance);
   const goal = analysis.goal;
 
   // تعیین محدوده تکرار
@@ -220,8 +239,18 @@ function generateSets(exercise: Exercise, analysis: ProfileAnalysis): GeneratedS
   let baseRIR = rirRange.min;
   if (analysis.experience === 'beginner') baseRIR = Math.min(baseRIR + 1, rirRange.max);
 
+  // اگر خستگی بالا → RIR بیشتر (تمرین سبک‌تر)
+  if (performance.fatigue.needsDeload) {
+    baseRIR = Math.min(baseRIR + 2, rirRange.max + 2);
+  }
+
   const repsStr = `${repRange.min}-${repRange.max}`;
   const restSeconds = Math.round((exercise.restSeconds.min + exercise.restSeconds.max) / 2);
+
+  // محاسبه وزنه پیشنهادی از رکورد قبلی
+  const lastPerformance = performance.allExercises.find(
+    (p) => p.exerciseId === exercise.id || p.exerciseName === exercise.name
+  );
 
   const sets: GeneratedSet[] = [];
   for (let i = 1; i <= setCount; i++) {
@@ -231,7 +260,12 @@ function generateSets(exercise: Exercise, analysis: ProfileAnalysis): GeneratedS
       targetRIR: baseRIR,
       restSeconds,
       tempo: exercise.tempo,
-    });
+      // وزنه پیشنهادی
+      suggestedWeight: lastPerformance
+        ? Math.round(lastPerformance.lastWeight * 0.95 / 2.5) * 2.5  // کاهش ۵٪ برای شروع
+        : undefined,
+      lastWeight: lastPerformance?.lastWeight,
+    } as any);
   }
 
   return sets;
@@ -239,8 +273,13 @@ function generateSets(exercise: Exercise, analysis: ProfileAnalysis): GeneratedS
 
 /**
  * محاسبه تعداد ست برای یک حرکت
+ * با در نظر گرفتن خستگی
  */
-function calculateSetCount(exercise: Exercise, analysis: ProfileAnalysis): number {
+function calculateSetCount(
+  exercise: Exercise,
+  analysis: ProfileAnalysis,
+  performance: PerformanceAnalysis
+): number {
   const baseSets: Record<string, number> = {
     beginner: exercise.isCompound ? 3 : 2,
     intermediate: exercise.isCompound ? 4 : 3,
@@ -255,6 +294,11 @@ function calculateSetCount(exercise: Exercise, analysis: ProfileAnalysis): numbe
     sets = Math.max(2, sets - 1);
   }
 
+  // کاهش حجم در صورت خستگی بالا
+  if (performance.fatigue.needsDeload) {
+    sets = Math.max(2, sets - 1);
+  }
+
   // محدودیت حجم هر جلسه
   const maxPerSession = MAX_VOLUME_PER_SESSION[exercise.primaryMuscle] || 10;
   sets = Math.min(sets, Math.ceil(maxPerSession / 2));
@@ -262,9 +306,7 @@ function calculateSetCount(exercise: Exercise, analysis: ProfileAnalysis): numbe
   return sets;
 }
 
-/**
- * تخمین مدت جلسه
- */
+
 function estimateDuration(exercises: GeneratedExercise[], maxMinutes: number): number {
   let totalSeconds = 600; // گرم‌کردن
   for (const ex of exercises) {

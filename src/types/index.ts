@@ -24,6 +24,16 @@ export interface AthleteProfile {
   timeline: string;
   trainingHistory: string;
   strengthRecords: Record<string, string>;
+  strengthRecordsExtended?: {
+    squat?: { weight: number; reps: number; estimated1RM?: number };
+    benchPress?: { weight: number; reps: number; estimated1RM?: number };
+    deadlift?: { weight: number; reps: number; estimated1RM?: number };
+    overheadPress?: { weight: number; reps: number; estimated1RM?: number };
+    barbellRow?: { weight: number; reps: number; estimated1RM?: number };
+    pullUp?: { weight: number; reps: number };        // وزن بدن + وزنه اضافه
+    dip?: { weight: number; reps: number };
+    lastUpdated?: string;
+  };
   bodyMeasurements: BodyMeasurements;
   dietaryGoal: string;
   dietType: string;
@@ -55,14 +65,27 @@ export interface AthleteProfile {
 export type Goal = 'hypertrophy' | 'strength' | 'fat_loss' | 'recomposition' | 'competition' | 'general_fitness';
 
 export interface BodyMeasurements {
-  chest?: number;
-  waist?: number;
-  hips?: number;
-  arms?: number;
-  thighs?: number;
-  calves?: number;
-  shoulders?: number;
-  neck?: number;
+  // دورها (سانتی‌متر)
+  chest?: number;        // دور سینه
+  waist?: number;        // دور کمر
+  hips?: number;         // دور باسن
+  arms?: number;         // دور بازو (منقبض)
+  forearms?: number;     // دور ساعد
+  thighs?: number;       // دور ران
+  calves?: number;       // دور ساق
+  shoulders?: number;    // دور سرشانه
+  neck?: number;         // دور گردن
+  wrist?: number;        // دور مچ
+  ankle?: number;        // دور قوزک
+
+  // طول‌ها (سانتی‌متر)
+  legLength?: number;    // طول پا
+  torsoLength?: number;  // طول تنه
+  armLength?: number;    // طول بازو
+
+  // تیپ بدنی
+  bodyFrame?: "ectomorph" | "mesomorph" | "endomorph";
+  dominantLimbLength?: "short" | "average" | "long";
 }
 
 export interface WorkoutProgram {

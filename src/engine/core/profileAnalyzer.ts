@@ -23,6 +23,7 @@ export interface ProfileAnalysis {
   weeklyTrainingDays: number;
   sessionMinutes: number;
   programDurationWeeks: number;
+  fatigueDetected?: boolean;
 }
 
 /**

@@ -1,32 +1,38 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
-  LayoutDashboard, User, Brain, Dumbbell, Calendar,
-  Import, Trophy, Menu, X, Sun, Moon, Apple, Pill, Home
+  LayoutDashboard, User, Dumbbell, Calendar,
+  Trophy, Menu, X, Sun, Moon, Home,
+  Sparkles, Apple, Pill, Zap, FileText
 } from 'lucide-react';
 import { useState } from 'react';
 import { getPersianDate } from '../utils/jalali';
 import { APP_VERSION } from '../version';
 import { useTheme } from '../context/ThemeContext';
+import { FEATURE_FLAGS } from '../engine/version';
 
-const sidebarItems = [
+const mainItems = [
   { path: '/', label: 'داشبورد', icon: LayoutDashboard },
-  { path: '/workouts', label: 'تاریخچه تمرینات', icon: Dumbbell },
-  { path: '/profile', label: 'پروفایل', icon: User },
-  { path: '/prompt', label: 'پرامپت', icon: Brain },
-  { path: '/import', label: 'ورود برنامه', icon: Import },
-  { path: '/nutrition', label: 'تغذیه', icon: Apple },
-  { path: '/supplements', label: 'مکمل', icon: Pill },
+  { path: '/programs', label: 'برنامه‌های من', icon: Dumbbell },
+  { path: '/history', label: 'تاریخچه تمرینات', icon: FileText },
   { path: '/calendar', label: 'تقویم', icon: Calendar },
   { path: '/progress', label: 'پیشرفت', icon: Trophy },
+  { path: '/profile', label: 'پروفایل', icon: User },
+];
+
+const generatorItems = [
+  { path: '/generate/workout', label: 'برنامه تمرینی', icon: Dumbbell, enabled: FEATURE_FLAGS.offlineWorkout },
+  { path: '/generate/nutrition', label: 'برنامه تغذیه', icon: Apple, enabled: FEATURE_FLAGS.offlineNutrition },
+  { path: '/generate/supplement', label: 'برنامه مکمل', icon: Pill, enabled: FEATURE_FLAGS.offlineSupplements },
+  { path: '/generate/compact', label: 'برنامه فشرده', icon: Zap, enabled: FEATURE_FLAGS.compactWorkout },
 ];
 
 const bottomNavItems = [
   { path: '/', label: 'داشبورد', icon: Home },
-  { path: '/today-session', label: 'تمرینات', icon: Dumbbell },
-  { path: '/calendar', label: 'تقویم', icon: Calendar },
+  { path: '/programs', label: 'برنامه‌ها', icon: Dumbbell },
+  { path: '/generate/workout', label: 'تولید', icon: Sparkles },
+  { path: '/history', label: 'تاریخچه', icon: FileText },
   { path: '/progress', label: 'پیشرفت', icon: Trophy },
-  { path: '/profile', label: 'پروفایل', icon: User },
 ];
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -35,6 +41,47 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === 'dark';
+
+  const renderNavItem = (item: any, compact: boolean) => {
+    const Icon = item.icon;
+    const isActive = location.pathname === item.path ||
+      (item.path !== '/' && location.pathname.startsWith(item.path));
+    const isDisabled = item.enabled === false;
+
+    return (
+      <button
+        key={item.path}
+        onClick={() => {
+          if (isDisabled) {
+            alert(`${item.label} به‌زودی در دسترس خواهد بود!`);
+            return;
+          }
+          navigate(item.path);
+          if (compact) setMenuOpen(false);
+        }}
+        disabled={isDisabled}
+        className={`flex items-center gap-3 rounded-xl text-sm transition-all ${
+          compact ? 'px-4 py-3.5' : 'px-4 py-3'
+        } ${
+          isActive
+            ? isDark ? 'bg-[#d4af37]/15 text-[#d4af37] font-bold' : 'bg-[#14b8a6]/15 text-[#0d9488] font-bold'
+            : isDisabled
+            ? isDark ? 'text-gray-600 cursor-not-allowed' : 'text-gray-400 cursor-not-allowed'
+            : isDark ? 'text-gray-400 hover:text-white hover:bg-white/5' : 'text-[#0f766e]/70 hover:text-[#0d9488] hover:bg-[#f0fdfa]'
+        }`}
+      >
+        <Icon size={compact ? 20 : 18} />
+        <span className="flex-1 text-right">{item.label}</span>
+        {isDisabled && (
+          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
+            isDark ? 'bg-white/5 text-gray-500' : 'bg-gray-100 text-gray-500'
+          }`}>
+            به‌زودی
+          </span>
+        )}
+      </button>
+    );
+  };
 
   return (
     <div className={'min-h-screen flex flex-col theme-transition ' + (
@@ -70,39 +117,46 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
       <div className="flex flex-1">
         <aside className={'hidden lg:flex flex-col w-60 border-l p-4 gap-1 sticky top-[68px] h-[calc(100vh-68px)] overflow-y-auto theme-transition ' + (isDark ? 'bg-[#0c0c0c] border-white/5' : 'bg-white/50 border-[#14b8a6]/10')}>
-          <div className="mb-4 px-3"><p className={'text-xs font-bold ' + (isDark ? 'text-gray-500' : 'text-[#0f766e]/70')}>منوی اصلی</p></div>
-          {sidebarItems.map(item => {
-            const Icon = item.icon;
-            const isActive = location.pathname === item.path;
-            return (
-              <button key={item.path} onClick={() => navigate(item.path)} className={'group flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-all ' + (isActive ? (isDark ? 'bg-[#d4af37]/15 text-[#d4af37] font-bold' : 'bg-[#14b8a6]/15 text-[#0d9488] font-bold') : (isDark ? 'text-gray-400 hover:text-white hover:bg-white/5' : 'text-[#0f766e]/70 hover:text-[#0d9488] hover:bg-[#f0fdfa]'))}>
-                <Icon size={18} /><span>{item.label}</span>
-              </button>
-            );
-          })}
+          <div className="mb-2 px-3">
+            <p className={'text-xs font-bold ' + (isDark ? 'text-gray-500' : 'text-[#0f766e]/70')}>منوی اصلی</p>
+          </div>
+          {mainItems.map(item => renderNavItem(item, false))}
+
+          <div className="my-3 px-3">
+            <div className={`h-px ${isDark ? 'bg-white/10' : 'bg-gray-200'}`} />
+          </div>
+
+          <div className="mb-2 px-3 flex items-center gap-2">
+            <Sparkles size={12} className={isDark ? 'text-[#d4af37]' : 'text-[#0d9488]'} />
+            <p className={'text-xs font-bold ' + (isDark ? 'text-gray-500' : 'text-[#0f766e]/70')}>تولید برنامه</p>
+          </div>
+          {generatorItems.map(item => renderNavItem(item, false))}
         </aside>
 
         {menuOpen && (
           <div className="lg:hidden fixed inset-0 z-40 bg-black/70 backdrop-blur-sm" onClick={() => setMenuOpen(false)}>
-            <aside className={'w-72 h-full p-5 flex flex-col gap-1 shadow-2xl ' + (isDark ? 'bg-[#0c0c0c]' : 'bg-white')} onClick={e => e.stopPropagation()}>
+            <aside className={'w-72 h-full p-5 flex flex-col gap-1 shadow-2xl overflow-y-auto ' + (isDark ? 'bg-[#0c0c0c]' : 'bg-white')} onClick={e => e.stopPropagation()}>
               <div className={'flex items-center gap-3 mb-6 pb-5 border-b ' + (isDark ? 'border-white/10' : 'border-[#14b8a6]/20')}>
                 <div className={'w-12 h-12 rounded-2xl flex items-center justify-center overflow-hidden ' + (isDark ? 'bg-[#0D0D1A]' : 'bg-[#0D0D1A]')}>
                   <img src="/coachino-icon.png" alt="کوچینو" className="w-11 h-11 object-contain" />
                 </div>
                 <div>
                   <span className={'font-bold text-lg block ' + (isDark ? 'text-white' : 'text-[#0d9488]')}>کوچینو</span>
-                  <span className={'text-xs ' + (isDark ? 'text-gray-500' : 'text-[#0f766e]/70')}>Coachino · دستیار هوشمند بدنسازی</span>
+                  <span className={'text-xs ' + (isDark ? 'text-gray-500' : 'text-[#0f766e]/70')}>Coachino · مربی آفلاین</span>
                 </div>
               </div>
-              {sidebarItems.map(item => {
-                const Icon = item.icon;
-                const isActive = location.pathname === item.path;
-                return (
-                  <button key={item.path} onClick={() => { navigate(item.path); setMenuOpen(false); }} className={'flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm transition-all ' + (isActive ? (isDark ? 'bg-[#d4af37]/15 text-[#d4af37] font-bold' : 'bg-[#14b8a6]/15 text-[#0d9488] font-bold') : (isDark ? 'text-gray-300 hover:bg-white/5' : 'text-[#0f766e]/70 hover:bg-[#f0fdfa]'))}>
-                    <Icon size={20} /><span>{item.label}</span>
-                  </button>
-                );
-              })}
+
+              {mainItems.map(item => renderNavItem(item, true))}
+
+              <div className="my-3">
+                <div className={`h-px ${isDark ? 'bg-white/10' : 'bg-gray-200'}`} />
+              </div>
+
+              <div className="mb-2 flex items-center gap-2 px-2">
+                <Sparkles size={14} className={isDark ? 'text-[#d4af37]' : 'text-[#0d9488]'} />
+                <p className={'text-xs font-bold ' + (isDark ? 'text-gray-500' : 'text-[#0f766e]/70')}>تولید برنامه</p>
+              </div>
+              {generatorItems.map(item => renderNavItem(item, true))}
             </aside>
           </div>
         )}

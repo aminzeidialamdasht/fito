@@ -19,7 +19,6 @@ import {
 } from 'lucide-react';
 import { toPersianNumber, getProgramTimelineDetails } from '../utils/jalali';
 import { DEFAULT_WORKOUT_PLAN } from '../data/defaultPlans';
-import { useSubscription } from '../subscription/SubscriptionContext';
 
 const isStoreBuild = ['bazaar', 'myket'].includes(import.meta.env.VITE_APP_FLAVOR || '');
 
@@ -61,7 +60,6 @@ export default function ProgramImport() {
 
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  const { isPremium, buy } = useSubscription();
 
   const [jsonInput, setJsonInput] = useState('');
   const [startDate, setStartDate] = useState(() => new Date().toISOString().split('T')[0]);
@@ -72,9 +70,8 @@ export default function ProgramImport() {
   } | null>(null);
   const [showPreview, setShowPreview] = useState(false);
   const [imported, setImported] = useState(false);
-  const [buyBusy, setBuyBusy] = useState(false);
 
-  const canUseJsonImport = !isStoreBuild || isPremium;
+  const canUseJsonImport = true;
 
   const handleValidate = () => {
     if (!canUseJsonImport) return;
@@ -339,42 +336,9 @@ export default function ProgramImport() {
       }`}>
         <h3 className={'font-bold mb-3 flex items-center gap-2 ' + (isDark ? 'text-[#14b8a6]' : 'text-[#0d9488]')}>
           JSON برنامه تمرینی
-          {isStoreBuild && !isPremium && (
-            <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
-              isDark ? 'bg-[#d4af37]/20 text-[#d4af37]' : 'bg-amber-100 text-amber-700'
-            }`}>
-              ویژه مشترکین
-            </span>
-          )}
         </h3>
 
-        {!canUseJsonImport ? (
-          <div className={`rounded-xl p-4 text-center ${
-            isDark ? 'bg-[#0d0d1a] border border-[#d4af37]/20' : 'bg-amber-50 border border-amber-200'
-          }`}>
-            <Lock size={28} className={`mx-auto mb-2 ${isDark ? 'text-[#d4af37]' : 'text-amber-600'}`} />
-            <p className={'text-sm font-bold mb-1 ' + (isDark ? 'text-white' : 'text-[#134e4a]')}>
-              ورود JSON برنامه اختصاصی AI فقط برای مشترکین است
-            </p>
-            <p className={'text-xs mb-4 ' + (isDark ? 'text-gray-400' : 'text-[#0f766e]/70')}>
-              برای تولید و ایمپورت برنامه شخصی‌سازی‌شده، اشتراک ماهانه تهیه کنید. برنامه پیش‌فرض رایگان در بالا در دسترس است.
-            </p>
-            <button
-              onClick={async () => {
-                setBuyBusy(true);
-                await buy();
-                setBuyBusy(false);
-              }}
-              disabled={buyBusy}
-              className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm disabled:opacity-50 ${
-                isDark ? 'bg-[#d4af37] text-black' : 'bg-amber-500 text-white'
-              }`}
-            >
-              <Crown size={16} />
-              {buyBusy ? 'لطفاً صبر کنید...' : 'تهیه اشتراک ماهانه'}
-            </button>
-          </div>
-        ) : (
+                {(
           <>
             <p className={'text-sm mb-3 ' + (isDark ? 'text-gray-400' : 'text-[#0f766e]/70')}>
               خروجی هوش مصنوعی را در قالب JSON وارد کنید.

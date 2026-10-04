@@ -5,7 +5,7 @@ import { useTheme } from '../context/ThemeContext';
 import { formatDateJalali, toPersianNumber } from '../utils/jalali';
 import { useMemo } from 'react';
 
-export default function Workouts() {
+export default function History() {
   const navigate = useNavigate();
   const { sessions } = useAppContext();
   const { theme } = useTheme();

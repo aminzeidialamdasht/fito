@@ -40,6 +40,8 @@ export interface GeneratedSet {
   targetRIR: number;       // 2
   restSeconds: number;     // 90
   tempo?: string;          // "3-1-1-0"
+  suggestedWeight?: number;  // وزنه پیشنهادی بر اساس رکورد قبلی
+  lastWeight?: number;       // آخرین وزنه ثبت‌شده
 }
 
 export interface GeneratedExercise {

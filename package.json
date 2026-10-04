@@ -1,20 +1,13 @@
 {
-  "name": "coachino",
+  "name": "fito",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "typecheck": "tsc --noEmit",
-    "build:personal": "cross-env VITE_APP_FLAVOR=personal vite build",
-    "build:bazaar": "cross-env VITE_APP_FLAVOR=bazaar vite build",
-    "build:myket": "cross-env VITE_APP_FLAVOR=myket vite build",
-    "sync:personal": "cross-env VITE_APP_FLAVOR=personal npx cap sync android",
-    "sync:bazaar": "cross-env VITE_APP_FLAVOR=bazaar npx cap sync android",
-    "sync:myket": "cross-env VITE_APP_FLAVOR=myket npx cap sync android",
-    "android:personal": "npm run build:personal && npm run sync:personal && npx cap open android",
-    "android:bazaar": "npm run build:bazaar && npm run sync:bazaar && npx cap open android",
-    "android:myket": "npm run build:myket && npm run sync:myket && npx cap open android"
+    "sync": "npx cap sync android",
+    "android": "npm run build && npm run sync && npx cap open android"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.2",
@@ -47,5 +40,5 @@
     "typescript": "^5.7.0",
     "vite": "^6.3.5"
   },
-  "version": "1.6.8"
+  "version": "2.0.0"
 }

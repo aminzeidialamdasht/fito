@@ -1,28 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
-// خواندن متغیر محیطی (پیش‌فرض: myket)
-const flavor = process.env.VITE_APP_FLAVOR || 'myket';
-
-const APP_CONFIG: Record<string, { appId: string; appName: string }> = {
-  personal: {
-    appId: 'com.amin.aifitness.personal',
-    appName: 'Coachino Personal',
-  },
-  bazaar: {
-    appId: 'com.aifitness.coach',
-    appName: 'Coachino',
-  },
-  myket: {
-    appId: 'com.coachino.myket',
-    appName: 'Coachino',
-  },
-};
-
-const current = APP_CONFIG[flavor] || APP_CONFIG.myket;
-
 const config: CapacitorConfig = {
-  appId: current.appId,
-  appName: current.appName,
+  appId: 'com.fito.app',
+  appName: 'Fito',
   webDir: 'dist',
   bundledWebRuntime: false,
   server: {
@@ -33,24 +13,24 @@ const config: CapacitorConfig = {
     allowMixedContent: false,
     captureInput: true,
     webContentsDebuggingEnabled: false,
-    backgroundColor: '#0D0D1A',
-    overrideUserAgent: 'Coachino-Android',
+    backgroundColor: '#0f172a',
+    overrideUserAgent: 'Fito-Android',
   },
   ios: {
-    backgroundColor: '#0D0D1A',
+    backgroundColor: '#0f172a',
     scrollEnabled: true,
   },
   plugins: {
     SplashScreen: {
       launchShowDuration: 2000,
-      backgroundColor: '#0D0D1A',
+      backgroundColor: '#0f172a',
       showSpinner: false,
       androidSplashResourceName: 'splash',
       androidScaleType: 'CENTER_CROP',
     },
     StatusBar: {
       style: 'DARK',
-      backgroundColor: '#1A1A2E',
+      backgroundColor: '#0f172a',
       overlaysWebView: true,
     },
     Keyboard: {
@@ -59,7 +39,7 @@ const config: CapacitorConfig = {
     },
     LocalNotifications: {
       smallIcon: 'ic_stat_icon_config_sample',
-      iconColor: '#D4AF37',
+      iconColor: '#a3e635',
     },
   },
 };

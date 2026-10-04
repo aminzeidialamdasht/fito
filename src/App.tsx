@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
 import { ThemeProvider } from './context/ThemeContext';
 import Layout from './components/Layout';
@@ -15,17 +15,30 @@ import Supplements from './pages/Supplements';
 import SupplementImport from './pages/SupplementImport';
 import WorkoutTracker from './pages/WorkoutTracker';
 import SessionPreview from './pages/SessionPreview';
-import Workouts from './pages/Workouts';
+import History from './pages/History';
+import Programs from './pages/Programs';
 import TodaySession from './pages/TodaySession';
 import CalendarPage from './pages/Calendar';
 import Progress from './pages/Progress';
-import { SubscriptionProvider } from './subscription/SubscriptionContext';
-import PremiumGate from './subscription/PremiumGate';
+import OfflineGenerator from './pages/OfflineGenerator';
+import GeneratorEntry from './pages/generators/GeneratorEntry';
+import Onboarding from './pages/Onboarding';
+import ProgramDetail from './pages/program/ProgramDetail';
 
 function AppContent({ showWelcome, onContinue }: { showWelcome: boolean; onContinue: () => void }) {
+  const location = useLocation();
+
   if (showWelcome) {
     return <Welcome onContinue={onContinue} />;
   }
+
+  // مسیرهایی که نباید BottomNav داشته باشند
+  const hideBottomNav =
+    location.pathname.startsWith('/onboarding') ||
+    (location.pathname.startsWith('/generate/') && !location.pathname.endsWith('/ready'));
+
+  // مسیرهایی که Layout نباید داشته باشند (تمام صفحه)
+  const isFullScreen = location.pathname.startsWith('/onboarding');
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -36,16 +49,23 @@ function AppContent({ showWelcome, onContinue }: { showWelcome: boolean; onConti
         <Route path="/calendar" element={<Layout><CalendarPage /></Layout>} />
         <Route path="/progress" element={<Layout><Progress /></Layout>} />
         <Route path="/profile" element={<Layout><Profile /></Layout>} />
-        <Route path="/workouts" element={<Layout><Workouts /></Layout>} />
+        <Route path="/programs" element={<Layout><Programs /></Layout>} />
+        <Route path="/program/:id" element={<Layout><ProgramDetail /></Layout>} />
+        <Route path="/history" element={<Layout><History /></Layout>} />
+        <Route path="/workouts" element={<Navigate to="/programs" replace />} />
         <Route path="/today-session" element={<TodaySession />} />
         
-        <Route path="/prompt" element={<Layout><PremiumGate title="تولید پرامپت"><PromptGenerator /></PremiumGate></Layout>} />
+        <Route path="/prompt" element={<Layout><PromptGenerator /></Layout>} />
         {/* ورود برنامه: صفحه باز است تا برنامه پیش‌فرض رایگان در دسترس باشد؛ JSON اختصاصی داخل صفحه قفل می‌شود */}
         <Route path="/import" element={<Layout><ProgramImport /></Layout>} />
+        <Route path="/generate" element={<Navigate to="/generate/workout" replace />} />
+        <Route path="/onboarding" element={<Onboarding />} />
+        <Route path="/generate/:type" element={<GeneratorEntry />} />
+        <Route path="/generate/:type/ready" element={<Layout><OfflineGenerator /></Layout>} />
         <Route path="/nutrition" element={<Layout><Nutrition /></Layout>} />
-        <Route path="/nutrition-import" element={<Layout><PremiumGate title="ورود برنامه تغذیه"><NutritionImport /></PremiumGate></Layout>} />
+        <Route path="/nutrition-import" element={<Layout><NutritionImport /></Layout>} />
         <Route path="/supplements" element={<Layout><Supplements /></Layout>} />
-        <Route path="/supplement-import" element={<Layout><PremiumGate title="ورود برنامه مکمل"><SupplementImport /></PremiumGate></Layout>} />
+        <Route path="/supplement-import" element={<Layout><SupplementImport /></Layout>} />
 
         <Route path="/session/:id" element={<SessionPreview />} />
         <Route path="/tracker/:id" element={<WorkoutTracker />} />
@@ -54,7 +74,7 @@ function AppContent({ showWelcome, onContinue }: { showWelcome: boolean; onConti
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       
-      <BottomNav />
+      {!hideBottomNav && <BottomNav />}
     </div>
   );
 }
@@ -65,13 +85,11 @@ function App() {
 
   return (
     <ThemeProvider>
-      <SubscriptionProvider>
-        <AppProvider>
-          <HashRouter>
-            <AppContent showWelcome={showWelcome} onContinue={continueToApp} />
-          </HashRouter>
-        </AppProvider>
-      </SubscriptionProvider>
+      <AppProvider>
+        <HashRouter>
+          <AppContent showWelcome={showWelcome} onContinue={continueToApp} />
+        </HashRouter>
+      </AppProvider>
     </ThemeProvider>
   );
 }
