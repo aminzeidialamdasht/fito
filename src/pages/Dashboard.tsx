@@ -167,7 +167,7 @@ export default function Dashboard() {
       {/* Welcome Hero */}
       <div
         className="rounded-3xl p-5 relative overflow-hidden shadow-xl"
-        style={{ background: `linear-gradient(135deg, ${teal} 0%, #0d9488 50%, ${gold} 130%)` }}
+        style={{ background: `linear-gradient(135deg, ${teal}cc 0%, #14b8a6aa 55%, ${gold}99 130%), linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%)` }}
       >
         {/* دایره‌های تزئینی */}
         <div className="absolute -top-16 -left-16 w-48 h-48 rounded-full opacity-20 bg-white" />
