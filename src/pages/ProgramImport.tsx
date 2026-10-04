@@ -79,7 +79,7 @@ export default function ProgramImport() {
   const handleValidate = () => {
     if (!canUseJsonImport) return;
     const expectedDays = activeProfile ? Number(activeProfile.trainingDays) : undefined;
-    const result = validateWorkoutJSON(jsonInput, expectedDays);
+    const result = validateWorkoutJSON(jsonInput, expectedDays, activeProfile?.targetMuscles);
     setValidationResult(result);
 
     if (result.valid) {

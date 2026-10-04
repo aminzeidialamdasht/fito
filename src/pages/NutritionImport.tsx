@@ -19,7 +19,7 @@ export default function NutritionImport() {
   const [imported, setImported] = useState(false);
 
   const handleValidate = () => {
-    const result = validateNutritionJSON(jsonInput);
+    const result = validateNutritionJSON(jsonInput, activeProfile ? Number(activeProfile.mealsPerDay) : undefined);
     setValidationResult(result);
     if (result.valid) {
       setShowPreview(true);

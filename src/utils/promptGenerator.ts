@@ -279,7 +279,14 @@ export function generateWorkoutPrompt(profile: AthleteProfile): string {
 
   let priorityRule = '';
   if (targetMusclesEn) {
-    priorityRule = `- **PRIORITY MUSCLE RULE**: Priority muscles must receive optimal frequency/volume (usually 2x/week when possible) without omitting non-priority muscles. Non-priority muscles need at least maintenance volume once per week. Fit this inside exactly ${trainingDays} sessions.`;
+    priorityRule = `- **ABSOLUTE PRIORITY MUSCLE MANDATE (NON-NEGOTIABLE)**:
+  The athlete has explicitly specified these PRIORITY muscles: ${targetMusclesEn}.
+  You MUST include AT LEAST ONE dedicated exercise for EACH priority muscle in EVERY weekly program.
+  Priority muscles MUST receive AT LEAST 2x/week frequency (if ${trainingDays} >= 4) and AT LEAST 8-12 direct working sets per week.
+  Omitting ANY priority muscle is STRICTLY FORBIDDEN and will cause program rejection.
+  If a priority muscle conflicts with injuries/limitations/equipment, you MUST still include it but use a safe substitute or a different movement pattern that trains the same muscle.
+  The "weekly_volume_summary" MUST include a row for EACH priority muscle with the direct set count.
+  The "days"[].muscle_groups array MUST explicitly mention each priority muscle that is trained that day.`;
   }
 
   let secondaryGoalRule = '';
@@ -352,6 +359,10 @@ Design a weekly template that can be progressed over this requested timeframe.
 - **Injury Details**: ${profile.injuryDetails || 'None'}
 - **Hormone / Medication Notes**: ${profile.hormoneMedNotes || 'None'}
 - **Competition Date / Deadline**: ${profile.competitionDate || 'None'}
+- **Training History**: ${profile.trainingHistory || 'Not specified'}
+- **Health Conditions**: ${(profile.healthConditions || []).join(', ') || 'None'}
+- **Body Fat Percent**: ${profile.bodyFatPercent != null ? profile.bodyFatPercent + '%' : 'Not specified'}
+- **Body Composition**: ${profile.bodyComposition || 'Not specified'}
 
 ## PRE-PROGRAMMING ANALYSIS (MANDATORY)
 Before selecting exercises, analyze:
@@ -694,7 +705,11 @@ Important:
   return prompt;
 }
 
-export function validateWorkoutJSON(json: string, expectedDays?: number): { valid: boolean; data?: any; error?: string } {
+export function validateWorkoutJSON(
+  json: string,
+  expectedDays?: number,
+  priorityMuscles?: string[]
+): { valid: boolean; data?: any; error?: string } {
   try {
     const data = JSON.parse(cleanJsonInput(json));
 
@@ -744,13 +759,49 @@ export function validateWorkoutJSON(json: string, expectedDays?: number): { vali
       }
     }
 
+    // ✅ چک عضلات اولویت‌دار
+    if (Array.isArray(priorityMuscles) && priorityMuscles.length > 0) {
+      const allExercises = data.days.flatMap((d: any) => d.exercises || []);
+      const allTargetMuscles = allExercises
+        .map((ex: any) => String(ex.target_muscle || '').toLowerCase().trim())
+        .join(' | ');
+      const allMuscleGroups = data.days
+        .flatMap((d: any) => d.muscle_groups || [])
+        .map((m: any) => String(m).toLowerCase().trim())
+        .join(' | ');
+      const combined = allTargetMuscles + ' | ' + allMuscleGroups;
+
+      const missing: string[] = [];
+      for (const pm of priorityMuscles) {
+        const pmNorm = String(pm).toLowerCase().trim();
+        if (!pmNorm) continue;
+        const variants = [
+          pmNorm,
+          MUSCLE_TRANSLATIONS[pm]?.toLowerCase() || '',
+          (MUSCLE_TRANSLATIONS[pm] || '').toLowerCase(),
+        ].filter(Boolean);
+        const found = variants.some((v) => combined.includes(v));
+        if (!found) missing.push(pm);
+      }
+
+      if (missing.length > 0) {
+        return {
+          valid: false,
+          error: `عضلات اولویت‌دار در برنامه دیده نشدند: ${missing.join('، ')}. لطفاً دوباره تلاش کنید یا پرامپت را دستی اصلاح کنید.`,
+        };
+      }
+    }
+
     return { valid: true, data };
   } catch (e) {
     return { valid: false, error: 'فرمت JSON نامعتبر است: ' + (e as Error).message };
   }
 }
 
-export function validateNutritionJSON(json: string): { valid: boolean; data?: any; error?: string } {
+export function validateNutritionJSON(
+  json: string,
+  expectedMealsPerDay?: number
+): { valid: boolean; data?: any; error?: string } {
   try {
     const data = JSON.parse(cleanJsonInput(json));
 
@@ -768,6 +819,14 @@ export function validateNutritionJSON(json: string): { valid: boolean; data?: an
 
     if (data.days.length === 0) {
       return { valid: false, error: 'آرایه days خالی است' };
+    }
+
+    // ✅ چک دقیقاً ۷ روز
+    if (data.days.length !== 7) {
+      return {
+        valid: false,
+        error: `تعداد روزهای برنامه تغذیه (${data.days.length}) باید دقیقاً ۷ روز باشد.`,
+      };
     }
 
     for (let i = 0; i < data.days.length; i++) {
@@ -788,6 +847,30 @@ export function validateNutritionJSON(json: string): { valid: boolean; data?: an
       if (day.meals.length === 0) {
         return { valid: false, error: `روز ${i + 1} هیچ وعده غذایی ندارد` };
       }
+
+      // ✅ چک تعداد وعده‌ها
+      if (typeof expectedMealsPerDay === 'number' && expectedMealsPerDay > 0) {
+        if (day.meals.length !== expectedMealsPerDay) {
+          return {
+            valid: false,
+            error: `تعداد وعده‌های روز ${i + 1} (${day.meals.length}) با تعداد درخواستی پروفایل (${expectedMealsPerDay}) مطابقت ندارد.`,
+          };
+        }
+      }
+
+      // ✅ چک هر وعده
+      for (let j = 0; j < day.meals.length; j++) {
+        const meal = day.meals[j];
+        if (!meal || typeof meal !== 'object') {
+          return { valid: false, error: `وعده شماره ${j + 1} در روز ${i + 1} یک آبجکت نیست` };
+        }
+        if (!meal.meal_name || typeof meal.meal_name !== 'string') {
+          return { valid: false, error: `فیلد meal_name در وعده ${j + 1} روز ${i + 1} معتبر نیست` };
+        }
+        if (!Array.isArray(meal.foods) || meal.foods.length === 0) {
+          return { valid: false, error: `وعده ${j + 1} روز ${i + 1} هیچ غذایی ندارد` };
+        }
+      }
     }
 
     return { valid: true, data };
@@ -796,7 +879,9 @@ export function validateNutritionJSON(json: string): { valid: boolean; data?: an
   }
 }
 
-export function validateSupplementJSON(json: string): { valid: boolean; data?: any; error?: string } {
+export function validateSupplementJSON(
+  json: string
+): { valid: boolean; data?: any; error?: string } {
   try {
     const raw = JSON.parse(cleanJsonInput(json));
 
@@ -825,9 +910,28 @@ export function validateSupplementJSON(json: string): { valid: boolean; data?: a
         return { valid: false, error: `مکمل شماره ${i + 1} یک آبجکت نیست` };
       }
 
-      if (!supplement.name || typeof supplement.name !== 'string') {
-        return { valid: false, error: `فیلد name برای مکمل شماره ${i + 1} الزامی است` };
+      // ✅ چک فیلدهای اجباری هر مکمل
+      const requiredFields: Array<{ key: string; label: string }> = [
+        { key: 'name', label: 'نام مکمل' },
+        { key: 'dosage', label: 'دوز' },
+        { key: 'timing', label: 'زمان مصرف' },
+        { key: 'benefits', label: 'فواید' },
+      ];
+
+      for (const f of requiredFields) {
+        const val = (supplement as any)[f.key];
+        if (!val || typeof val !== 'string' || val.trim().length === 0) {
+          return {
+            valid: false,
+            error: `فیلد "${f.label}" (${f.key}) برای مکمل شماره ${i + 1} الزامی است.`,
+          };
+        }
       }
+    }
+
+    // ✅ چک وجود warnings و important_notes
+    if (raw.warnings != null && typeof raw.warnings !== 'string') {
+      return { valid: false, error: 'فیلد warnings باید یک رشته باشد' };
     }
 
     return { valid: true, data: raw };
