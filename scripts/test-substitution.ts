@@ -167,6 +167,49 @@ printScenario('سناریو ۲: فقط دستگاه و سیم‌کش', lateralSo
 });
 
 // ═══════════════════════════════════════════════════════════
+//  سناریوهای پا
+// ═══════════════════════════════════════════════════════════
+
+printHeader('چهارسر — حرکت مرجع: اسکوات پشت هالتر');
+const squatSource = findOrFail('quads_001');
+console.log(`🎯 ${squatSource.name} (${squatSource.englishName})`);
+
+printScenario('سناریو ۱: باشگاه کامل', squatSource, {
+  availableEquipment: fullGym, maxResults: 5,
+});
+printScenario('سناریو ۲: فقط دستگاه', squatSource, {
+  availableEquipment: machineOnly, maxResults: 5,
+});
+printScenario('سناریو ۳: آسیب کمر (lowerBack)', squatSource, {
+  availableEquipment: fullGym, injuries: { lowerBack: 'medium' }, maxResults: 5,
+});
+printScenario('سناریو ۴: آسیب زانو (knee)', squatSource, {
+  availableEquipment: fullGym, injuries: { knee: 'medium' }, maxResults: 5,
+});
+
+printHeader('همسترینگ — حرکت مرجع: ددلیفت رومانیایی هالتر');
+const rdlSource = findOrFail('hams_001');
+console.log(`🎯 ${rdlSource.name} (${rdlSource.englishName})`);
+
+printScenario('سناریو ۱: باشگاه کامل', rdlSource, {
+  availableEquipment: fullGym, maxResults: 5,
+});
+printScenario('سناریو ۲: آسیب کمر', rdlSource, {
+  availableEquipment: fullGym, injuries: { lowerBack: 'medium' }, maxResults: 5,
+});
+
+printHeader('سرینی — حرکت مرجع: هیپ تراست هالتر');
+const hipThrustSource = findOrFail('glutes_001');
+console.log(`🎯 ${hipThrustSource.name} (${hipThrustSource.englishName})`);
+
+printScenario('سناریو ۱: باشگاه کامل', hipThrustSource, {
+  availableEquipment: fullGym, maxResults: 5,
+});
+printScenario('سناریو ۲: فقط دستگاه', hipThrustSource, {
+  availableEquipment: machineOnly, maxResults: 5,
+});
+
+// ═══════════════════════════════════════════════════════════
 //  تست isExerciseAvailable
 // ═══════════════════════════════════════════════════════════
 
