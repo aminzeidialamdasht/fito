@@ -17,6 +17,11 @@ import { selectSplit, getSplitName, type SplitPlan } from '../core/splitSelector
 import { selectExercisesForSession } from '../core/exerciseSelector';
 import { getTargetWeeklyVolume, MAX_VOLUME_PER_SESSION } from '../data/rules/volumeRules';
 import { addEffectiveSetsToVolume } from '../core/stimulusCalculator';
+import {
+  distributeMuscleAcrossSessions,
+  buildSessionBudget,
+  type SessionBudget,
+} from '../core/volumeAllocator';
 import { analyzePerformance, type PerformanceAnalysis } from '../core/performanceAnalyzer';
 
 export const ENGINE_VERSION = '1.0.0';
@@ -80,9 +85,48 @@ export function generateWorkoutProgram(
   const allSelectedIds: string[] = [];
   const weeklyVolume: Partial<Record<MuscleGroup, number>> = {};
 
+  // ۳.۵. محاسبه توزیع حجم هر عضله بین جلسات
+  const allMuscles = Array.from(
+    new Set(split.sessions.flatMap((s) => s.muscleGroups as MuscleGroup[]))
+  ) as MuscleGroup[];
+
+  const muscleWeeklyTargets: Record<string, number> = {};
+  for (const muscle of allMuscles) {
+    const isPriority = analysis.priorityMuscles.includes(muscle);
+    const target = getTargetWeeklyVolume(
+      muscle,
+      analysis.experience,
+      analysis.goal,
+      isPriority
+    );
+    muscleWeeklyTargets[muscle] = target.target;
+  }
+
+  const muscleDistributions: Record<string, Record<number, number>> = {};
+  for (const muscle of allMuscles) {
+    const sessionsWithMuscle: number[] = [];
+    split.sessions.forEach((s, idx) => {
+      if ((s.muscleGroups as MuscleGroup[]).includes(muscle)) {
+        sessionsWithMuscle.push(idx);
+      }
+    });
+    muscleDistributions[muscle] = distributeMuscleAcrossSessions(
+      muscle,
+      muscleWeeklyTargets[muscle],
+      sessionsWithMuscle
+    );
+  }
+
+  // ۴. تولید هر جلسه با بودجه
   for (let i = 0; i < split.sessions.length; i++) {
     const session = split.sessions[i];
     const dayIndex = sessionDayIndices[i];
+
+    const sessionBudget = buildSessionBudget(
+      session.muscleGroups as MuscleGroup[],
+      muscleDistributions,
+      i
+    );
 
     const day = generateDay(
       dayIndex,
@@ -91,7 +135,8 @@ export function generateWorkoutProgram(
       analysis,
       allSelectedIds,
       weeklyVolume,
-      performance
+      performance,
+      sessionBudget
     );
 
     days.push(day);
@@ -140,44 +185,86 @@ function generateDay(
   analysis: ProfileAnalysis,
   allSelectedIds: string[],
   weeklyVolume: Partial<Record<MuscleGroup, number>>,
-  performance: PerformanceAnalysis
+  performance: PerformanceAnalysis,
+  sessionBudget?: SessionBudget
 ): GeneratedDay {
-  // تعداد حرکات بر اساس مدت جلسه
-  const exerciseCount = calculateExerciseCount(analysis.sessionMinutes, analysis.experience);
+  // ═══════════════════════════════════════════════════════════
+  // منطق انتخاب Exercise + تعیین Set بر اساس Budget
+  // ═══════════════════════════════════════════════════════════
 
-  // انتخاب حرکات
-  const selectedExercises = selectExercisesForSession(
-    muscleGroups,
-    analysis,
-    allSelectedIds,
-    exerciseCount
-  );
+  const generatedExercises: GeneratedExercise[] = [];
 
-  // تبدیل به GeneratedExercise
-  const generatedExercises: GeneratedExercise[] = selectedExercises.map((ex) => {
-    const sets = generateSets(ex, analysis, performance);
+  if (sessionBudget && Object.keys(sessionBudget).length > 0) {
+    // === مسیر ۱: با Budget دقیق ===
+    // برای هر عضله در بودجه، تعداد Exercise و Set را تعیین کن
 
-    // ثبت حجم مؤثر (شامل عضلات ثانویه با ضریب)
+    for (const [muscle, budget] of Object.entries(sessionBudget)) {
+      if (budget <= 0) continue;
 
+      // تعداد Exercise بر اساس Budget
+      const exerciseCountForMuscle = calculateMuscleExerciseCount(budget);
 
-    addEffectiveSetsToVolume(weeklyVolume, ex, sets.length);
+      // انتخاب Exerciseها فقط برای این عضله
+      const exercisesForMuscle = selectExercisesForSession(
+        [muscle as MuscleGroup],
+        analysis,
+        allSelectedIds,
+        exerciseCountForMuscle
+      );
 
-    return {
-      exerciseId: ex.id,
-      name: ex.name,
-      englishName: ex.englishName,
-      primaryMuscle: ex.primaryMuscle,
-      secondaryMuscles: ex.secondaryMuscles,
-      type: ex.type,
-      sets,
-      notes: ex.cues[0] || undefined,
-      substituteId: ex.substitutes[0] || undefined,
-    };
-  });
+      // توزیع Set بین Exerciseها
+      const setDistribution = distributeSetsAmongExercises(
+        budget,
+        exercisesForMuscle.length
+      );
 
-  // اضافه کردن به لیست انتخاب‌شده‌ها
-  for (const ex of selectedExercises) {
-    allSelectedIds.push(ex.id);
+      for (let idx = 0; idx < exercisesForMuscle.length; idx++) {
+        const ex = exercisesForMuscle[idx];
+        const sets = generateSets(ex, analysis, performance, setDistribution[idx]);
+
+        addEffectiveSetsToVolume(weeklyVolume, ex, sets.length);
+
+        generatedExercises.push({
+          exerciseId: ex.id,
+          name: ex.name,
+          englishName: ex.englishName,
+          primaryMuscle: ex.primaryMuscle,
+          secondaryMuscles: ex.secondaryMuscles,
+          type: ex.type,
+          sets,
+          notes: ex.cues[0] || undefined,
+          substituteId: ex.substitutes[0] || undefined,
+        });
+
+        allSelectedIds.push(ex.id);
+      }
+    }
+  } else {
+    // === مسیر ۲: بدون Budget (fallback قدیم) ===
+    const exerciseCount = calculateExerciseCount(analysis.sessionMinutes, analysis.experience);
+    const selectedExercises = selectExercisesForSession(
+      muscleGroups,
+      analysis,
+      allSelectedIds,
+      exerciseCount
+    );
+
+    for (const ex of selectedExercises) {
+      const sets = generateSets(ex, analysis, performance);
+      addEffectiveSetsToVolume(weeklyVolume, ex, sets.length);
+      generatedExercises.push({
+        exerciseId: ex.id,
+        name: ex.name,
+        englishName: ex.englishName,
+        primaryMuscle: ex.primaryMuscle,
+        secondaryMuscles: ex.secondaryMuscles,
+        type: ex.type,
+        sets,
+        notes: ex.cues[0] || undefined,
+        substituteId: ex.substitutes[0] || undefined,
+      });
+      allSelectedIds.push(ex.id);
+    }
   }
 
   const durationEstimate = estimateDuration(generatedExercises, analysis.sessionMinutes);
@@ -192,6 +279,40 @@ function generateDay(
     warmup: '۵ تا ۱۰ دقیقه گرم‌کردن عمومی (دویدن سبک، تحرک مفاصل) + ۲ ست آماده‌سازی با وزنه سبک',
     cooldown: '۵ دقیقه سردکردن و کشش سبک',
   };
+}
+
+/**
+ * محاسبه تعداد Exercise برای یک عضله بر اساس Budget
+ *  1-3 ست  → 1 حرکت
+ *  4-6 ست  → 2 حرکت
+ *  7-9 ست  → 3 حرکت
+ *  10+ ست  → 4 حرکت
+ */
+function calculateMuscleExerciseCount(budget: number): number {
+  if (budget <= 3) return 1;
+  if (budget <= 6) return 2;
+  if (budget <= 9) return 3;
+  return 4;
+}
+
+/**
+ * توزیع ست‌ها بین Exerciseهای یک عضله
+ * مثال: budget=7, exerciseCount=2 → [4, 3]
+ * مثال: budget=9, exerciseCount=3 → [3, 3, 3]
+ */
+function distributeSetsAmongExercises(budget: number, exerciseCount: number): number[] {
+  if (exerciseCount <= 0) return [];
+
+  const base = Math.floor(budget / exerciseCount);
+  const remainder = budget % exerciseCount;
+
+  const distribution: number[] = [];
+  for (let i = 0; i < exerciseCount; i++) {
+    // Exerciseهای اول کمی بیشتر
+    distribution.push(base + (i < remainder ? 1 : 0));
+  }
+
+  return distribution;
 }
 
 /**
@@ -251,9 +372,12 @@ function calculateProgression(
 function generateSets(
   exercise: Exercise,
   analysis: ProfileAnalysis,
-  performance: PerformanceAnalysis
+  performance: PerformanceAnalysis,
+  overrideSetCount: number = 0
 ): GeneratedSet[] {
-  const setCount = calculateSetCount(exercise, analysis, performance);
+  const setCount = overrideSetCount > 0
+    ? overrideSetCount
+    : calculateSetCount(exercise, analysis, performance);
   const goal = analysis.goal;
 
   // تعیین محدوده تکرار
@@ -295,7 +419,8 @@ function generateSets(
       targetReps: repsStr,
       targetRIR: baseRIR,
       restSeconds,
-      tempo: exercise.tempo,      // وزنه پیشنهادی بر اساس Double Progression
+      tempo: exercise.tempo,
+      // وزنه پیشنهادی بر اساس Double Progression
       suggestedWeight: lastPerformance
         ? calculateProgression(
             lastPerformance.lastWeight,

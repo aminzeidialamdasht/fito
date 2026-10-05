@@ -19,6 +19,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import SubstituteModal from '../../components/SubstituteModal';
+import VolumeSummary from '../../components/VolumeSummary';
 
 const PERSIAN_WEEKDAYS = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
 
@@ -164,6 +165,37 @@ export default function ProgramDetail() {
             </div>
           </div>
         </div>
+
+        {/* Volume Summary (Effective Sets) */}
+
+
+        {program.weeklyVolumeSummary && (
+
+
+          <VolumeSummary
+
+
+            weeklyVolume={program.weeklyVolumeSummary as any}
+
+
+            experience={'intermediate'}
+
+
+            goal={'hypertrophy'}
+
+
+            priorityMuscles={[]}
+
+
+            isDark={isDark}
+
+
+          />
+
+
+        )}
+
+
 
         {/* Days List */}
         <h2 className={`font-black text-sm px-1 ${textMain}`}>جلسات تمرینی</h2>
