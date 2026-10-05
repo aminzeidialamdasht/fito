@@ -34,6 +34,24 @@ export type SessionFocus =
   | 'shoulders_arms'
   | 'custom';
 
+export type TrainingTechnique =
+  | 'straight'
+  | 'rpt'
+  | 'rest_pause'
+  | 'myo_reps'
+  | 'drop_set'
+  | 'cluster';
+
+export interface TechniqueConfig {
+  loadPercent?: number;
+  dropCount?: number;
+  dropPercent?: number;
+  miniSets?: number;
+  miniSetRest?: number;
+  clusterReps?: number;
+  noteFa?: string;
+}
+
 export interface GeneratedSet {
   setNumber: number;
   targetReps: string;      // "8-12"
@@ -42,6 +60,8 @@ export interface GeneratedSet {
   tempo?: string;          // "3-1-1-0"
   suggestedWeight?: number;  // وزنه پیشنهادی بر اساس رکورد قبلی
   lastWeight?: number;       // آخرین وزنه ثبت‌شده
+  technique?: TrainingTechnique;
+  techniqueConfig?: TechniqueConfig;
 }
 
 export interface GeneratedExercise {
