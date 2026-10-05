@@ -212,6 +212,39 @@ function calculateExerciseCount(sessionMinutes: number, experience: string): num
 /**
  * تولید ست‌ها برای یک حرکت
  */
+/**
+ * محاسبه وزنه پیشنهادی بر اساس Double Progression
+ */
+function calculateProgression(
+  lastWeight: number,
+  lastReps: number,
+  lastRIR: number,
+  repMin: number,
+  repMax: number,
+  targetRIR: number
+): number {
+  if (!lastWeight || !lastReps) return 0;
+
+  // تکرار کمتر از پایین بازه → کاهش وزنه
+  if (lastReps < repMin) {
+    return Math.round((lastWeight * 0.95) / 2.5) * 2.5;
+  }
+
+  // در پایین بازه + RIR کم → کاهش جزئی
+  if (lastReps === repMin && lastRIR <= 1) {
+    return Math.round((lastWeight * 0.975) / 2.5) * 2.5;
+  }
+
+  // در بالای بازه + RIR در محدوده هدف → افزایش وزنه
+  if (lastReps >= repMax && lastRIR <= targetRIR + 1) {
+    const increment = lastRIR <= targetRIR ? 1.05 : 1.025;
+    return Math.round((lastWeight * increment) / 2.5) * 2.5;
+  }
+
+  // در غیر این صورت: همان وزنه
+  return lastWeight;
+}
+
 function generateSets(
   exercise: Exercise,
   analysis: ProfileAnalysis,
@@ -259,12 +292,20 @@ function generateSets(
       targetReps: repsStr,
       targetRIR: baseRIR,
       restSeconds,
-      tempo: exercise.tempo,
-      // وزنه پیشنهادی
+      tempo: exercise.tempo,      // وزنه پیشنهادی بر اساس Double Progression
       suggestedWeight: lastPerformance
-        ? Math.round(lastPerformance.lastWeight * 0.95 / 2.5) * 2.5  // کاهش ۵٪ برای شروع
+        ? calculateProgression(
+            lastPerformance.lastWeight,
+            lastPerformance.lastReps || 0,
+            lastPerformance.lastRIR ?? 2,
+            repRange.min,
+            repRange.max,
+            baseRIR
+          )
         : undefined,
       lastWeight: lastPerformance?.lastWeight,
+      lastReps: lastPerformance?.lastReps,
+      lastRIR: lastPerformance?.lastRIR,
     } as any);
   }
 

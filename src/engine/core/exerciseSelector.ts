@@ -122,8 +122,8 @@ export function selectExercisesForMuscle(
   const { muscle, analysis, alreadySelected, preferCompound = true, count = 2 } = options;
 
   const availableEquipment = mapProfileEquipment(
-    'full_gym', // TODO: از profile.equipmentType استفاده کنیم
-    []
+    analysis.equipmentType,
+    analysis.customEquipment || []
   );
 
   let candidates = ALL_EXERCISES.filter((ex) => {

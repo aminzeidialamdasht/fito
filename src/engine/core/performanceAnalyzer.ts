@@ -24,6 +24,10 @@ export interface ExercisePerformance {
   totalSessions: number;
   /** آخرین وزنه استفاده‌شده */
   lastWeight: number;
+  /** آخرین تعداد تکرار */
+  lastReps: number;
+  /** آخرین RIR (تکرار در ذخیره) */
+  lastRIR: number;
   /** آخرین تاریخ تمرین */
   lastDate: string;
   /** روند پیشرفت (مثبت = بهبود، منفی = پسرفت) */
@@ -193,6 +197,8 @@ export function analyzePerformance(
       avgVolumePerSession: avgVolume,
       totalSessions: new Set(records.map((r) => r.date)).size,
       lastWeight: lastRecord.weight,
+      lastReps: (lastRecord as any).reps || 0,
+      lastRIR: (lastRecord as any).rir ?? 2,
       lastDate: lastRecord.date,
       trend,
     });

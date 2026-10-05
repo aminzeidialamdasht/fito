@@ -5,6 +5,7 @@
 
 import type { AthleteProfile } from '../../types';
 import type { ExperienceLevel, Goal } from '../types/program';
+import type { EquipmentType } from '../types/exercise';
 
 export interface ProfileAnalysis {
   bmr: number;
@@ -24,6 +25,8 @@ export interface ProfileAnalysis {
   sessionMinutes: number;
   programDurationWeeks: number;
   fatigueDetected?: boolean;
+  equipmentType: string;
+  customEquipment: string[];
 }
 
 /**
@@ -150,5 +153,7 @@ export function analyzeProfile(profile: AthleteProfile): ProfileAnalysis {
     weeklyTrainingDays,
     sessionMinutes,
     programDurationWeeks,
+    equipmentType: profile.equipmentType || 'full_gym',
+    customEquipment: profile.customEquipment || [],
   };
 }
