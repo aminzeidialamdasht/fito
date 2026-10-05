@@ -25,6 +25,8 @@ import {
   type SessionBudget,
 } from '../core/volumeAllocator';
 import { analyzePerformance, type PerformanceAnalysis } from '../core/performanceAnalyzer';
+import { selectProgramSystem } from '../core/systemSelector';
+import { applyTechniquesToExercises } from '../core/techniqueApplier';
 import { suggestWeightForSet } from '../core/progressionEngine';
 
 export const ENGINE_VERSION = '1.0.0';
@@ -80,6 +82,9 @@ export function generateWorkoutProgram(
   }
 
   // ۲. انتخاب Split
+  // فاز ۶: انتخاب سیستم تمرینی سطح برنامه
+  const programSystem = selectProgramSystem(profile, analysis, performance);
+
   const split = selectSplit(analysis.weeklyTrainingDays, analysis.experience, analysis.goal);
 
   // ۳. تولید جلسات
@@ -159,6 +164,9 @@ export function generateWorkoutProgram(
     );
 
     // اضافه کردن به لیست هفتگی
+    // فاز ۶: اعمال تکنیک‌های ست روی حرکات همین جلسه
+    applyTechniquesToExercises(day.exercises, profile, analysis, performance);
+
     usedAcrossWeek.push(...allSelectedIds);
 
     days.push(day);
@@ -195,6 +203,10 @@ export function generateWorkoutProgram(
       goal: analysis.goal,
       experience: analysis.experience,
       injuries: analysis.safeInjuries,
+      systemName: programSystem.id,
+      systemNameFa: programSystem.nameFa,
+      periodizationPhase: programSystem.weeklyScheme[0]?.label,
+      weeklyProgression: programSystem.weeklyScheme.map((w, idx) => ({ week: idx + 1, ...w })),
     },
   };
   // ۷. اعتبارسنجی برنامه

@@ -53,6 +53,14 @@ export function applyTechniquesToExercises(
         s.techniqueConfig = { ...rule.config };
         s.restSeconds = Math.max(s.restSeconds, 150);
       });
+    } else if (technique === 'super_giant') {
+      const transitionRest = rule.config.miniSetRest ?? 20;
+      const followedByPair = plan[i + 1] === 'super_giant';
+      sets.forEach((s) => {
+        s.technique = 'super_giant';
+        s.techniqueConfig = { ...rule.config };
+        if (followedByPair) s.restSeconds = transitionRest;
+      });
     } else {
       const last = sets[sets.length - 1];
       last.technique = technique;

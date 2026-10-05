@@ -27,19 +27,34 @@ export function selectProgramSystem(
 
   const goal = analysis.goal === 'competition' ? 'strength' : analysis.goal;
   const days = analysis.weeklyTrainingDays;
+  const minutes = analysis.sessionMinutes;
+  const frame = profile.bodyMeasurements?.bodyFrame;
+  const limb = profile.bodyMeasurements?.dominantLimbLength;
   const allowed = PROGRAM_SYSTEMS.filter(
     (s) => s.experience.includes(analysis.experience) &&
            (s.goals as string[]).includes(goal) &&
            days >= s.minDaysPerWeek && days <= s.maxDaysPerWeek
   );
 
-  const gvtOk = fatigue.fatigueLevel < 40 && profile.bodyMeasurements?.bodyFrame !== 'ectomorph';
+  // دروازه‌های انتخاب: مدت جلسه + ریکاوری + آنتروپومتری
+  const gvtOk = fatigue.fatigueLevel < 40 && frame !== 'ectomorph';
+  const blockOk = minutes >= 60 && fatigue.fatigueLevel < 60;
+  const conjugateOk = days >= 4 && minutes <= 75;
+  const bulgarianOk = days >= 4 && minutes <= 60 && fatigue.fatigueLevel < 50;
+  const gates: Record<ProgramSystemId, boolean> = {
+    linear: true, dup: true, gvt: gvtOk, wendler_531: true,
+    block: blockOk, conjugate: conjugateOk, bulgarian: bulgarianOk,
+  };
+
+  // اندام‌های بلند: پرهیز از حداکثر روزانه (بلغاری) و ترجیح کانژوگیت/5-3-1
+  const longLimb = limb === 'long';
   let order: ProgramSystemId[] = ['linear'];
-  if (goal === 'strength') order = ['wendler_531', 'dup', 'linear'];
-  else if (goal === 'hypertrophy') order = gvtOk ? ['gvt', 'dup', 'linear'] : ['dup', 'linear'];
-  else if (goal === 'recomposition') order = ['dup', 'wendler_531', 'linear'];
+  if (goal === 'strength') order = longLimb ? ['conjugate', 'wendler_531', 'dup', 'linear'] : ['bulgarian', 'conjugate', 'wendler_531', 'dup', 'linear'];
+  else if (goal === 'hypertrophy') order = gvtOk ? ['gvt', 'block', 'dup', 'linear'] : ['block', 'dup', 'linear'];
+  else if (goal === 'recomposition') order = ['block', 'dup', 'wendler_531', 'linear'];
 
   for (const id of order) {
+    if (!gates[id]) continue;
     const found = allowed.find((s) => s.id === id);
     if (found) return found;
   }
@@ -74,6 +89,7 @@ export function planSessionTechniques(
     : goal === 'hypertrophy' || goal === 'recomposition' ? ['rest_pause', 'myo_reps', 'drop_set'] : [];
 
   const tryApply = (idx: number, prefs: TrainingTechnique[]) => {
+    if (result[idx] !== 'straight') return;
     for (const id of prefs) {
       const rule = getTechniqueRule(id);
       const ok = rule.experience.includes(analysis.experience) &&
@@ -94,6 +110,24 @@ export function planSessionTechniques(
     if (slots[i].isCompound) continue;
     tryApply(i, isoPref);
     if (result[i] !== 'straight') isoUsed++;
+  }
+
+  // سوپرست/جاینت‌ست: pairSize حرکت ایزوله و پشت‌سرهم را جفت کن (دیرترین جای ممکن)
+  const sgRule = getTechniqueRule('super_giant');
+  const pairSize = sgRule.config.pairSize ?? 2;
+  const pairAllowed = sgRule.experience.includes(analysis.experience) &&
+    sgRule.goals.includes(goal) && sgRule.fatigueCost <= budget;
+  if (pairAllowed) {
+    for (let i = result.length - pairSize; i >= 0; i--) {
+      let free = true;
+      for (let k = 0; k < pairSize; k++) {
+        if (result[i + k] !== 'straight' || slots[i + k].isCompound) { free = false; break; }
+      }
+      if (!free) continue;
+      for (let k = 0; k < pairSize; k++) result[i + k] = 'super_giant';
+      budget -= sgRule.fatigueCost;
+      break;
+    }
   }
   return result;
 }

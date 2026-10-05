@@ -35,3 +35,6 @@ Screenshot_*.jpg
 keystore/
 *.jks
 *.keystore
+
+# Scrappy AI indexes
+.scrappy/

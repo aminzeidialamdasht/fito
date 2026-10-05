@@ -42,6 +42,9 @@ export const TECHNIQUES_ADVANCED: TechniqueRule[] = [
   { id: 'cluster', nameFa: 'Cluster Set', experience: ADV_UP, goals: ['strength', 'competition'],
     allowCompound: true, allowIsolation: false, fatigueCost: 2,
     config: { clusterReps: 2, miniSetRest: 20, noteFa: 'هر ۲ تکرار ۲۰ ثانیه استراحت تا وزنه سنگین با کیفیت بالا زده شود' } },
+  { id: 'super_giant', nameFa: 'سوپرست / جاینت‌ست', experience: INT_UP, goals: GROWTH_GOALS,
+    allowCompound: true, allowIsolation: true, fatigueCost: 1,
+    config: { pairSize: 2, miniSetRest: 20, noteFa: 'دو حرکت (سوپرست) یا سه حرکت (جاینت‌ست) پشت‌سرهم بدون استراحت؛ استراحت فقط پس از پایان جفت' } },
 ];
 
 export const TECHNIQUES: TechniqueRule[] = [...TECHNIQUES_BASIC, ...TECHNIQUES_ADVANCED];
@@ -51,7 +54,7 @@ export function getTechniqueRule(id: TrainingTechnique): TechniqueRule {
 }
 
 // ── بخش ۳: سیستم‌های سطح برنامه ──
-export type ProgramSystemId = 'linear' | 'dup' | 'gvt' | 'wendler_531';
+export type ProgramSystemId = 'linear' | 'dup' | 'gvt' | 'wendler_531' | 'block' | 'conjugate' | 'bulgarian';
 
 export interface ProgramSystemRule {
   id: ProgramSystemId;
@@ -98,6 +101,35 @@ export const PROGRAM_SYSTEMS: ProgramSystemRule[] = [
       { reps: '3', rir: 1, label: 'هفته ۳ تکرار' },
       { reps: '1-5', rir: 0, label: 'هفته 5/3/1' },
       { reps: '5', rir: 4, label: 'هفته دیلود' },
+    ] },
+  { id: 'block', nameFa: 'دوره‌بندی بلوکی', experience: INT_UP,
+    goals: ['hypertrophy', 'strength', 'competition', 'recomposition'], minDaysPerWeek: 3, maxDaysPerWeek: 6, weeks: 6,
+    summaryFa: 'یک مزوسایکل شش‌هفته‌ای: انباشت (حجم) ← تبدیل (شدت) ← تحقق (اوج) و هفته دیلود',
+    weeklyScheme: [
+      { reps: '10-12', rir: 3, label: 'انباشت ۱' },
+      { reps: '10-12', rir: 3, label: 'انباشت ۲' },
+      { reps: '6-8', rir: 2, label: 'تبدیل ۱' },
+      { reps: '6-8', rir: 2, label: 'تبدیل ۲' },
+      { reps: '2-3', rir: 0, label: 'تحقق (اوج)' },
+      { reps: '8-10', rir: 4, label: 'دیلود' },
+    ] },
+  { id: 'conjugate', nameFa: 'کانژوگیت (Westside)', experience: ADV_UP,
+    goals: ['strength', 'competition'], minDaysPerWeek: 3, maxDaysPerWeek: 5, weeks: 4,
+    summaryFa: 'هر هفته سه نوع روز: حداکثری (ME)، سرعتی (DE) و تکرار بالا (RE)؛ حرکت ME هر هفته می‌چرخد',
+    weeklyScheme: [
+      { reps: '1-3', rir: 0, label: 'موج ۱ — ME اسکات/پرس سنگین' },
+      { reps: '1-3', rir: 0, label: 'موج ۲ — ME ددلیفت واریانت' },
+      { reps: '1-3', rir: 0, label: 'موج ۳ — ME پرس بالای سر' },
+      { reps: '5', rir: 3, label: 'دیلود + تست ۱RM' },
+    ] },
+  { id: 'bulgarian', nameFa: 'روش بلغاری', experience: ADV_UP,
+    goals: ['strength', 'competition'], minDaysPerWeek: 4, maxDaysPerWeek: 6, weeks: 4,
+    summaryFa: 'فراوانی بالا روی حرکات اصلی با حداکثر روزانه و حجم کم در هر جلسه؛ تنظیم خودکار با آمادگی روز',
+    weeklyScheme: [
+      { reps: '3', rir: 1, label: 'هفته ۱ — تثبیت (۸۰-۸۵٪)' },
+      { reps: '2', rir: 0, label: 'هفته ۲ — حداکثر روزانه (۹۰-۹۵٪)' },
+      { reps: '1-2', rir: 0, label: 'هفته ۳ — حداکثر روزانه (۹۵-۱۰۰٪)' },
+      { reps: '3', rir: 2, label: 'هفته ۴ — بازگشت/تثبیت' },
     ] },
 ];
 

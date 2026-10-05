@@ -112,6 +112,10 @@ export interface WorkoutProgram {
     goal?: string;
     experience?: string;
     validationScore?: number;
+    systemName?: string;
+    systemNameFa?: string;
+    periodizationPhase?: string;
+    weeklyProgression?: Array<{ week: number; reps: string; rir: number; label: string }>;
     injuries?: string[];
     splitType?: string;
   };

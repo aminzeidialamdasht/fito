@@ -40,7 +40,8 @@ export type TrainingTechnique =
   | 'rest_pause'
   | 'myo_reps'
   | 'drop_set'
-  | 'cluster';
+  | 'cluster'
+  | 'super_giant';
 
 export interface TechniqueConfig {
   loadPercent?: number;
@@ -49,6 +50,7 @@ export interface TechniqueConfig {
   miniSets?: number;
   miniSetRest?: number;
   clusterReps?: number;
+  pairSize?: number;
   noteFa?: string;
 }
 
@@ -62,6 +64,9 @@ export interface GeneratedSet {
   lastWeight?: number;       // آخرین وزنه ثبت‌شده
   technique?: TrainingTechnique;
   techniqueConfig?: TechniqueConfig;
+  techniqueNameFa?: string;
+  week?: number;
+  week1RM?: number;
 }
 
 export interface GeneratedExercise {
@@ -87,6 +92,13 @@ export interface GeneratedDay {
   cooldown?: string;
 }
 
+export interface WeeklyProgressionStep {
+  week: number;
+  reps: string;
+  rir: number;
+  label: string;
+}
+
 export interface GeneratedProgram {
   id: string;
   name: string;
@@ -109,5 +121,9 @@ export interface GeneratedProgram {
     goal?: string;
     experience?: string;
     validationScore?: number;
+    systemName?: string;
+    systemNameFa?: string;
+    periodizationPhase?: string;
+    weeklyProgression?: WeeklyProgressionStep[];
   };
 }
