@@ -127,6 +127,10 @@ export function generateWorkoutProgram(
   }
 
   // ۴. تولید هر جلسه با بودجه
+  // allSelectedIds: IDهایی که در این جلسه استفاده شده‌اند (برای جلوگیری از تکرار در یک جلسه)
+  // usedAcrossWeek: IDهایی که در هفته استفاده شده‌اند (برای تنوع بین جلسات)
+  const usedAcrossWeek: string[] = [];
+
   for (let i = 0; i < split.sessions.length; i++) {
     const session = split.sessions[i];
     const dayIndex = sessionDayIndices[i];
@@ -137,6 +141,9 @@ export function generateWorkoutProgram(
       i
     );
 
+    // allSelectedIds فقط در این جلسه ریست می‌شود
+    const allSelectedIds: string[] = [];
+
     const day = generateDay(
       dayIndex,
       session.title,
@@ -145,8 +152,12 @@ export function generateWorkoutProgram(
       allSelectedIds,
       weeklyVolume,
       performance,
-      sessionBudget
+      sessionBudget,
+      usedAcrossWeek
     );
+
+    // اضافه کردن به لیست هفتگی
+    usedAcrossWeek.push(...allSelectedIds);
 
     days.push(day);
   }
@@ -206,7 +217,8 @@ function generateDay(
   allSelectedIds: string[],
   weeklyVolume: Partial<Record<MuscleGroup, number>>,
   performance: PerformanceAnalysis,
-  sessionBudget?: SessionBudget
+  sessionBudget?: SessionBudget,
+  usedAcrossWeek: string[] = []
 ): GeneratedDay {
   // ═══════════════════════════════════════════════════════════
   // منطق انتخاب Exercise + تعیین Set بر اساس Budget
@@ -225,12 +237,28 @@ function generateDay(
       const exerciseCountForMuscle = calculateMuscleExerciseCount(budget);
 
       // انتخاب Exerciseها فقط برای این عضله
-      const exercisesForMuscle = selectExercisesForSession(
+      // اول تلاش با حرکات استفاده‌نشده در هفته، بعد fallback
+      let exercisesForMuscle = selectExercisesForSession(
         [muscle as MuscleGroup],
         analysis,
-        allSelectedIds,
+        [...allSelectedIds, ...usedAcrossWeek],
         exerciseCountForMuscle
       );
+
+      // اگر کمتر از انتظار بود، بدون usedAcrossWeek امتحان کن
+      if (exercisesForMuscle.length < exerciseCountForMuscle) {
+        const retry = selectExercisesForSession(
+          [muscle as MuscleGroup],
+          analysis,
+          allSelectedIds,
+          exerciseCountForMuscle
+        );
+        for (const ex of retry) {
+          if (!exercisesForMuscle.find(e => e.id === ex.id)) {
+            exercisesForMuscle.push(ex);
+          }
+        }
+      }
 
       // توزیع Set بین Exerciseها
       const setDistribution = distributeSetsAmongExercises(

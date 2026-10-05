@@ -14,6 +14,8 @@ export interface ExerciseSelectionOptions {
   alreadySelected: string[];
   preferCompound?: boolean;
   count?: number;
+  /** اگر true، فقط حرکاتی که primaryMuscle برابر muscle است */
+  onlyPrimary?: boolean;
 }
 
 /**
@@ -119,7 +121,7 @@ function scoreExercise(
 export function selectExercisesForMuscle(
   options: ExerciseSelectionOptions
 ): Exercise[] {
-  const { muscle, analysis, alreadySelected, preferCompound = true, count = 2 } = options;
+  const { muscle, analysis, alreadySelected, preferCompound = true, count = 2, onlyPrimary = false } = options;
 
   const availableEquipment = mapProfileEquipment(
     analysis.equipmentType,
