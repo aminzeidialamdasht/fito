@@ -1,6 +1,6 @@
 import { AppState, AthleteProfile, WorkoutProgram, NutritionProgram, SupplementProgram, WorkoutSession, ProgressEntry } from '../types';
 
-const STORAGE_KEY = 'ai_fitness_coach_data';
+const STORAGE_KEY = 'fito_state_v2';
 
 function getInitialState(): AppState {
   return {

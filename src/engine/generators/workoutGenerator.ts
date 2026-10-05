@@ -16,6 +16,7 @@ import { analyzeProfile, type ProfileAnalysis } from '../core/profileAnalyzer';
 import { selectSplit, getSplitName, type SplitPlan } from '../core/splitSelector';
 import { selectExercisesForSession } from '../core/exerciseSelector';
 import { getTargetWeeklyVolume, MAX_VOLUME_PER_SESSION } from '../data/rules/volumeRules';
+import { addEffectiveSetsToVolume } from '../core/stimulusCalculator';
 import { analyzePerformance, type PerformanceAnalysis } from '../core/performanceAnalyzer';
 
 export const ENGINE_VERSION = '1.0.0';
@@ -156,8 +157,10 @@ function generateDay(
   const generatedExercises: GeneratedExercise[] = selectedExercises.map((ex) => {
     const sets = generateSets(ex, analysis, performance);
 
-    // ثبت حجم هفتگی
-    weeklyVolume[ex.primaryMuscle] = (weeklyVolume[ex.primaryMuscle] || 0) + sets.length;
+    // ثبت حجم مؤثر (شامل عضلات ثانویه با ضریب)
+
+
+    addEffectiveSetsToVolume(weeklyVolume, ex, sets.length);
 
     return {
       exerciseId: ex.id,

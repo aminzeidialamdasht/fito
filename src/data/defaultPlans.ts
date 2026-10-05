@@ -283,8 +283,8 @@ export const DEFAULT_WORKOUT_PLAN: WorkoutProgram = {
   duration: DEFAULT_BEGINNER_3DAY_JSON.duration,
   createdAt: new Date().toISOString(),
   trainingDays: 3,
-  restDays: DEFAULT_BEGINNER_3DAY_JSON.rest_days,
-  weeklyVolumeSummary: DEFAULT_BEGINNER_3DAY_JSON.weekly_volume_summary,
+  restDays: DEFAULT_BEGINNER_3DAY_JSON.rest_days as any,
+  weeklyVolumeSummary: DEFAULT_BEGINNER_3DAY_JSON.weekly_volume_summary as any,
   sessionDurationSummary: DEFAULT_BEGINNER_3DAY_JSON.session_duration_summary,
   adjustmentRules: DEFAULT_BEGINNER_3DAY_JSON.adjustment_rules,
   days: DEFAULT_BEGINNER_3DAY_JSON.days.map((d, i) => ({

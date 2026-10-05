@@ -141,7 +141,7 @@ export default function ProgramImport() {
       createdAt: new Date().toISOString(),
       trainingDays: Number(data.training_days) || activeProfile.trainingDays || days.length,
       restDays,
-      weeklyVolumeSummary,
+      weeklyVolumeSummary: weeklyVolumeSummary as any,
       sessionDurationSummary,
       adjustmentRules: typeof data.adjustment_rules === 'string' ? data.adjustment_rules : undefined,
       days: days.map((day: any, index: number) => ({

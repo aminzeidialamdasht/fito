@@ -96,8 +96,8 @@ export interface WorkoutProgram {
   createdAt: string;
   startDate?: string;
   trainingDays?: number;
-  restDays?: string[];
-  weeklyVolumeSummary?: Record<string, string>;
+  restDays?: number[];
+  weeklyVolumeSummary?: Record<string, number>;
   sessionDurationSummary?: Record<string, string>;
   adjustmentRules?: string;
   days: WorkoutDay[];

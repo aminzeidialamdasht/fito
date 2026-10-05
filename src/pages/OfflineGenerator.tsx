@@ -103,6 +103,8 @@ export default function OfflineGenerator() {
           notes: ex.notes,
         })),
       })),
+      weeklyVolumeSummary: generatedProgram.weeklyVolumeSummary || {},
+      restDays: generatedProgram.restDays || [],
     };
 
     addProgram(programForApp);

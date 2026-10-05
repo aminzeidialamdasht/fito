@@ -23,20 +23,83 @@ interface InputProps {
   type?: string;
   placeholder?: string;
   isDark?: boolean;
+  min?: number;
+  max?: number;
+  step?: number;
+  showButtons?: boolean;
 }
 
-export function Input({ value, onChange, type = 'text', placeholder, isDark }: InputProps) {
+
+export function Input({ value, onChange, type = 'text', placeholder, isDark, min, max, step = 1, showButtons = false }: InputProps) {
+  const isNumber = type === 'number';
+
+  const toPersian = (s: string) => s.replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[Number(d)]);
+
+  const handleIncrement = () => {
+    const current = Number(value) || 0;
+    const next = Math.min(current + step, max ?? Infinity);
+    onChange(String(next));
+  };
+
+  const handleDecrement = () => {
+    const current = Number(value) || 0;
+    const next = Math.max(current - step, min ?? 0);
+    onChange(String(next));
+  };
+
+  const baseInputClass = isDark
+    ? 'bg-white/5 border-white/10 text-white focus:border-violet-500 placeholder:text-gray-600'
+    : 'bg-white border-gray-200 text-gray-900 focus:border-violet-500 placeholder:text-gray-400';
+
+  const handleNumericChange = (raw: string) => {
+    const englishDigits = raw.replace(/[۰-۹]/g, (d) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)));
+    const cleaned = englishDigits.replace(/[^0-9]/g, '');
+    onChange(cleaned);
+  };
+
+  if (isNumber && showButtons) {
+    return (
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={handleDecrement}
+          className={`w-12 h-12 shrink-0 rounded-xl border text-xl font-black flex items-center justify-center transition-all active:scale-95 ${baseInputClass}`}
+          aria-label="کاهش"
+        >
+          −
+        </button>
+        <input
+          type="text"
+          inputMode="numeric"
+          pattern="[0-9]*"
+          value={toPersian(String(value ?? ''))}
+          onChange={(e) => handleNumericChange(e.target.value)}
+          onFocus={(e) => e.target.select()}
+          placeholder={placeholder}
+          className={`flex-1 min-w-0 text-center px-4 py-3 rounded-xl border text-lg font-black outline-none transition-colors ${baseInputClass}`}
+        />
+        <button
+          type="button"
+          onClick={handleIncrement}
+          className={`w-12 h-12 shrink-0 rounded-xl border text-xl font-black flex items-center justify-center transition-all active:scale-95 ${baseInputClass}`}
+          aria-label="افزایش"
+        >
+          +
+        </button>
+      </div>
+    );
+  }
+
   return (
     <input
-      type={type}
-      value={value ?? ''}
-      onChange={(e) => onChange(e.target.value)}
+      type={isNumber ? 'text' : type}
+      inputMode={isNumber ? 'numeric' : undefined}
+      pattern={isNumber ? '[0-9]*' : undefined}
+      value={isNumber ? toPersian(String(value ?? '')) : (value ?? '')}
+      onChange={(e) => isNumber ? handleNumericChange(e.target.value) : onChange(e.target.value)}
+      onFocus={(e) => isNumber && e.target.select()}
       placeholder={placeholder}
-      className={`w-full px-4 py-3 rounded-xl border text-sm font-bold outline-none transition-colors ${
-        isDark
-          ? 'bg-white/5 border-white/10 text-white focus:border-violet-500 placeholder:text-gray-600'
-          : 'bg-white border-gray-200 text-gray-900 focus:border-violet-500 placeholder:text-gray-400'
-      }`}
+      className={`w-full px-4 py-3 rounded-xl border text-sm font-bold outline-none transition-colors ${baseInputClass}`}
     />
   );
 }
