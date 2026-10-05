@@ -20,6 +20,8 @@ import {
 } from 'lucide-react';
 import SubstituteModal from '../../components/SubstituteModal';
 import VolumeSummary from '../../components/VolumeSummary';
+import SafetyReportCard from '../../components/SafetyReportCard';
+import { analyzeProgramSafety } from '../../engine/core/injurySafetyEngine';
 
 const PERSIAN_WEEKDAYS = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
 
@@ -28,9 +30,18 @@ export default function ProgramDetail() {
   const navigate = useNavigate();
   const { programs, state, setActiveProgram, updateProgram } = useAppContext();
   const { theme } = useTheme();
+
   const isDark = theme === 'dark';
 
   const program = programs.find((p) => p.id === id);
+
+  // فاز 4: تحلیل ایمنی (adapter: WorkoutProgram → GeneratedProgram-like)
+  const safetyReport = program && (program.metadata?.injuries?.length ?? 0) > 0
+    ? analyzeProgramSafety(
+        program as unknown as Parameters<typeof analyzeProgramSafety>[0],
+        program.metadata!.injuries!
+      )
+    : null;
   const [expandedDay, setExpandedDay] = useState<number | null>(null);
   const [substituteTarget, setSubstituteTarget] = useState<{
     dayIdx: number;
@@ -194,6 +205,10 @@ export default function ProgramDetail() {
 
 
         )}
+
+        {/* فاز 4: کارت ایمنی آسیب‌ها */}
+        {safetyReport && <SafetyReportCard report={safetyReport} />}
+
 
 
 

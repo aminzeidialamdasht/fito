@@ -112,6 +112,8 @@ export interface WorkoutProgram {
     goal?: string;
     experience?: string;
     validationScore?: number;
+    injuries?: string[];
+    splitType?: string;
   };
 }
 
