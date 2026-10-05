@@ -85,6 +85,7 @@ export interface GeneratedProgram {
     generatedFrom: 'offline_engine';
     notes?: string;
     priorityMuscles?: string[];
+    injuries?: string[];
     goal?: string;
     experience?: string;
     validationScore?: number;

@@ -20,6 +20,7 @@
 import type { MuscleGroup } from '../types/exercise';
 import type { GeneratedProgram, GeneratedDay } from '../types/program';
 import { getTargetWeeklyVolume } from '../data/rules/volumeRules';
+import { analyzeProgramSafety } from './injurySafetyEngine';
 
 export type Severity = 'error' | 'warning' | 'info';
 
@@ -76,6 +77,9 @@ export function validateProgram(program: GeneratedProgram): ValidationResult {
 
   // ۱۰. مجموع حجم
   checkTotalVolume(program, issues);
+
+  // ۱۱. ایمنی آسیب‌ها (فاز 4)
+  checkInjurySafety(program, issues);
 
   // دسته‌بندی
   const errors = issues.filter((i) => i.severity === 'error');
@@ -360,4 +364,46 @@ function calculateScore(errorCount: number, warningCount: number): number {
  */
 export function isProgramAcceptable(program: GeneratedProgram): boolean {
   return validateProgram(program).isValid;
+}
+
+/**
+ * ۱۱. ایمنی آسیب‌ها (فاز 4)
+ *
+ * از Injury Safety Engine استفاده می‌کند.
+ * برنامه فعلاً دسترسی مستقیم به safeInjuries کاربر ندارد،
+ * پس از metadata برنامه (در صورت وجود) استفاده می‌کنیم.
+ *
+ * توجه: اگر برنامه metadata.injuries داشته باشد از آن، وگرنه هیچ.
+ */
+function checkInjurySafety(program: GeneratedProgram, issues: ValidationIssue[]) {
+  const injuries = program.metadata?.injuries;
+  if (!injuries || injuries.length === 0) return;
+
+  const report = analyzeProgramSafety(program, injuries);
+
+  for (const ex of report.forbidden) {
+    issues.push({
+      severity: 'error',
+      code: 'INJURY_FORBIDDEN',
+      message: `حرکت «${ex.name}» برای آسیب‌های شما پرخطر است.`,
+      suggestion: `از جایگزین ایمن استفاده کنید یا این حرکت را حذف کنید.`,
+    });
+  }
+
+  for (const ex of report.caution) {
+    issues.push({
+      severity: 'warning',
+      code: 'INJURY_CAUTION',
+      message: `حرکت «${ex.name}» نیاز به احتیاط دارد — وزنه سبک و تکنیک دقیق.`,
+    });
+  }
+
+  // اگر هیچ خطایی نبود ولی آسیب فعال داشت
+  if (report.forbidden.length === 0 && report.caution.length === 0) {
+    issues.push({
+      severity: 'info',
+      code: 'INJURY_SAFE',
+      message: `برنامه با آسیب‌های شما سازگار است (نمره ایمنی: ${report.score}).`,
+    });
+  }
 }

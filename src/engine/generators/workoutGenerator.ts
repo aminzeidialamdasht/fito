@@ -192,6 +192,7 @@ export function generateWorkoutProgram(
       priorityMuscles: analysis.priorityMuscles,
       goal: analysis.goal,
       experience: analysis.experience,
+      injuries: analysis.safeInjuries,
     },
   };
   // ۷. اعتبارسنجی برنامه
