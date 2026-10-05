@@ -28,20 +28,24 @@ const PERSIAN_WEEKDAYS = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌ش
 export default function ProgramDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { programs, state, setActiveProgram, updateProgram } = useAppContext();
+  const { programs, state, setActiveProgram, updateProgram, activeProfile } = useAppContext();
   const { theme } = useTheme();
 
   const isDark = theme === 'dark';
 
   const program = programs.find((p) => p.id === id);
 
-  // فاز 4: تحلیل ایمنی (adapter: WorkoutProgram → GeneratedProgram-like)
-  const safetyReport = program && (program.metadata?.injuries?.length ?? 0) > 0
+  // فاز 4: تحلیل ایمنی — injuries از activeProfile
+  const injuriesList: string[] = activeProfile?.injuries || [];
+  const limitationsList: string[] = activeProfile?.limitations || [];
+  const allInjuries = [...injuriesList, ...limitationsList];
+  const safetyReport = program && allInjuries.length > 0
     ? analyzeProgramSafety(
         program as unknown as Parameters<typeof analyzeProgramSafety>[0],
-        program.metadata!.injuries!
+        allInjuries
       )
     : null;
+
   const [expandedDay, setExpandedDay] = useState<number | null>(null);
   const [substituteTarget, setSubstituteTarget] = useState<{
     dayIdx: number;

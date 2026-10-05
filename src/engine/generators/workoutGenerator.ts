@@ -25,6 +25,7 @@ import {
   type SessionBudget,
 } from '../core/volumeAllocator';
 import { analyzePerformance, type PerformanceAnalysis } from '../core/performanceAnalyzer';
+import { suggestWeightForSet } from '../core/progressionEngine';
 
 export const ENGINE_VERSION = '1.0.0';
 
@@ -145,6 +146,7 @@ export function generateWorkoutProgram(
     const allSelectedIds: string[] = [];
 
     const day = generateDay(
+      profile,
       dayIndex,
       session.title,
       session.muscleGroups as MuscleGroup[],
@@ -211,6 +213,7 @@ export function generateWorkoutProgram(
  * تولید یک جلسه تمرینی
  */
 function generateDay(
+  profile: AthleteProfile,
   dayIndex: number,
   title: string,
   muscleGroups: MuscleGroup[],
@@ -269,7 +272,7 @@ function generateDay(
 
       for (let idx = 0; idx < exercisesForMuscle.length; idx++) {
         const ex = exercisesForMuscle[idx];
-        const sets = generateSets(ex, analysis, performance, setDistribution[idx]);
+        const sets = generateSets(profile, ex, analysis, performance, setDistribution[idx]);
 
         addEffectiveSetsToVolume(weeklyVolume, ex, sets.length);
 
@@ -299,7 +302,7 @@ function generateDay(
     );
 
     for (const ex of selectedExercises) {
-      const sets = generateSets(ex, analysis, performance);
+      const sets = generateSets(profile, ex, analysis, performance);
       addEffectiveSetsToVolume(weeklyVolume, ex, sets.length);
       generatedExercises.push({
         exerciseId: ex.id,
@@ -419,6 +422,7 @@ function calculateProgression(
 }
 
 function generateSets(
+  profile: AthleteProfile,
   exercise: Exercise,
   analysis: ProfileAnalysis,
   performance: PerformanceAnalysis,
@@ -470,16 +474,19 @@ function generateSets(
       restSeconds,
       tempo: exercise.tempo,
       // وزنه پیشنهادی بر اساس Double Progression
-      suggestedWeight: lastPerformance
-        ? calculateProgression(
-            lastPerformance.lastWeight,
-            lastPerformance.lastReps || 0,
-            lastPerformance.lastRIR ?? 2,
-            repRange.min,
-            repRange.max,
-            baseRIR
-          )
-        : undefined,
+      suggestedWeight: suggestWeightForSet(
+        exercise,
+        repRange.min,
+        i,
+        profile,
+        performance,
+        lastPerformance?.lastWeight,
+        lastPerformance?.lastReps,
+        lastPerformance?.lastRIR ?? 2,
+        baseRIR,
+        repRange.min,
+        repRange.max
+      ),
       lastWeight: lastPerformance?.lastWeight,
       lastReps: lastPerformance?.lastReps,
       lastRIR: lastPerformance?.lastRIR,
