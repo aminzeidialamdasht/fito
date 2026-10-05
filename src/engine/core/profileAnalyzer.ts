@@ -6,6 +6,7 @@
 import type { AthleteProfile } from '../../types';
 import type { ExperienceLevel, Goal } from '../types/program';
 import type { EquipmentType } from '../types/exercise';
+import { mapMusclesToEnglish, mapInjuriesToEnglish } from './persianMapping';
 
 export interface ProfileAnalysis {
   bmr: number;
@@ -149,7 +150,7 @@ export function analyzeProfile(profile: AthleteProfile): ProfileAnalysis {
     hasKneeIssue,
     hasHipIssue,
     safeInjuries,
-    priorityMuscles: profile.targetMuscles || [],
+    priorityMuscles: mapMusclesToEnglish(profile.targetMuscles || []) as string[],
     weeklyTrainingDays,
     sessionMinutes,
     programDurationWeeks,

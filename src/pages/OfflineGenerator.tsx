@@ -105,6 +105,7 @@ export default function OfflineGenerator() {
       })),
       weeklyVolumeSummary: generatedProgram.weeklyVolumeSummary || {},
       restDays: generatedProgram.restDays || [],
+      metadata: generatedProgram.metadata,
     };
 
     addProgram(programForApp);

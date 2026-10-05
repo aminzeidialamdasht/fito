@@ -178,13 +178,13 @@ export default function ProgramDetail() {
             weeklyVolume={program.weeklyVolumeSummary as any}
 
 
-            experience={'intermediate'}
+            experience={(program.metadata?.experience as any) || 'intermediate'}
 
 
-            goal={'hypertrophy'}
+            goal={(program.metadata?.goal as any) || 'hypertrophy'}
 
 
-            priorityMuscles={[]}
+            priorityMuscles={program.metadata?.priorityMuscles || []}
 
 
             isDark={isDark}

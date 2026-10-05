@@ -30,20 +30,23 @@ export const MUSCLE_VOLUME_MULTIPLIER: Record<MuscleGroup, number> = {
   chest:       1.2,
   upper_back:  1.3,
   lats:        1.3,
-  lower_back:  0.6,
-  traps:       0.7,
+  // عضلات کمکی — MEV پایین‌تر (چون از compoundها Effective می‌گیرند)
+  lower_back:  0.4,
+  traps:       0.4,
+  forearms:    0.3,
+  obliques:    0.4,
+  // عضلات متوسط
   front_delts: 0.9,
   side_delts:  1.0,
   rear_delts:  0.9,
   biceps:      0.9,
   triceps:     0.9,
-  forearms:    0.5,
+  // عضلات بزرگ
   quads:       1.3,
   hamstrings:  1.0,
   glutes:      1.0,
-  calves:      0.9,
+  calves:      0.5,
   abs:         0.9,
-  obliques:    0.6,
 };
 
 /** تنظیم حجم بر اساس هدف */
@@ -56,6 +59,46 @@ export const GOAL_VOLUME_MODIFIER: Record<Goal, number> = {
   general_fitness: 0.8,
 };
 
+
+/**
+ * تنظیم MEV اختصاصی برای عضلات کمکی
+ * این عضلات از compoundها Effective می‌گیرند و MEV واقعی‌شان پایین‌تر است.
+ */
+function getMuscleSpecificMEV(
+  muscle: MuscleGroup,
+  baseMEV: number
+): number {
+  const accessoryMuscles: Partial<Record<MuscleGroup, number>> = {
+    traps: 3,
+    forearms: 3,
+    obliques: 3,
+    lower_back: 6,
+    calves: 4,
+    abs: 5,
+    rear_delts: 8,
+    front_delts: 5,
+    biceps: 5,
+    triceps: 5,
+  };
+
+  return accessoryMuscles[muscle] ?? baseMEV;
+}
+
+
+/**
+ * ضریب اولویت‌داری بر اساس اندازه عضله
+ * عضلات بزرگ (سینه، پشت، پا) → ضریب کمتر (چون Effective از compound زیاد است)
+ * عضلات کوچک (سرشانه کنار، بازو) → ضریب بیشتر
+ */
+function getPriorityModifier(muscle: MuscleGroup): number {
+  const largeMuscles: MuscleGroup[] = ['chest', 'upper_back', 'lats', 'quads', 'hamstrings', 'glutes'];
+  const smallMuscles: MuscleGroup[] = ['side_delts', 'rear_delts', 'biceps', 'triceps', 'calves', 'forearms', 'traps', 'abs', 'obliques'];
+
+  if (largeMuscles.includes(muscle)) return 1.15;   // عضلات بزرگ
+  if (smallMuscles.includes(muscle)) return 1.4;    // عضلات کوچک
+  return 1.25;                                       // عضلات متوسط (سرشانه جلو، ...)
+}
+
 /** محاسبه حجم هفتگی هدف برای یک عضله */
 export function getTargetWeeklyVolume(
   muscle: MuscleGroup,
@@ -66,7 +109,7 @@ export function getTargetWeeklyVolume(
   const base = BASE_VOLUME_BY_EXPERIENCE[experience];
   const muscleMultiplier = MUSCLE_VOLUME_MULTIPLIER[muscle] || 1.0;
   const goalModifier = GOAL_VOLUME_MODIFIER[goal] || 1.0;
-  const priorityModifier = isPriority ? 1.4 : 1.0;
+  const priorityModifier = isPriority ? getPriorityModifier(muscle) : 1.0;
 
   const target = Math.round(base.mav * muscleMultiplier * goalModifier * priorityModifier);
   const min = Math.max(base.mev, Math.round(base.mev * muscleMultiplier * goalModifier));

@@ -102,6 +102,66 @@ export function allocateVolume(
   };
 }
 
+
+/**
+ * ضریب تبدیل Effective Target به Direct Target
+ *
+ * چون Effective Sets = Direct + (Secondary × 0.5)، باید Target Effective
+ * را به Direct تبدیل کنیم تا بعد از جمع با Secondary، به Target برسیم.
+ *
+ * مثال: سینه با Target=14 Effective، از حرکاتی مثل Bench Press که
+ * 40٪ Effective از Compoundها می‌آید، فقط به 8-9 ست Direct نیاز دارد.
+ *
+ * ضرایب بر اساس تجربه:
+ *  - Beginner: overlap کمتر (چون compound کمتر) → 0.7
+ *  - Intermediate: overlap متوسط → 0.6
+ *  - Advanced: overlap بیشتر (compound بیشتر) → 0.5
+ */
+function getDirectVolumeMultiplier(
+  muscle: MuscleGroup,
+  experience: ExperienceLevel,
+  goal: Goal
+): number {
+  // عضلات بزرگ‌تر (chest, back, quads) بیشتر از compoundها Effective می‌گیرند
+  const bigMuscles: MuscleGroup[] = ['chest', 'upper_back', 'lats', 'quads', 'hamstrings', 'glutes'];
+  // عضلات کوچک (biceps, triceps) هم از compoundهای بزرگ Effective می‌گیرند
+  const smallMuscles: MuscleGroup[] = ['biceps', 'triceps', 'front_delts', 'rear_delts', 'calves', 'abs'];
+  // عضلات متوسط
+  const medMuscles: MuscleGroup[] = ['side_delts', 'traps', 'forearms', 'obliques'];
+
+  let baseMultiplier: number;
+
+  if (bigMuscles.includes(muscle)) {
+    baseMultiplier = 0.75; // سینه 25٪ Effective از پشت‌بازو/سرشانه می‌گیرد؟ نه، سینه primary است
+  } else if (smallMuscles.includes(muscle)) {
+    baseMultiplier = 0.5; // پشت‌بازو 50٪ از Bench+OHP می‌گیرد
+  } else if (medMuscles.includes(muscle)) {
+    baseMultiplier = 0.7;
+  } else {
+    baseMultiplier = 0.65;
+  }
+
+  // تنظیم بر اساس تجربه
+  const experienceFactor: Record<ExperienceLevel, number> = {
+    beginner: 0.85,     // کمتر compound، overlap کمتر
+    intermediate: 0.75,
+    advanced: 0.7,
+    professional: 0.65,
+  };
+
+  // تنظیم بر اساس هدف
+  const goalFactor: Record<Goal, number> = {
+    hypertrophy: 0.75,
+    strength: 0.65,      // compound بیشتر، overlap بیشتر
+    fat_loss: 0.8,
+    recomposition: 0.75,
+    competition: 0.7,
+    general_fitness: 0.85,
+  };
+
+  return baseMultiplier * experienceFactor[experience] * goalFactor[goal];
+}
+
 /**
  * توزیع هدف هفتگی بین جلسات
  *
@@ -110,18 +170,31 @@ export function allocateVolume(
  * @param sessionsInvolvingMuscle شماره جلساتی که این عضله را دارند
  * @returns مقدار بودجه برای هر جلسه
  */
+export function getDirectVolumeMultiplierWrapper(
+  muscle: MuscleGroup,
+  experience: ExperienceLevel,
+  goal: Goal
+): number {
+  return getDirectVolumeMultiplier(muscle, experience, goal);
+}
+
 export function distributeMuscleAcrossSessions(
   muscle: MuscleGroup,
   weeklyTarget: number,
-  sessionsInvolvingMuscle: number[]
+  sessionsInvolvingMuscle: number[],
+  directMultiplier: number = 1.0,
+  isPriority: boolean = false
 ): Record<number, number> {
   const distribution: Record<number, number> = {};
   const count = sessionsInvolvingMuscle.length;
 
   if (count === 0) return distribution;
 
-  // تقسیم مساوی
-  const perSession = weeklyTarget / count;
+  // تبدیل Effective Target به Direct Target
+  // توجه: ضریب Direct برای همه یکسان است. اولویت‌داری قبلاً در Target اعمال شده (1.4×)
+  const directTarget = weeklyTarget * directMultiplier;
+  // تقسیم بین جلسات
+  const perSession = directTarget / count;
 
   // عضلات بزرگ‌تر ترجیحاً در جلسه اول حجم بیشتری بگیرند
   for (let i = 0; i < count; i++) {

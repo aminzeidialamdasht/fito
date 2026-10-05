@@ -101,6 +101,15 @@ export interface WorkoutProgram {
   sessionDurationSummary?: Record<string, string>;
   adjustmentRules?: string;
   days: WorkoutDay[];
+  metadata?: {
+    engineVersion?: string;
+    generatedFrom?: string;
+    notes?: string;
+    priorityMuscles?: string[];
+    goal?: string;
+    experience?: string;
+    validationScore?: number;
+  };
 }
 
 export interface WorkoutDay {

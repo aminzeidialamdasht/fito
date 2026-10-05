@@ -17,9 +17,11 @@ import { selectSplit, getSplitName, type SplitPlan } from '../core/splitSelector
 import { selectExercisesForSession } from '../core/exerciseSelector';
 import { getTargetWeeklyVolume, MAX_VOLUME_PER_SESSION } from '../data/rules/volumeRules';
 import { addEffectiveSetsToVolume } from '../core/stimulusCalculator';
+import { validateProgram } from '../core/programValidator';
 import {
   distributeMuscleAcrossSessions,
   buildSessionBudget,
+  getDirectVolumeMultiplierWrapper,
   type SessionBudget,
 } from '../core/volumeAllocator';
 import { analyzePerformance, type PerformanceAnalysis } from '../core/performanceAnalyzer';
@@ -110,10 +112,17 @@ export function generateWorkoutProgram(
         sessionsWithMuscle.push(idx);
       }
     });
+    const directMultiplier = getDirectVolumeMultiplierWrapper(
+      muscle,
+      analysis.experience,
+      analysis.goal
+    );
     muscleDistributions[muscle] = distributeMuscleAcrossSessions(
       muscle,
       muscleWeeklyTargets[muscle],
-      sessionsWithMuscle
+      sessionsWithMuscle,
+      directMultiplier,
+      analysis.priorityMuscles.includes(muscle)
     );
   }
 
@@ -169,8 +178,19 @@ export function generateWorkoutProgram(
       engineVersion: ENGINE_VERSION,
       generatedFrom: 'offline_engine',
       notes: `برنامه تولیدشده توسط موتور آفلاین فیتو نسخه ${ENGINE_VERSION}`,
+      priorityMuscles: analysis.priorityMuscles,
+      goal: analysis.goal,
+      experience: analysis.experience,
     },
   };
+  // ۷. اعتبارسنجی برنامه
+  const validation = validateProgram(program);
+  if (!validation.isValid) {
+    console.warn('⚠️ Program validation issues:');
+    validation.errors.forEach((e) => console.warn('  ❌', e.message));
+  } else {
+    console.log('✅ Program valid (score: ' + validation.score + '/100)');
+  }
 
   return program;
 }

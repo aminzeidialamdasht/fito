@@ -62,7 +62,7 @@ function buildSessions(splitType: SplitType, days: number): SplitSession[] {
       if (days === 4) {
         return [
           { focus: 'upper', title: 'بالاتنه ۱', muscleGroups: ['chest', 'upper_back', 'lats', 'front_delts', 'side_delts', 'biceps', 'triceps'] },
-          { focus: 'lower', title: 'پایین‌تنه ۱', muscleGroups: ['quads', 'hamstrings', 'glutes', 'calves', 'abs'] },
+          { focus: 'lower', title: 'پایین‌تنه ۱', muscleGroups: ['quads', 'hamstrings', 'glutes', 'calves', 'abs', 'obliques'] },
           { focus: 'upper', title: 'بالاتنه ۲', muscleGroups: ['chest', 'upper_back', 'lats', 'rear_delts', 'biceps', 'triceps'] },
           { focus: 'lower', title: 'پایین‌تنه ۲', muscleGroups: ['quads', 'hamstrings', 'glutes', 'calves', 'abs'] },
         ];
@@ -80,14 +80,14 @@ function buildSessions(splitType: SplitType, days: number): SplitSession[] {
       if (days === 3) {
         return [
           { focus: 'push', title: 'پرس - سینه، سرشانه، پشت‌بازو', muscleGroups: ['chest', 'front_delts', 'side_delts', 'triceps'] },
-          { focus: 'pull', title: 'کشش - پشت، جلوبازو', muscleGroups: ['upper_back', 'lats', 'rear_delts', 'biceps', 'forearms'] },
+          { focus: 'pull', title: 'کشش - پشت، جلوبازو', muscleGroups: ['upper_back', 'lats', 'rear_delts', 'traps', 'biceps', 'forearms'] },
           { focus: 'legs', title: 'پا - چهارسر، همسترینگ، سرینی', muscleGroups: ['quads', 'hamstrings', 'glutes', 'calves', 'abs'] },
         ];
       }
       if (days === 6) {
         return [
           { focus: 'push', title: 'پرس ۱ - سینه، سرشانه، پشت‌بازو', muscleGroups: ['chest', 'front_delts', 'side_delts', 'triceps'] },
-          { focus: 'pull', title: 'کشش ۱ - پشت، جلوبازو', muscleGroups: ['upper_back', 'lats', 'rear_delts', 'biceps'] },
+          { focus: 'pull', title: 'کشش ۱ - پشت، جلوبازو', muscleGroups: ['upper_back', 'lats', 'rear_delts', 'traps', 'biceps', 'forearms'] },
           { focus: 'legs', title: 'پا ۱ - چهارسر، همسترینگ، سرینی', muscleGroups: ['quads', 'hamstrings', 'glutes', 'calves', 'abs'] },
           { focus: 'push', title: 'پرس ۲ - سینه، سرشانه، پشت‌بازو', muscleGroups: ['chest', 'front_delts', 'side_delts', 'triceps'] },
           { focus: 'pull', title: 'کشش ۲ - پشت، جلوبازو', muscleGroups: ['upper_back', 'lats', 'rear_delts', 'biceps'] },
