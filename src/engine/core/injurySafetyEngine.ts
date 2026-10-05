@@ -141,14 +141,17 @@ export function analyzeProgramSafety(
   const programExerciseIds = new Set<string>();
   for (const day of program.days) {
     for (const ge of day.exercises) {
-      programExerciseIds.add(ge.exerciseId);
+      programExerciseIds.add((ge as any).exerciseId || (ge as any).id);
     }
   }
 
   for (const day of program.days) {
     for (const ge of day.exercises) {
-      const ex = EXERCISE_MAP.get(ge.exerciseId);
+      // پشتیبانی از هر دو ساختار: GeneratedExercise (exercise کامل) و WorkoutExercise (exerciseId)
+      const ex = (ge as any).exercise
+        || EXERCISE_MAP.get((ge as any).exerciseId || (ge as any).id);
       if (!ex) continue;
+      // eslint-disable-next-line no-console
       const level = getSafetyLevel(ex, injuries);
 
       if (level === 'forbidden') {

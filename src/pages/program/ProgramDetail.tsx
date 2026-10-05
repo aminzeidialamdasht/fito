@@ -22,6 +22,7 @@ import SubstituteModal from '../../components/SubstituteModal';
 import VolumeSummary from '../../components/VolumeSummary';
 import SafetyReportCard from '../../components/SafetyReportCard';
 import { analyzeProgramSafety } from '../../engine/core/injurySafetyEngine';
+import { analyzeProfile } from '../../engine/core/profileAnalyzer';
 
 const PERSIAN_WEEKDAYS = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
 
@@ -35,10 +36,8 @@ export default function ProgramDetail() {
 
   const program = programs.find((p) => p.id === id);
 
-  // فاز 4: تحلیل ایمنی — injuries از activeProfile
-  const injuriesList: string[] = activeProfile?.injuries || [];
-  const limitationsList: string[] = activeProfile?.limitations || [];
-  const allInjuries = [...injuriesList, ...limitationsList];
+  // فاز 4: تحلیل ایمنی — آسیب‌ها از analyzeProfile (فارسی → کلید انگلیسی)
+  const allInjuries: string[] = activeProfile ? analyzeProfile(activeProfile).safeInjuries : [];
   const safetyReport = program && allInjuries.length > 0
     ? analyzeProgramSafety(
         program as unknown as Parameters<typeof analyzeProgramSafety>[0],
