@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
@@ -53,11 +53,14 @@ const MUSCLE_OPTIONS = [
 export default function Onboarding() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { saveProfile, setActiveProfile } = useAppContext();
+  const { profiles, saveProfile, setActiveProfile } = useAppContext();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
   const type = searchParams.get('type') || 'workout';
+  const mode = searchParams.get('mode') || 'new'; // 'new' | 'edit'
+  const editId = searchParams.get('id');
+  const isEditMode = mode === 'edit' && !!editId;
 
   const [stepIndex, setStepIndex] = useState(0);
   const [saved, setSaved] = useState(false);
@@ -114,6 +117,18 @@ export default function Onboarding() {
     competitionDate: '',
   });
 
+  // اگر حالت ویرایش است، پروفایل موجود را لود کن
+  useEffect(() => {
+    if (isEditMode && editId) {
+      const existing = profiles.find((p) => p.id === editId);
+      if (existing) {
+        setForm(existing);
+        console.log('📝 Edit mode: loaded profile', existing.name);
+      }
+    }
+  }, [isEditMode, editId, profiles]);
+
+
   const teal = isDark ? '#a78bfa' : '#8b5cf6';
   const gold = isDark ? '#d4af37' : '#f59e0b';
   const bgMain = isDark ? '#0f172a' : '#f8fafc';
@@ -156,8 +171,11 @@ export default function Onboarding() {
   };
 
   const handleSave = () => {
+    const isEdit = isEditMode && editId;
+    const existing = isEdit ? profiles.find((p) => p.id === editId) : null;
+
     const newProfile: AthleteProfile = {
-      id: uuidv4(),
+      id: isEdit && editId ? editId : uuidv4(),
       name: form.name || 'ورزشکار',
       age: form.age || 25,
       gender: form.gender || 'male',
@@ -206,7 +224,7 @@ export default function Onboarding() {
       exercisePreferences: form.exercisePreferences || '',
       hormoneMedNotes: form.hormoneMedNotes || '',
       competitionDate: form.competitionDate || '',
-      createdAt: new Date().toISOString(),
+      createdAt: existing?.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
 
@@ -216,7 +234,7 @@ export default function Onboarding() {
     soundEffects.playWorkoutFinish?.();
 
     setTimeout(() => {
-      navigate(`/generate/${type}/ready`);
+      navigate(isEdit ? '/profile' : `/generate/${type}/ready`);
     }, 800);
   };
 
