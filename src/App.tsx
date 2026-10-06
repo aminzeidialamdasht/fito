@@ -7,6 +7,7 @@ import BottomNav from './components/BottomNav';
 import Welcome from './pages/Welcome';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
+import StrengthRecords from './pages/StrengthRecords';
 import PromptGenerator from './pages/PromptGenerator';
 import ProgramImport from './pages/ProgramImport';
 import Nutrition from './pages/Nutrition';
@@ -79,6 +80,7 @@ function AppContent({ showWelcome, onContinue }: { showWelcome: boolean; onConti
         <Route path="/calendar" element={<Layout><CalendarPage /></Layout>} />
         <Route path="/progress" element={<Layout><Progress /></Layout>} />
         <Route path="/profile" element={<Layout><Profile /></Layout>} />
+        <Route path="/strength-records" element={<Layout><StrengthRecords /></Layout>} />
         <Route path="/programs" element={<Layout><Programs /></Layout>} />
         <Route path="/program/:id" element={<Layout><ProgramDetail /></Layout>} />
         <Route path="/history" element={<Layout><History /></Layout>} />
