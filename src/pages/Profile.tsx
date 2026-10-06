@@ -37,6 +37,14 @@ export default function Profile() {
     ? 'border-white/10'
     : 'border-violet-200/60';
 
+  // Phase 10 Step 6c: Strength records
+  const strengthRecords = (activeProfile?.strengthRecordsExtended as any) || {};
+  const strengthEntries = Object.entries(strengthRecords)
+    .filter(([key, value]) => key !== 'lastUpdated' && value)
+    .slice(0, 3);
+  const recordCount = Object.keys(strengthRecords)
+    .filter((key) => key !== 'lastUpdated' && strengthRecords[key]).length;
+
   const handleDelete = (id: string) => {
     soundEffects.playClick();
     deleteProfile(id);
@@ -83,6 +91,44 @@ export default function Profile() {
 
       {/* Main */}
       <div className="p-4 space-y-3 max-w-2xl mx-auto">
+      {activeProfile && (
+        <div className={`rounded-2xl p-4 border ${borderCard} ${cardBg}`}>
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `${gold}20`, color: gold }}>
+              <Dumbbell size={20} />
+            </div>
+            <div className="flex-1">
+              <h3 className={`font-black text-sm ${textMain}`}>رکوردهای قدرت</h3>
+              <p className={`text-[11px] ${textSub}`}>
+                {recordCount > 0
+                  ? `${toPersianNumber(recordCount)} رکورد ثبت شده — ${new Date(strengthRecords.lastUpdated || '').toLocaleDateString('fa-IR')}`
+                  : 'هنوز رکوردی ثبت نکرده‌اید'}
+              </p>
+            </div>
+          </div>
+          {recordCount > 0 && (
+            <div className="grid grid-cols-3 gap-2 mb-3">
+              {strengthEntries.map(([key, value]: [string, any]) => (
+                <div key={key} className="rounded-xl bg-black/10 p-2 text-center">
+                  <p className={`text-[10px] ${textSub}`}>{key}</p>
+                  <p className="text-sm font-black" style={{ color: gold }}>
+                    {toPersianNumber(Number(value.estimated1RM || value.weight).toFixed(1))}
+                  </p>
+                  <p className={`text-[10px] ${textSub}`}>کیلوگرم</p>
+                </div>
+              ))}
+            </div>
+          )}
+          <button
+            onClick={() => { soundEffects.playClick(); navigate('/strength-records'); }}
+            className="w-full py-2.5 rounded-xl font-bold text-xs min-h-[44px]"
+            style={{ background: gold, color: '#0f172a' }}
+            aria-label="ویرایش رکوردهای قدرت"
+          >
+            {recordCount > 0 ? 'ویرایش رکوردها' : 'ثبت رکوردها'}
+          </button>
+        </div>
+      )}
         {profiles.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <div className="w-20 h-20 rounded-full flex items-center justify-center mb-4" style={{ background: `${teal}15` }}>
