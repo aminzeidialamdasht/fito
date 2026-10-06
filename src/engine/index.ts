@@ -13,7 +13,8 @@
 // API اصلی
 // ============================================
 
-export { generateWorkoutProgram as generateOfflineWorkout, ENGINE_VERSION } from './generators/workoutGenerator';
+export { generateWorkoutProgram as generateOfflineWorkout } from './generators/workoutGenerator';
+export { ENGINE_VERSION } from './version';
 
 // ============================================
 // تایپ‌ها

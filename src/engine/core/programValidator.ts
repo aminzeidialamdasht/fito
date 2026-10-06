@@ -24,6 +24,8 @@ import { analyzeProgramSafety } from './injurySafetyEngine';
 
 const ACCESSORY_MUSCLES = new Set<MuscleGroup>([
   'lower_back',
+  'side_delts',
+  'rear_delts',
   'traps',
   'forearms',
   'obliques',
@@ -167,7 +169,7 @@ function checkWeeklyVolume(program: GeneratedProgram, issues: ValidationIssue[])
     );
 
     // کمتر از MEV
-    if (vol < target.min && !ACCESSORY_MUSCLES.has(muscle as MuscleGroup)) {
+    if (vol < target.min && !(ACCESSORY_MUSCLES.has(muscle as MuscleGroup) && !isPriority)) {
       const gap = target.min - vol;
       issues.push({
         severity: gap > target.min * 0.4 ? 'error' : 'warning',

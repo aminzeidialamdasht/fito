@@ -30,8 +30,8 @@ import { selectProgramSystem } from '../core/systemSelector';
 import { applyTechniquesToExercises } from '../core/techniqueApplier';
 import type { ProgramSystemRule } from '../data/rules/trainingSystems';
 import { suggestWeightForSet } from '../core/progressionEngine';
+import { ENGINE_VERSION } from '../version';
 
-export const ENGINE_VERSION = '1.0.0';
 
 const PERSIAN_WEEKDAYS = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
 
@@ -89,7 +89,6 @@ export function generateWorkoutProgram(
   // ۳. تولید جلسات
   const sessionDayIndices = getTrainingDayIndices(analysis.weeklyTrainingDays);
   const days: GeneratedDay[] = [];
-  const allSelectedIds: string[] = [];
   const weeklyVolume: Partial<Record<MuscleGroup, number>> = {};
 
   // ۳.۵. محاسبه توزیع حجم هر عضله بین جلسات
@@ -206,9 +205,9 @@ export function generateWorkoutProgram(
     restDays,
     weeklyVolumeSummary,
     metadata: {
-      engineVersion: ENGINE_VERSION,
+      engineVersion: ENGINE_VERSION.full,
       generatedFrom: 'offline_engine',
-      notes: `برنامه تولیدشده توسط موتور آفلاین فیتو نسخه ${ENGINE_VERSION}`,
+      notes: `برنامه تولیدشده توسط موتور آفلاین فیتو نسخه ${ENGINE_VERSION.full}`,
       priorityMuscles: analysis.priorityMuscles,
       goal: analysis.goal,
       experience: analysis.experience,
