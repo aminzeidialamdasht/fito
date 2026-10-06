@@ -9,6 +9,7 @@
     "sync": "npx cap sync android",
     "android": "npm run build && npm run sync && npx cap open android",
     "test:engine": "tsx scripts/test-substitution.ts",
+    "test:systems": "tsx scripts/test-systems.ts",
     "build:myket": "cross-env VITE_APP_FLAVOR=myket vite build",
     "build:bazaar": "cross-env VITE_APP_FLAVOR=bazaar vite build",
     "build:personal": "cross-env VITE_APP_FLAVOR=personal vite build",
