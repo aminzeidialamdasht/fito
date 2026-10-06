@@ -130,3 +130,49 @@ export function countTotalSets(program: Program): number {
     0,
   );
 }
+
+export const TECHNIQUE_NAMES_FA: Record<string, string> = {
+  straight_set: 'ست معمولی',
+  drop_set: 'دراپ‌ست',
+  rest_pause: 'رست‌پاز',
+  myo_reps: 'مایو رپس',
+  pyramid: 'هرمی',
+  reverse_pyramid: 'هرمی معکوس',
+  superset: 'سوپرست',
+  giant_set: 'جاینت‌ست',
+  cluster_set: 'کلاسترست',
+  amrap: 'AMRAP',
+};
+
+export function getExerciseSetCount(
+  sets: number | unknown[] | undefined,
+): number {
+  if (Array.isArray(sets)) return sets.length;
+  if (typeof sets === 'number' && sets > 0) return sets;
+  return 3;
+}
+
+export function getExerciseRestSeconds(
+  exercise: { rest?: number | string } | undefined,
+): number {
+  const rest = exercise?.rest;
+  if (typeof rest === 'number' && rest > 0) return rest;
+  if (typeof rest === 'string') {
+    const parsed = parseInt(rest, 10);
+    if (!Number.isNaN(parsed) && parsed > 0) return parsed;
+  }
+  return 90;
+}
+
+export function estimateWorkoutMinutes(
+  totalSets: number,
+  avgRestSeconds = 90,
+  exerciseCount = 0,
+): number {
+  const safeSets = Math.max(0, totalSets);
+  const setTime = safeSets * 40;
+  const restTime = Math.max(0, safeSets - 1) * Math.max(0, avgRestSeconds);
+  const transitionTime = Math.max(0, exerciseCount - 1) * 15;
+  const totalSeconds = 600 + setTime + restTime + transitionTime;
+  return Math.round(totalSeconds / 60);
+}
