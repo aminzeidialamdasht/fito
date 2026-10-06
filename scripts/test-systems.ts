@@ -8,7 +8,7 @@ import {
   getProgramSystem,
 } from '../src/engine';
 import { SAMPLE_PROFILE } from '../src/data/defaultPlans';
-import type { AthleteProfile } from '../src/types';
+import type { AthleteProfile, WorkoutSession } from '../src/types';
 import type { GeneratedProgram, GeneratedSet } from '../src/engine/types/program';
 
 // ═══════════════════════════════════════════════════════════
@@ -176,3 +176,79 @@ console.log(`📌 نام فارسی: ${program.metadata.systemNameFa}`);
 console.log(`📌 مدت برنامه: ${program.durationWeeks} هفته`);
 console.log(`📌 تعداد کل ست‌ها: ${allSets.length}`);
 console.log('✅ تست کامل شد');
+
+// ═══════════════════════════════════════════════════════════
+//  Phase 8 — Deload Test
+// ═══════════════════════════════════════════════════════════
+
+printHeader('Phase 8 — Adaptive Deload E2E');
+
+function makeFakeSessions(count: number, daysAgo: number): WorkoutSession[] {
+  const sessions: WorkoutSession[] = [];
+  const now = new Date();
+
+  for (let i = 0; i < count; i++) {
+    const date = new Date(now);
+    date.setDate(date.getDate() - (i % daysAgo));
+
+    sessions.push({
+      id: `session-${i}`,
+      profileId: 'systems-test-profile',
+      programId: 'test-program',
+      dayId: `day-${i}`,
+      date: date.toISOString(),
+      startTime: '10:00',
+      duration: 60,
+      sets: [],
+      totalVolume: 15000,  // volume بالا برای trigger fatigue
+      completed: true,
+    });
+  }
+
+  return sessions;
+}
+
+// ۷ سشن در ۷ روز اخیر → fatigue بالا
+const heavySessions = makeFakeSessions(7, 7);
+const deloadProgram = generateOfflineWorkout(
+  SYSTEMS_TEST_PROFILE,
+  heavySessions
+);
+
+console.log('👥 سشن‌های شبیه‌سازی: 7 جلسه در 7 روز اخیر');
+console.log('📊 سیستم انتخابی:', deloadProgram.metadata.systemName);
+console.log('📊 نام فارسی:', deloadProgram.metadata.systemNameFa);
+console.log('📊 فاز:', deloadProgram.metadata.periodizationPhase);
+
+check(
+  'deload level heavy تشخیص داده شد',
+  deloadProgram.metadata.systemName === 'deload'
+);
+
+check(
+  'systemNameFa بازیابی (دیلود)',
+  deloadProgram.metadata.systemNameFa === 'بازیابی (دیلود)'
+);
+
+check(
+  'periodizationPhase دیلود',
+  deloadProgram.metadata.periodizationPhase === 'دیلود'
+);
+
+const deloadSets = deloadProgram.days
+  .flatMap((day) => day.exercises)
+  .flatMap((exercise) => exercise.sets);
+
+const regularSets = program.days
+  .flatMap((day) => day.exercises)
+  .flatMap((exercise) => exercise.sets);
+
+check(
+  `حجم deload (${deloadSets.length}) کمتر از عادی (${regularSets.length})`,
+  deloadSets.length < regularSets.length
+);
+
+console.log(`\n📌 حجم deload: ${deloadSets.length} ست`);
+console.log(`📌 حجم عادی: ${regularSets.length} ست`);
+console.log(`📌 کاهش: ${Math.round((1 - deloadSets.length / regularSets.length) * 100)}%`);
+console.log('✅ تست Deload کامل شد');

@@ -213,9 +213,9 @@ export function generateWorkoutProgram(
       goal: analysis.goal,
       experience: analysis.experience,
       injuries: analysis.safeInjuries,
-      systemName: programSystem.id,
-      systemNameFa: programSystem.nameFa,
-      periodizationPhase: programSystem.weeklyScheme[0]?.label,
+      systemName: analysis.deloadLevel === 'heavy' ? 'deload' : programSystem.id,
+      systemNameFa: analysis.deloadLevel === 'heavy' ? 'بازیابی (دیلود)' : programSystem.nameFa,
+      periodizationPhase: analysis.deloadLevel === 'heavy' ? 'دیلود' : programSystem.weeklyScheme[0]?.label,
       weeklyProgression: programSystem.weeklyScheme.map((w, idx) => ({ week: idx + 1, ...w })),
     },
   };
