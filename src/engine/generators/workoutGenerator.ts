@@ -167,7 +167,13 @@ export function generateWorkoutProgram(
 
     // اضافه کردن به لیست هفتگی
     // فاز ۶: اعمال تکنیک‌های ست روی حرکات همین جلسه
-    applyTechniquesToExercises(day.exercises, profile, analysis, performance);
+    applyTechniquesToExercises(
+      day.exercises,
+      profile,
+      analysis,
+      performance,
+      programSystem
+    );
 
     usedAcrossWeek.push(...allSelectedIds);
 
@@ -319,7 +325,7 @@ function generateDay(
     );
 
     for (const ex of selectedExercises) {
-      const sets = generateSets(profile, ex, analysis, performance);
+      const sets = generateSets(profile, ex, analysis, performance, 0, programSystem);
       addEffectiveSetsToVolume(weeklyVolume, ex, sets.length);
       generatedExercises.push({
         exerciseId: ex.id,
