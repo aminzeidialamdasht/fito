@@ -472,6 +472,26 @@ function generateSets(
     rirRange = exercise.rirRange.hypertrophy;
   }
 
+  if (
+    (goal === 'hypertrophy' || goal === 'recomposition') &&
+    analysis.bodyFrame
+  ) {
+    if (analysis.bodyFrame === 'ectomorph') {
+      repRange = {
+        min: repRange.min + 2,
+        max: repRange.max + 3,
+      };
+    } else if (analysis.bodyFrame === 'endomorph') {
+      const adjustedMin = Math.max(4, repRange.min - 2);
+      const adjustedMax = Math.max(6, repRange.max - 2);
+      repRange = {
+        min: adjustedMin,
+        max: Math.max(adjustedMin, adjustedMax),
+      };
+    }
+  }
+
+
   const weekOneScheme = programSystem?.weeklyScheme?.[0];
 
   // RIR پایه

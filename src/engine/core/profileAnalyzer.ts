@@ -16,6 +16,7 @@ export interface ProfileAnalysis {
   experience: ExperienceLevel;
   goal: Goal;
   avoidedExercises: string[];
+  bodyFrame?: 'ectomorph' | 'mesomorph' | 'endomorph';
   isBeginnerFriendly: boolean;
   hasSpineIssue: boolean;
   hasShoulderIssue: boolean;
@@ -146,6 +147,7 @@ export function analyzeProfile(profile: AthleteProfile): ProfileAnalysis {
     experience,
     goal,
     avoidedExercises: profile.avoidedExercises || [],
+    bodyFrame: profile.bodyMeasurements?.bodyFrame,
     isBeginnerFriendly: experience === 'beginner',
     hasSpineIssue,
     hasShoulderIssue,
