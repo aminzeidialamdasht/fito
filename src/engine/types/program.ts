@@ -19,6 +19,10 @@ export type SplitType =
   | 'upper_lower'
   | 'push_pull_legs'
   | 'bro_split'
+  | 'arnold_split'
+  | 'torso_limbs'
+  | 'push_pull'
+  | 'upper_lower_push_pull_legs'
   | 'ppl_ul_hybrid';
 
 export type SessionFocus =
@@ -32,6 +36,12 @@ export type SessionFocus =
   | 'chest_triceps'
   | 'back_biceps'
   | 'shoulders_arms'
+  | 'chest'
+  | 'back'
+  | 'shoulders'
+  | 'arms'
+  | 'torso'
+  | 'limbs'
   | 'custom';
 
 export type TrainingTechnique =

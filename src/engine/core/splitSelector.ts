@@ -182,6 +182,10 @@ export function getSplitName(splitType: SplitType): string {
     upper_lower: 'بالاتنه / پایین‌تنه',
     push_pull_legs: 'پرس / کشش / پا',
     bro_split: 'تفکیک گروه‌های عضلانی',
+    arnold_split: 'آرنولد اسپلیت',
+    torso_limbs: 'تنه / اندام',
+    push_pull: 'پرس / کشش',
+    upper_lower_push_pull_legs: 'بالاتنه / پایین‌تنه / پرس / کشش / پا',
     ppl_ul_hybrid: 'ترکیبی PPL + بالاتنه/پایین‌تنه',
   };
   return names[splitType] || 'سفارشی';
