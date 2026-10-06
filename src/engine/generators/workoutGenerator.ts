@@ -27,6 +27,7 @@ import {
 import { analyzePerformance, type PerformanceAnalysis } from '../core/performanceAnalyzer';
 import { selectProgramSystem } from '../core/systemSelector';
 import { applyTechniquesToExercises } from '../core/techniqueApplier';
+import type { ProgramSystemRule } from '../data/rules/trainingSystems';
 import { suggestWeightForSet } from '../core/progressionEngine';
 
 export const ENGINE_VERSION = '1.0.0';
@@ -159,6 +160,7 @@ export function generateWorkoutProgram(
       allSelectedIds,
       weeklyVolume,
       performance,
+      programSystem,
       sessionBudget,
       usedAcrossWeek
     );
@@ -190,7 +192,9 @@ export function generateWorkoutProgram(
     splitType: split.type,
     trainingDaysPerWeek: analysis.weeklyTrainingDays,
     sessionDuration: analysis.sessionMinutes,
-    durationWeeks: analysis.programDurationWeeks,
+    durationWeeks: programSystem.weeks > 0
+      ? programSystem.weeks
+      : analysis.programDurationWeeks,
     createdAt: new Date().toISOString(),
     days,
     restDays,
@@ -233,6 +237,7 @@ function generateDay(
   allSelectedIds: string[],
   weeklyVolume: Partial<Record<MuscleGroup, number>>,
   performance: PerformanceAnalysis,
+  programSystem: ProgramSystemRule,
   sessionBudget?: SessionBudget,
   usedAcrossWeek: string[] = []
 ): GeneratedDay {
@@ -284,7 +289,7 @@ function generateDay(
 
       for (let idx = 0; idx < exercisesForMuscle.length; idx++) {
         const ex = exercisesForMuscle[idx];
-        const sets = generateSets(profile, ex, analysis, performance, setDistribution[idx]);
+        const sets = generateSets(profile, ex, analysis, performance, setDistribution[idx], programSystem);
 
         addEffectiveSetsToVolume(weeklyVolume, ex, sets.length);
 
@@ -438,7 +443,8 @@ function generateSets(
   exercise: Exercise,
   analysis: ProfileAnalysis,
   performance: PerformanceAnalysis,
-  overrideSetCount: number = 0
+  overrideSetCount: number = 0,
+  programSystem?: ProgramSystemRule
 ): GeneratedSet[] {
   const setCount = overrideSetCount > 0
     ? overrideSetCount
@@ -460,8 +466,12 @@ function generateSets(
     rirRange = exercise.rirRange.hypertrophy;
   }
 
+  const weekOneScheme = programSystem?.weeklyScheme?.[0];
+
   // RIR پایه
-  let baseRIR = rirRange.min;
+  let baseRIR = typeof weekOneScheme?.rir === 'number'
+    ? weekOneScheme.rir
+    : rirRange.min;
   if (analysis.experience === 'beginner') baseRIR = Math.min(baseRIR + 1, rirRange.max);
 
   // اگر خستگی بالا → RIR بیشتر (تمرین سبک‌تر)
@@ -469,7 +479,8 @@ function generateSets(
     baseRIR = Math.min(baseRIR + 2, rirRange.max + 2);
   }
 
-  const repsStr = `${repRange.min}-${repRange.max}`;
+  const repsStr = weekOneScheme?.reps?.trim()
+    || `${repRange.min}-${repRange.max}`;
   const restSeconds = Math.round((exercise.restSeconds.min + exercise.restSeconds.max) / 2);
 
   // محاسبه وزنه پیشنهادی از رکورد قبلی
@@ -486,6 +497,7 @@ function generateSets(
       restSeconds,
       tempo: exercise.tempo,
       // وزنه پیشنهادی بر اساس Double Progression
+      week: 1,
       suggestedWeight: suggestWeightForSet(
         exercise,
         repRange.min,
