@@ -106,6 +106,23 @@ function scoreExercise(
   const safetyScore = 10 - (exercise.injuryRisk.shoulder === 'high' ? 5 : 0) - (exercise.injuryRisk.lowerBack === 'high' ? 5 : 0);
   score += safetyScore;
 
+  // تعدیل امتیاز بر اساس طول اندام غالب
+  if (
+    analysis.dominantLimbLength === 'long' &&
+    (exercise.movementPattern === 'squat' ||
+      exercise.movementPattern === 'hinge')
+  ) {
+    score -= 3;
+  }
+
+  if (
+    analysis.dominantLimbLength === 'short' &&
+    (exercise.movementPattern === 'horizontal_push' ||
+      exercise.movementPattern === 'vertical_push')
+  ) {
+    score -= 3;
+  }
+
   // عضلات اولویت‌دار
   const muscleName = exercise.primaryMuscle;
   if (analysis.priorityMuscles.some((pm) => pm.toLowerCase().includes(muscleName))) {

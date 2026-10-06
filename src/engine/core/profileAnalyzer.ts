@@ -17,6 +17,7 @@ export interface ProfileAnalysis {
   goal: Goal;
   avoidedExercises: string[];
   bodyFrame?: 'ectomorph' | 'mesomorph' | 'endomorph';
+  dominantLimbLength?: 'short' | 'average' | 'long';
   isBeginnerFriendly: boolean;
   hasSpineIssue: boolean;
   hasShoulderIssue: boolean;
@@ -148,6 +149,7 @@ export function analyzeProfile(profile: AthleteProfile): ProfileAnalysis {
     goal,
     avoidedExercises: profile.avoidedExercises || [],
     bodyFrame: profile.bodyMeasurements?.bodyFrame,
+    dominantLimbLength: profile.bodyMeasurements?.dominantLimbLength,
     isBeginnerFriendly: experience === 'beginner',
     hasSpineIssue,
     hasShoulderIssue,
