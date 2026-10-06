@@ -39,35 +39,44 @@ function getMuscleFrequency(
   splitType: SplitType,
   trainingDays: number
 ): number {
-  // عضلات کوچک: فرکانس بالاتر
   const isSmallMuscle = ['biceps', 'triceps', 'forearms', 'calves', 'rear_delts', 'abs', 'obliques', 'traps'].includes(muscle);
   const isMediumMuscle = ['side_delts', 'front_delts', 'chest', 'lats', 'upper_back'].includes(muscle);
   const isLargeMuscle = ['quads', 'hamstrings', 'glutes', 'lower_back'].includes(muscle);
+  const isLegMuscle = ['quads', 'hamstrings', 'glutes', 'calves'].includes(muscle);
+  const isUpperMuscle = !isLegMuscle;
 
-  // پیش‌فرض بر اساس نوع Split
   switch (splitType) {
     case 'full_body':
-      // هر جلسه تمام بدن → فرکانس = تعداد روز
       return trainingDays;
 
     case 'upper_lower':
-      if (isLargeMuscle) return Math.max(2, Math.floor(trainingDays / 2));
       return Math.max(2, Math.floor(trainingDays / 2));
 
     case 'push_pull_legs':
-      // هر عضله در گروه push/pull/legs → 1-2 بار در هفته
       if (isSmallMuscle) return Math.max(2, Math.floor(trainingDays / 3));
       return Math.max(1, Math.floor(trainingDays / 3));
 
     case 'ppl_ul_hybrid':
-      // هیبرید: عضلات کوچک فرکانس بالاتر
       if (isSmallMuscle) return Math.max(2, Math.floor(trainingDays / 2));
       if (isMediumMuscle) return 2;
       if (isLargeMuscle) return Math.max(1, Math.floor(trainingDays / 3));
       return 2;
 
+    case 'upper_lower_push_pull_legs':
+      return isUpperMuscle ? 3 : 2;
+
+    case 'push_pull':
+      if (['chest', 'front_delts', 'side_delts', 'triceps'].includes(muscle)) return 2;
+      if (['upper_back', 'lats', 'rear_delts', 'biceps'].includes(muscle)) return 2;
+      return 1;
+
+    case 'torso_limbs':
+      return 2;
+
+    case 'arnold_split':
+      return 2;
+
     case 'bro_split':
-      // هر عضله یک بار در هفته
       return 1;
 
     default:
