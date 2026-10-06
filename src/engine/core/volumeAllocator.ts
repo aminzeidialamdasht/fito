@@ -15,6 +15,7 @@ import type { MuscleGroup } from '../types/exercise';
 import type { ExperienceLevel, Goal, SplitType } from '../types/program';
 import { getTargetWeeklyVolume } from '../data/rules/volumeRules';
 
+import type { DeloadLevel } from '../../types';
 export interface SessionBudget {
   /** عضله → تعداد ست مؤثر هدف */
   [muscle: string]: number;
@@ -183,16 +184,25 @@ export function distributeMuscleAcrossSessions(
   weeklyTarget: number,
   sessionsInvolvingMuscle: number[],
   directMultiplier: number = 1.0,
-  isPriority: boolean = false
+  isPriority: boolean = false,
+  deloadLevel: DeloadLevel = 'none'
 ): Record<number, number> {
   const distribution: Record<number, number> = {};
   const count = sessionsInvolvingMuscle.length;
 
   if (count === 0) return distribution;
 
+  // فاز ۸: ضریب تخفیف deload
+  const deloadFactor: Record<DeloadLevel, number> = {
+    none: 1.0,
+    light: 0.9,
+    medium: 0.8,
+    heavy: 0.6,
+  };
+
   // تبدیل Effective Target به Direct Target
   // توجه: ضریب Direct برای همه یکسان است. اولویت‌داری قبلاً در Target اعمال شده (1.4×)
-  const directTarget = weeklyTarget * directMultiplier;
+  const directTarget = weeklyTarget * directMultiplier * deloadFactor[deloadLevel];
   // تقسیم بین جلسات
   const perSession = directTarget / count;
 

@@ -25,6 +25,7 @@ import {
   type SessionBudget,
 } from '../core/volumeAllocator';
 import { analyzePerformance, type PerformanceAnalysis } from '../core/performanceAnalyzer';
+import { getDeloadLevel } from '../core/deloadEngine';
 import { selectProgramSystem } from '../core/systemSelector';
 import { applyTechniquesToExercises } from '../core/techniqueApplier';
 import type { ProgramSystemRule } from '../data/rules/trainingSystems';
@@ -76,11 +77,8 @@ export function generateWorkoutProgram(
   // ۲. تحلیل عملکرد از تاریخچه تمرینات
   const performance = analyzePerformance(sessions);
 
-  // تنظیم سطح تجربه بر اساس خستگی
-  if (performance.fatigue.needsDeload) {
-    // کاهش حجم در صورت خستگی بالا
-    analysis.fatigueDetected = true;
-  }
+  // فاز ۸: تعیین سطح deload از خستگی
+  analysis.deloadLevel = getDeloadLevel(performance.fatigue);
 
   // ۲. انتخاب Split
   // فاز ۶: انتخاب سیستم تمرینی سطح برنامه
@@ -130,7 +128,8 @@ export function generateWorkoutProgram(
       muscleWeeklyTargets[muscle],
       sessionsWithMuscle,
       directMultiplier,
-      analysis.priorityMuscles.includes(muscle)
+      analysis.priorityMuscles.includes(muscle),
+      analysis.deloadLevel
     );
   }
 

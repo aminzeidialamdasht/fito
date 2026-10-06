@@ -1,3 +1,5 @@
+import type { DeloadLevel } from '../../types';
+
 /**
  * تحلیل‌گر پروفایل ورزشکار
  * محاسبه BMR, TDEE, BMI و تعیین فاکتورهای کلیدی
@@ -29,7 +31,7 @@ export interface ProfileAnalysis {
   weeklyTrainingDays: number;
   sessionMinutes: number;
   programDurationWeeks: number;
-  fatigueDetected?: boolean;
+  deloadLevel: DeloadLevel;
   equipmentType: string;
   customEquipment: string[];
 }
@@ -168,6 +170,7 @@ export function analyzeProfile(profile: AthleteProfile): ProfileAnalysis {
     weeklyTrainingDays,
     sessionMinutes,
     programDurationWeeks,
+    deloadLevel: 'none',
     equipmentType: profile.equipmentType || 'full_gym',
     customEquipment: profile.customEquipment || [],
   };

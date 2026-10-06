@@ -1,3 +1,5 @@
+export type DeloadLevel = 'none' | 'light' | 'medium' | 'heavy';
+
 export interface AthleteProfile {
   id: string;
   name: string;
