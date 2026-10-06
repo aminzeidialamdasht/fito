@@ -5,38 +5,38 @@ import { useTheme } from '../../context/ThemeContext';
 import { soundEffects } from '../../utils/sound';
 import { toPersianNumber } from '../../utils/jalali';
 import {
-  ChevronLeft,
-  Dumbbell,
-  Play,
-  Calendar,
-  Clock,
-  Target,
-  ChevronDown,
-  ChevronUp,
-  CheckCircle2,
-  ArrowRightLeft,
-  Zap,
-  RefreshCw,
+  ChevronLeft, Dumbbell, Play, ChevronDown, ChevronUp,
+  CheckCircle2, ArrowRightLeft, RefreshCw,
 } from 'lucide-react';
 import SubstituteModal from '../../components/SubstituteModal';
 import VolumeSummary from '../../components/VolumeSummary';
 import SafetyReportCard from '../../components/SafetyReportCard';
+import ProgramIdentityCard from '../../components/program/ProgramIdentityCard';
+import DeloadBadge from '../../components/program/DeloadBadge';
+import PeriodizationCard from '../../components/program/PeriodizationCard';
+import TechniqueBadge from '../../components/program/TechniqueBadge';
 import { analyzeProgramSafety } from '../../engine/core/injurySafetyEngine';
 import { analyzeProfile } from '../../engine/core/profileAnalyzer';
+import { normalizeSets, countTotalSets } from '../../utils/programHelpers';
+import type { WorkoutProgram, WorkoutDay, Exercise } from '../../types';
+import type { TrainingTechnique } from '../../engine/types/program';
 
 const PERSIAN_WEEKDAYS = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
+
+function getExerciseTechnique(ex: Exercise): TrainingTechnique | undefined {
+  const sets = normalizeSets(ex.sets as unknown as any);
+  return sets[0]?.technique;
+}
 
 export default function ProgramDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { programs, state, setActiveProgram, updateProgram, activeProfile } = useAppContext();
   const { theme } = useTheme();
-
   const isDark = theme === 'dark';
 
   const program = programs.find((p) => p.id === id);
 
-  // فاز 4: تحلیل ایمنی — آسیب‌ها از analyzeProfile (فارسی → کلید انگلیسی)
   const allInjuries: string[] = activeProfile ? analyzeProfile(activeProfile).safeInjuries : [];
   const safetyReport = program && allInjuries.length > 0
     ? analyzeProgramSafety(
@@ -47,34 +47,23 @@ export default function ProgramDetail() {
 
   const [expandedDay, setExpandedDay] = useState<number | null>(null);
   const [substituteTarget, setSubstituteTarget] = useState<{
-    dayIdx: number;
-    exIdx: number;
-    exerciseId: string;
-    exerciseName: string;
+    dayIdx: number; exIdx: number; exerciseId: string; exerciseName: string;
   } | null>(null);
 
   const teal = isDark ? '#a78bfa' : '#8b5cf6';
   const gold = isDark ? '#d4af37' : '#f59e0b';
   const bgMain = isDark ? '#0f172a' : '#f8fafc';
-  const cardBg = isDark
-    ? 'bg-[#1e1b4b]/50 backdrop-blur-md'
-    : 'bg-violet-50/70 backdrop-blur-md';
+  const cardBg = isDark ? 'bg-[#1e1b4b]/50 backdrop-blur-md' : 'bg-violet-50/70 backdrop-blur-md';
   const textMain = isDark ? '#ffffff' : '#0f172a';
   const textSub = isDark ? '#94a3b8' : '#64748b';
-  const borderCard = isDark
-    ? 'border-white/10'
-    : 'border-violet-200/60';
+  const borderCard = isDark ? 'border-white/10' : 'border-violet-200/60';
 
   if (!program) {
     return (
       <div className={`min-h-screen flex flex-col items-center justify-center p-6 ${bgMain}`}>
         <Dumbbell size={48} className="opacity-30 mb-4" />
         <h2 className={`text-xl font-black mb-2 ${textMain}`}>برنامه یافت نشد</h2>
-        <button
-          onClick={() => navigate('/programs')}
-          className="mt-4 px-6 py-3 rounded-xl font-bold text-white"
-          style={{ background: teal }}
-        >
+        <button onClick={() => navigate('/programs')} className="mt-4 px-6 py-3 rounded-xl font-bold text-white" style={{ background: teal }}>
           بازگشت به برنامه‌ها
         </button>
       </div>
@@ -82,15 +71,11 @@ export default function ProgramDetail() {
   }
 
   const isActive = state.activeProgram === program.id;
-  const days = (program as any).days || [];
+  const days = (program as WorkoutProgram).days || [];
 
   const handleStartDay = (dayIndex: number) => {
     soundEffects.playClick();
-    // فعال‌سازی برنامه اگر غیرفعال بود
-    if (!isActive) {
-      setActiveProgram(program.id);
-    }
-    // انتقال به tracker با روز موردنظر
+    if (!isActive) setActiveProgram(program.id);
     navigate(`/tracker/${dayIndex}?day=${dayIndex}&autoStart=true`);
   };
 
@@ -100,24 +85,18 @@ export default function ProgramDetail() {
   };
 
   const handleSubstituteSelect = (newExerciseId: string, newExerciseName: string) => {
-    if (!substituteTarget || !program) return;
-
+    if (!substituteTarget) return;
     const { dayIdx, exIdx } = substituteTarget;
-    const updatedProgram: any = { ...program };
-    const updatedDays = [...(updatedProgram.days || [])];
-    const updatedDay = { ...updatedDays[dayIdx] };
-    const updatedExercises = [...(updatedDay.exercises || [])];
-    const updatedExercise = { ...updatedExercises[exIdx] };
-
-    updatedExercise.exerciseId = newExerciseId;
-    updatedExercise.name = newExerciseName;
-
-    updatedExercises[exIdx] = updatedExercise;
-    updatedDay.exercises = updatedExercises;
-    updatedDays[dayIdx] = updatedDay;
-    updatedProgram.days = updatedDays;
-
-    updateProgram(updatedProgram);
+    const updated: WorkoutProgram = {
+      ...program,
+      days: program.days.map((d, di) => di !== dayIdx ? d : ({
+        ...d,
+        exercises: d.exercises.map((e, ei) => ei !== exIdx ? e : ({
+          ...e, id: newExerciseId, name: newExerciseName,
+        })),
+      })),
+    };
+    updateProgram(updated);
     setSubstituteTarget(null);
   };
 
@@ -126,7 +105,7 @@ export default function ProgramDetail() {
       {/* Header */}
       <div className={`sticky top-0 z-30 backdrop-blur-md border-b px-4 py-4 ${isDark ? 'bg-[#0f172a]/90 border-white/10' : 'bg-white/90 border-gray-200'}`}>
         <div className="flex items-center gap-3 max-w-3xl mx-auto">
-          <button onClick={() => navigate(-1)} className="p-2 rounded-full hover:bg-black/5">
+          <button onClick={() => navigate(-1)} className="p-2 rounded-full hover:bg-black/5" aria-label="بازگشت">
             <ChevronLeft size={24} className={isDark ? 'text-white' : 'text-gray-800'} />
           </button>
           <div className="flex-1 min-w-0">
@@ -134,11 +113,7 @@ export default function ProgramDetail() {
             <p className={`text-xs ${textSub}`}>{program.duration || 'برنامه تمرینی'}</p>
           </div>
           {!isActive && (
-            <button
-              onClick={handleActivate}
-              className="px-3 py-2 rounded-xl font-bold text-xs text-white flex items-center gap-1.5"
-              style={{ background: teal }}
-            >
+            <button onClick={handleActivate} className="px-3 py-2 rounded-xl font-bold text-xs text-white flex items-center gap-1.5" style={{ background: teal }}>
               <CheckCircle2 size={14} />
               فعال‌سازی
             </button>
@@ -147,173 +122,114 @@ export default function ProgramDetail() {
       </div>
 
       <div className="p-4 space-y-4 max-w-3xl mx-auto">
-        {/* Program Info Card */}
-        <div className={`rounded-2xl p-5 border ${borderCard} ${cardBg}`}>
-          <div className="grid grid-cols-3 gap-3 mb-4">
-            <div className={`p-3 rounded-xl text-center ${isDark ? 'bg-white/5' : 'bg-gray-50'}`}>
-              <Calendar size={18} className="mx-auto mb-1.5" style={{ color: teal }} />
-              <p className={`text-lg font-black ${textMain}`}>{toPersianNumber(days.length)}</p>
-              <p className={`text-[10px] ${textSub}`}>روز تمرین</p>
-            </div>
-            <div className={`p-3 rounded-xl text-center ${isDark ? 'bg-white/5' : 'bg-gray-50'}`}>
-              <Target size={18} className="mx-auto mb-1.5" style={{ color: teal }} />
-              <p className={`text-lg font-black ${textMain}`}>
-                {toPersianNumber(days.reduce((a: number, d: any) => a + (d.exercises?.length || 0), 0))}
-              </p>
-              <p className={`text-[10px] ${textSub}`}>حرکت</p>
-            </div>
-            <div className={`p-3 rounded-xl text-center ${isDark ? 'bg-white/5' : 'bg-gray-50'}`}>
-              <Clock size={18} className="mx-auto mb-1.5" style={{ color: teal }} />
-              <p className={`text-lg font-black ${textMain}`}>{toPersianNumber(program.trainingDays || 0)}</p>
-              <p className={`text-[10px] ${textSub}`}>روز/هفته</p>
-            </div>
-          </div>
+        {/* Phase 10: Program Identity Card */}
+        <ProgramIdentityCard program={program} />
 
-          <div className={`p-3 rounded-xl text-xs leading-6 ${isDark ? 'bg-violet-500/5 text-gray-300' : 'bg-violet-50 text-gray-700'}`}>
-            <div className="flex items-start gap-2">
-              <Zap size={14} className="flex-shrink-0 mt-0.5" style={{ color: teal }} />
-              <p>
-                برای شروع هر جلسه، روی دکمه «شروع جلسه» همان روز کلیک کنید.
-                اگر روز تمرین شما تغییر کرده، می‌توانید هر روزی را انتخاب کنید.
-              </p>
-            </div>
-          </div>
-        </div>
+        {/* Phase 10: Deload Badge */}
+        <DeloadBadge program={program} />
 
-        {/* Volume Summary (Effective Sets) */}
+        {/* Phase 10: Periodization Card */}
+        <PeriodizationCard program={program} />
 
-
+        {/* Volume Summary */}
         {program.weeklyVolumeSummary && (
-
-
           <VolumeSummary
-
-
             weeklyVolume={program.weeklyVolumeSummary as any}
-
-
-            experience={(program.metadata?.experience as any) || 'intermediate'}
-
-
-            goal={(program.metadata?.goal as any) || 'hypertrophy'}
-
-
+            experience={(program.metadata?.experience as any) || (program.experience as any) || 'intermediate'}
+            goal={(program.metadata?.goal as any) || (program.goal as any) || 'hypertrophy'}
             priorityMuscles={program.metadata?.priorityMuscles || []}
-
-
             isDark={isDark}
-
-
           />
-
-
         )}
 
-        {/* فاز 4: کارت ایمنی آسیب‌ها */}
+        {/* Safety Report */}
         {safetyReport && <SafetyReportCard report={safetyReport} />}
-
-
-
 
         {/* Days List */}
         <h2 className={`font-black text-sm px-1 ${textMain}`}>جلسات تمرینی</h2>
 
-        {days.map((day: any, idx: number) => {
+        {days.map((day: WorkoutDay, idx: number) => {
           const isExpanded = expandedDay === idx;
           const exercises = day.exercises || [];
-          const totalSets = exercises.reduce((a: number, e: any) => a + (Number(e.sets) || 0), 0);
+          const totalSets = exercises.reduce(
+            (a, e) => a + normalizeSets(e.sets as unknown as any).length,
+            0
+          );
           const dayName = day.weekday || day.day || PERSIAN_WEEKDAYS[idx % 7];
 
           return (
-            <div
-              key={idx}
-              className={`rounded-2xl border overflow-hidden transition-all ${borderCard} ${cardBg}`}
-            >
-              {/* Day Header */}
+            <div key={idx} className={`rounded-2xl border overflow-hidden transition-all ${borderCard} ${cardBg}`}>
               <button
-                onClick={() => {
-                  soundEffects.playClick();
-                  setExpandedDay(isExpanded ? null : idx);
-                }}
+                onClick={() => { soundEffects.playClick(); setExpandedDay(isExpanded ? null : idx); }}
                 className="w-full p-4 flex items-center justify-between text-right"
               >
                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <div
-                    className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 text-base font-black"
-                    style={{ background: `${teal}20`, color: teal }}
-                  >
+                  <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 text-base font-black" style={{ background: `${teal}20`, color: teal }}>
                     {toPersianNumber(idx + 1)}
                   </div>
                   <div className="min-w-0 flex-1">
                     <h3 className={`font-black text-sm truncate ${textMain}`}>{dayName}</h3>
                     <p className={`text-[11px] ${textSub} mt-0.5`}>
                       {toPersianNumber(exercises.length)} حرکت · {toPersianNumber(totalSets)} ست
-                      {day.estimatedDuration ? ` · ~${toPersianNumber(day.estimatedDuration)} دقیقه` : ''}
                     </p>
                   </div>
                 </div>
-                {isExpanded ? (
-                  <ChevronUp size={20} className={textSub} />
-                ) : (
-                  <ChevronDown size={20} className={textSub} />
-                )}
+                {isExpanded ? <ChevronUp size={20} className={textSub} /> : <ChevronDown size={20} className={textSub} />}
               </button>
 
-              {/* Day Content */}
               {isExpanded && (
                 <div className="px-4 pb-4 space-y-2">
-                  {/* Exercises */}
-                  {exercises.map((ex: any, exIdx: number) => (
-                    <div
-                      key={exIdx}
-                      className={`flex items-center gap-2 p-2.5 rounded-xl ${isDark ? 'bg-white/5' : 'bg-gray-50'}`}
-                    >
-                      <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-black flex-shrink-0 ${isDark ? 'bg-white/10 text-white' : 'bg-white text-gray-600'}`}>
-                        {toPersianNumber(exIdx + 1)}
+                  {exercises.map((ex: Exercise, exIdx: number) => {
+                    const sets = normalizeSets(ex.sets as unknown as any);
+                    const tech = sets[0]?.technique;
+                    return (
+                      <div key={exIdx} className={`p-3 rounded-xl ${isDark ? 'bg-white/5' : 'bg-gray-50'}`}>
+                        <div className="flex items-center gap-2">
+                          <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-black flex-shrink-0 ${isDark ? 'bg-white/10 text-white' : 'bg-white text-gray-600'}`}>
+                            {toPersianNumber(exIdx + 1)}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <p className={`text-xs font-bold truncate ${textMain}`}>{ex.name}</p>
+                              {tech && <TechniqueBadge technique={tech} compact />}
+                            </div>
+                            <p className={`text-[10px] ${textSub}`}>
+                              {toPersianNumber(sets.length)} ست × {ex.reps || '—'}
+                              {ex.rest ? ` · استراحت ${toPersianNumber(ex.rest)} ثانیه` : ''}
+                            </p>
+                          </div>
+                          {(ex.id || (ex as any).exerciseId) && (
+                            <button
+                              onClick={() => {
+                                soundEffects.playClick();
+                                setSubstituteTarget({
+                                  dayIdx: idx, exIdx,
+                                  exerciseId: ex.id || (ex as any).exerciseId,
+                                  exerciseName: ex.name,
+                                });
+                              }}
+                              className={`p-2 rounded-lg flex-shrink-0 min-h-[44px] min-w-[44px] ${isDark ? 'hover:bg-white/10 text-gray-400' : 'hover:bg-gray-200 text-gray-500'}`}
+                              aria-label="تغییر حرکت"
+                            >
+                              <RefreshCw size={14} />
+                            </button>
+                          )}
+                        </div>
                       </div>
-                      <div className="min-w-0 flex-1">
-                        <p className={`text-xs font-bold truncate ${textMain}`}>{ex.name}</p>
-                        <p className={`text-[10px] ${textSub}`}>
-                          {toPersianNumber(ex.sets || 0)} ست × {ex.reps || '—'}
-                          {ex.rest ? ` · استراحت ${toPersianNumber(ex.rest)} ثانیه` : ''}
-                        </p>
-                      </div>
-                      {(ex.exerciseId || ex.id) && (
-                        <button
-                          onClick={() => {
-                            soundEffects.playClick();
-                            setSubstituteTarget({
-                              dayIdx: idx,
-                              exIdx,
-                              exerciseId: ex.exerciseId || ex.id,
-                              exerciseName: ex.name,
-                            });
-                          }}
-                          className={`p-1.5 rounded-lg flex-shrink-0 ${isDark ? 'hover:bg-white/10 text-gray-400' : 'hover:bg-gray-200 text-gray-500'}`}
-                          title="تغییر حرکت"
-                        >
-                          <RefreshCw size={14} />
-                        </button>
-                      )}
-                    </div>
-                  ))}
+                    );
+                  })}
 
-                  {/* Start Day Button */}
                   <button
                     onClick={() => handleStartDay(idx)}
-                    className="w-full mt-3 py-3 rounded-xl font-black text-sm text-white flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-md"
+                    className="w-full mt-3 py-3 rounded-xl font-black text-sm text-white flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-md min-h-[48px]"
                     style={{ background: `linear-gradient(135deg, ${teal} 0%, ${gold} 100%)` }}
                   >
                     <Play size={16} />
                     شروع جلسه {dayName}
                   </button>
 
-                  {/* Move/Reschedule hint */}
                   <button
-                    onClick={() => {
-                      soundEffects.playClick();
-                      navigate(`/tracker/${idx}?day=${idx}&autoStart=true`);
-                    }}
+                    onClick={() => { soundEffects.playClick(); navigate(`/tracker/${idx}?day=${idx}&autoStart=true`); }}
                     className={`w-full py-2 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}
                   >
                     <ArrowRightLeft size={12} />
