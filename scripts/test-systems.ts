@@ -6,9 +6,10 @@
 import {
   generateOfflineWorkout,
   getProgramSystem,
+  selectSplit,
 } from '../src/engine';
 import { SAMPLE_PROFILE } from '../src/data/defaultPlans';
-import type { AthleteProfile, WorkoutSession } from '../src/types';
+import type { AthleteProfile, Goal, WorkoutSession } from '../src/types';
 import type { GeneratedProgram, GeneratedSet } from '../src/engine/types/program';
 
 // ═══════════════════════════════════════════════════════════
@@ -252,3 +253,51 @@ console.log(`\n📌 حجم deload: ${deloadSets.length} ست`);
 console.log(`📌 حجم عادی: ${regularSets.length} ست`);
 console.log(`📌 کاهش: ${Math.round((1 - deloadSets.length / regularSets.length) * 100)}%`);
 console.log('✅ تست Deload کامل شد');
+
+// ═══════════════════════════════════════════════════════════
+//  Phase 9 — Split Selection E2E
+// ═══════════════════════════════════════════════════════════
+
+type SplitCase = {
+  name: string;
+  days: number;
+  experience: AthleteProfile['experience'];
+  goal: AthleteProfile['primaryGoal'];
+  expected: string;
+};
+
+function testSplitSelection(): void {
+  printHeader('Phase 9 — Split Selection E2E');
+
+  const cases: SplitCase[] = [
+    { name: 'beginner 3 rooz', days: 3, experience: 'beginner', goal: 'general_fitness', expected: 'full_body' },
+    { name: 'beginner 4 rooz', days: 4, experience: 'beginner', goal: 'general_fitness', expected: 'upper_lower' },
+    { name: 'intermediate 4 strength', days: 4, experience: 'intermediate', goal: 'strength', expected: 'push_pull' },
+    { name: 'intermediate 4 hypo', days: 4, experience: 'intermediate', goal: 'hypertrophy', expected: 'torso_limbs' },
+    { name: 'advanced 4', days: 4, experience: 'advanced', goal: 'hypertrophy', expected: 'torso_limbs' },
+    { name: 'advanced 5 hypo', days: 5, experience: 'advanced', goal: 'hypertrophy', expected: 'arnold_split' },
+    { name: 'advanced 5 strength', days: 5, experience: 'advanced', goal: 'strength', expected: 'bro_split' },
+    { name: 'advanced 6 hypo', days: 6, experience: 'advanced', goal: 'hypertrophy', expected: 'arnold_split' },
+    { name: 'advanced 6 strength', days: 6, experience: 'advanced', goal: 'strength', expected: 'ppl_ul_hybrid' },
+  ];
+
+  for (const testCase of cases) {
+    const profile: AthleteProfile = {
+      ...SYSTEMS_TEST_PROFILE,
+      name: 'Split E2E - ' + testCase.name,
+      experience: testCase.experience,
+      trainingDays: testCase.days,
+      primaryGoal: testCase.goal,
+    };
+    const plan = selectSplit(testCase.days, testCase.experience, testCase.goal as Goal);
+    const generated = generateOfflineWorkout(profile);
+
+    check(testCase.name + ': plan.type', plan.type === testCase.expected, plan.type + ' != ' + testCase.expected);
+    check(testCase.name + ': metadata.splitType', generated.splitType === testCase.expected, String(generated.splitType) + ' != ' + testCase.expected);
+    check(testCase.name + ': days', generated.days.length === testCase.days, generated.days.length + ' != ' + testCase.days);
+    check(testCase.name + ': sessions', plan.sessions.length === testCase.days, plan.sessions.length + ' != ' + testCase.days);
+    check(testCase.name + ': valid', plan.sessions.every((s) => Boolean(s.focus) && Boolean(s.title) && s.muscleGroups.length > 0));
+  }
+}
+
+testSplitSelection();
