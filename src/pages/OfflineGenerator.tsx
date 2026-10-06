@@ -101,6 +101,10 @@ export default function OfflineGenerator() {
           rest: ex.sets[0]?.restSeconds || 90,
           tempo: ex.sets[0]?.tempo,
           rir: ex.sets[0]?.targetRIR,
+          loadMethod:
+            ex.sets.find((set) => set.technique)?.techniqueNameFa ||
+            ex.sets.find((set) => set.technique)?.technique ||
+            undefined,
           targetMuscle: ex.primaryMuscle,
           primaryMuscle: ex.primaryMuscle,
           secondaryMuscles: ex.secondaryMuscles || [],
