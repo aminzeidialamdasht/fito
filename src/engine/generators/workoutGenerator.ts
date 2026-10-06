@@ -106,7 +106,8 @@ export function generateWorkoutProgram(
       muscle,
       analysis.experience,
       analysis.goal,
-      isPriority
+      isPriority,
+      analysis.secondaryGoal,
     );
     muscleWeeklyTargets[muscle] = target.target;
   }

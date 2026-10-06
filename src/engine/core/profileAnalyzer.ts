@@ -15,6 +15,7 @@ export interface ProfileAnalysis {
   bmiCategory: string;
   experience: ExperienceLevel;
   goal: Goal;
+  secondaryGoal?: Goal;
   avoidedExercises: string[];
   bodyFrame?: 'ectomorph' | 'mesomorph' | 'endomorph';
   dominantLimbLength?: 'short' | 'average' | 'long';
@@ -92,6 +93,11 @@ function determineGoal(profile: AthleteProfile): Goal {
   return goal;
 }
 
+function determineSecondaryGoal(profile: AthleteProfile): Goal | undefined {
+  const secondaryGoal = profile.secondaryGoal?.trim();
+  return secondaryGoal ? (secondaryGoal as Goal) : undefined;
+}
+
 /**
  * تبدیل مدت زمان به هفته
  */
@@ -131,6 +137,7 @@ export function analyzeProfile(profile: AthleteProfile): ProfileAnalysis {
 
   const experience = determineExperience(profile);
   const goal = determineGoal(profile);
+  const secondaryGoal = determineSecondaryGoal(profile);
 
   const rawTrainingDays = Number(profile.trainingDays) || 4;
   const weeklyTrainingDays = Math.min(7, Math.max(2, Math.round(rawTrainingDays)));
@@ -147,6 +154,7 @@ export function analyzeProfile(profile: AthleteProfile): ProfileAnalysis {
     bmiCategory: categorizeBMI(bmi),
     experience,
     goal,
+    secondaryGoal,
     avoidedExercises: profile.avoidedExercises || [],
     bodyFrame: profile.bodyMeasurements?.bodyFrame,
     dominantLimbLength: profile.bodyMeasurements?.dominantLimbLength,

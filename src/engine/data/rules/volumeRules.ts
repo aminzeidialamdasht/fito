@@ -104,11 +104,18 @@ export function getTargetWeeklyVolume(
   muscle: MuscleGroup,
   experience: ExperienceLevel,
   goal: Goal,
-  isPriority: boolean = false
+  isPriority: boolean = false,
+  secondaryGoal?: Goal
 ): { min: number; max: number; target: number } {
   const base = BASE_VOLUME_BY_EXPERIENCE[experience];
   const muscleMultiplier = MUSCLE_VOLUME_MULTIPLIER[muscle] || 1.0;
-  const goalModifier = GOAL_VOLUME_MODIFIER[goal] || 1.0;
+  const primaryModifier = GOAL_VOLUME_MODIFIER[goal] || 1.0;
+  const secondaryModifier = secondaryGoal
+    ? GOAL_VOLUME_MODIFIER[secondaryGoal] || 1.0
+    : primaryModifier;
+  const goalModifier = secondaryGoal
+    ? (primaryModifier + secondaryModifier) / 2
+    : primaryModifier;
   const priorityModifier = isPriority ? getPriorityModifier(muscle) : 1.0;
 
   const target = Math.round(base.mav * muscleMultiplier * goalModifier * priorityModifier);
