@@ -118,6 +118,31 @@ function scoreExercise(
 /**
  * انتخاب حرکات برای یک عضله مشخص
  */
+
+/**
+ * بررسی می‌کند آیا حرکت در لیست ممنوعه‌های کاربر است
+ */
+function isAvoidedExercise(exercise: Exercise, avoidedExercises: string[]): boolean {
+  if (avoidedExercises.length === 0) return false;
+
+  const exerciseKeys = [
+    exercise.id,
+    exercise.name,
+    exercise.englishName,
+  ]
+    .filter(Boolean)
+    .map((value) => value.toLowerCase().trim());
+
+  return avoidedExercises.some((avoided) => {
+    const avoidedKey = avoided.toLowerCase().trim();
+    return exerciseKeys.some(
+      (exerciseKey) =>
+        exerciseKey === avoidedKey ||
+        exerciseKey.includes(avoidedKey) ||
+        avoidedKey.includes(exerciseKey)
+    );
+  });
+}
 export function selectExercisesForMuscle(
   options: ExerciseSelectionOptions
 ): Exercise[] {
@@ -131,6 +156,7 @@ export function selectExercisesForMuscle(
   let candidates = ALL_EXERCISES.filter((ex) => {
     if (ex.primaryMuscle !== muscle && !ex.secondaryMuscles.includes(muscle)) return false;
     if (alreadySelected.includes(ex.id)) return false;
+    if (isAvoidedExercise(ex, analysis.avoidedExercises)) return false;
     if (!canPerform(ex, availableEquipment)) return false;
     if (!isSafeForUser(ex, analysis.safeInjuries)) return false;
     if (!isSuitableDifficulty(ex, analysis.experience)) return false;
@@ -144,6 +170,7 @@ export function selectExercisesForMuscle(
     candidates = ALL_EXERCISES.filter((ex) => {
       if (ex.primaryMuscle !== muscle && !ex.secondaryMuscles.includes(muscle)) return false;
       if (alreadySelected.includes(ex.id)) return false;
+      if (isAvoidedExercise(ex, analysis.avoidedExercises)) return false;
       if (!isSafeForUser(ex, analysis.safeInjuries)) return false;
       return true;
     });

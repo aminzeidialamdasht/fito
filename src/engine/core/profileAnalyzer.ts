@@ -15,6 +15,7 @@ export interface ProfileAnalysis {
   bmiCategory: string;
   experience: ExperienceLevel;
   goal: Goal;
+  avoidedExercises: string[];
   isBeginnerFriendly: boolean;
   hasSpineIssue: boolean;
   hasShoulderIssue: boolean;
@@ -144,6 +145,7 @@ export function analyzeProfile(profile: AthleteProfile): ProfileAnalysis {
     bmiCategory: categorizeBMI(bmi),
     experience,
     goal,
+    avoidedExercises: profile.avoidedExercises || [],
     isBeginnerFriendly: experience === 'beginner',
     hasSpineIssue,
     hasShoulderIssue,
