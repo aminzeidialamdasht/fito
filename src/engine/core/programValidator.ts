@@ -22,6 +22,15 @@ import type { GeneratedProgram, GeneratedDay } from '../types/program';
 import { getTargetWeeklyVolume } from '../data/rules/volumeRules';
 import { analyzeProgramSafety } from './injurySafetyEngine';
 
+const ACCESSORY_MUSCLES = new Set<MuscleGroup>([
+  'lower_back',
+  'traps',
+  'forearms',
+  'obliques',
+  'calves',
+  'abs',
+]);
+
 export type Severity = 'error' | 'warning' | 'info';
 
 export interface ValidationIssue {
@@ -146,7 +155,10 @@ function checkWeeklyVolume(program: GeneratedProgram, issues: ValidationIssue[])
   for (const [muscle, vol] of Object.entries(volume)) {
     if (vol <= 0) continue;
 
-    const isPriority = false; // TODO: از metadata بخوان
+    const priorityMuscles = new Set(
+      (program.metadata?.priorityMuscles || []) as MuscleGroup[],
+    );
+    const isPriority = priorityMuscles.has(muscle as MuscleGroup);
     const target = getTargetWeeklyVolume(
       muscle as MuscleGroup,
       program.experience,
@@ -155,7 +167,7 @@ function checkWeeklyVolume(program: GeneratedProgram, issues: ValidationIssue[])
     );
 
     // کمتر از MEV
-    if (vol < target.min) {
+    if (vol < target.min && !ACCESSORY_MUSCLES.has(muscle as MuscleGroup)) {
       const gap = target.min - vol;
       issues.push({
         severity: gap > target.min * 0.4 ? 'error' : 'warning',
@@ -230,8 +242,30 @@ function checkMuscleFrequency(program: GeneratedProgram, issues: ValidationIssue
  * ۵. اولویت‌دارها حجم بیشتر گرفته باشند
  */
 function checkPriorityMuscles(program: GeneratedProgram, issues: ValidationIssue[]) {
-  // فعلاً چک نمی‌کنیم چون priorityMuscles در metadata نیست
-  // TODO: اضافه شود در فاز بعد
+  const priorityMuscles = (program.metadata?.priorityMuscles || [])
+    .filter((muscle): muscle is MuscleGroup =>
+      Object.prototype.hasOwnProperty.call(program.weeklyVolumeSummary, muscle)
+    );
+
+  for (const muscle of priorityMuscles) {
+    const volume = program.weeklyVolumeSummary[muscle] || 0;
+    const target = getTargetWeeklyVolume(
+      muscle,
+      program.experience,
+      program.goal,
+      true,
+    );
+
+    if (volume < target.min) {
+      issues.push({
+        severity: ACCESSORY_MUSCLES.has(muscle) ? 'warning' : 'error',
+        code: 'PRIORITY_VOLUME_TOO_LOW',
+        message: `عضله اولویت‌دار ${muscle} (${volume.toFixed(1)} ست) حجم کافی دریافت نکرده است`,
+        muscle,
+        suggestion: `حجم این عضله حداقل به ${target.min} ست مؤثر در هفته برسد`,
+      });
+    }
+  }
 }
 
 /**
