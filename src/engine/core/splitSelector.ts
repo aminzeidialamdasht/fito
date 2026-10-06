@@ -26,23 +26,36 @@ function determineSplitType(
   experience: ExperienceLevel,
   goal: Goal
 ): SplitType {
-  // مبتدی‌ها همیشه Full Body
+  const strengthGoal = goal === 'strength' || goal === 'competition';
+  const hypertrophyGoal = goal === 'hypertrophy' || goal === 'recomposition';
+
+  if (days <= 2) return 'full_body';
+
   if (experience === 'beginner') {
     if (days <= 3) return 'full_body';
     return 'upper_lower';
   }
 
-  // حرفه‌ای‌ها
-  if (experience === 'advanced' || experience === 'professional') {
-    if (days <= 3) return 'full_body';
-    if (days === 4) return 'upper_lower';
-    if (days === 5) return 'ppl_ul_hybrid';
-    return 'push_pull_legs';
+  if (days === 3) return 'push_pull_legs';
+
+  if (days === 4) {
+    if (experience === 'advanced' || experience === 'professional') {
+      return 'torso_limbs';
+    }
+    return strengthGoal ? 'push_pull' : 'torso_limbs';
   }
 
-  // متوسط‌ها
-  if (days <= 3) return 'full_body';
-  if (days === 4) return 'upper_lower';
+  if (days === 5) {
+    if (experience === 'advanced' || experience === 'professional') {
+      return hypertrophyGoal ? 'arnold_split' : 'bro_split';
+    }
+    return strengthGoal ? 'upper_lower_push_pull_legs' : 'ppl_ul_hybrid';
+  }
+
+  if (experience === 'advanced' || experience === 'professional') {
+    return strengthGoal ? 'ppl_ul_hybrid' : 'arnold_split';
+  }
+
   return 'push_pull_legs';
 }
 
@@ -105,22 +118,66 @@ function buildSessions(splitType: SplitType, days: number): SplitSession[] {
       return sessions;
 
     case 'ppl_ul_hybrid':
-      return [
+      if (days === 6) {
+        return ([
+          { focus: 'push', title: 'پرس ۱', muscleGroups: ['chest', 'front_delts', 'side_delts', 'triceps'] },
+          { focus: 'pull', title: 'کشش ۱', muscleGroups: ['upper_back', 'lats', 'rear_delts', 'biceps'] },
+          { focus: 'legs', title: 'پا ۱', muscleGroups: ['quads', 'hamstrings', 'glutes', 'calves', 'abs'] },
+          { focus: 'push', title: 'پرس ۲', muscleGroups: ['chest', 'front_delts', 'side_delts', 'triceps'] },
+          { focus: 'pull', title: 'کشش ۲', muscleGroups: ['upper_back', 'lats', 'rear_delts', 'biceps'] },
+          { focus: 'legs', title: 'پا ۲', muscleGroups: ['quads', 'hamstrings', 'glutes', 'calves', 'abs'] },
+        ] as SplitSession[]).slice(0, days);
+      }
+      return ([
         { focus: 'push', title: 'پرس', muscleGroups: ['chest', 'front_delts', 'side_delts', 'triceps'] },
         { focus: 'pull', title: 'کشش', muscleGroups: ['upper_back', 'lats', 'rear_delts', 'biceps'] },
         { focus: 'legs', title: 'پا', muscleGroups: ['quads', 'hamstrings', 'glutes', 'calves', 'abs'] },
         { focus: 'upper', title: 'بالاتنه', muscleGroups: ['chest', 'upper_back', 'side_delts', 'rear_delts', 'biceps', 'triceps'] },
         { focus: 'lower', title: 'پایین‌تنه', muscleGroups: ['quads', 'hamstrings', 'glutes', 'calves', 'abs'] },
-      ];
+      ] as SplitSession[]).slice(0, days);
 
+    case 'upper_lower_push_pull_legs':
+      return ([
+        { focus: 'upper', title: 'بالاتنه', muscleGroups: ['chest', 'upper_back', 'lats', 'front_delts', 'side_delts', 'rear_delts', 'biceps', 'triceps'] },
+        { focus: 'lower', title: 'پایین‌تنه', muscleGroups: ['quads', 'hamstrings', 'glutes', 'calves', 'abs'] },
+        { focus: 'push', title: 'پرس', muscleGroups: ['chest', 'front_delts', 'side_delts', 'triceps'] },
+        { focus: 'pull', title: 'کشش', muscleGroups: ['upper_back', 'lats', 'traps', 'rear_delts', 'biceps', 'forearms'] },
+        { focus: 'legs', title: 'پا', muscleGroups: ['quads', 'hamstrings', 'glutes', 'calves', 'abs'] },
+      ] as SplitSession[]).slice(0, days);
+
+    case 'push_pull':
+      return ([
+        { focus: 'push', title: 'پرس', muscleGroups: ['chest', 'front_delts', 'side_delts', 'triceps'] },
+        { focus: 'pull', title: 'کشش', muscleGroups: ['upper_back', 'lats', 'traps', 'rear_delts', 'biceps', 'forearms'] },
+        { focus: 'push', title: 'پرس', muscleGroups: ['chest', 'front_delts', 'side_delts', 'triceps'] },
+        { focus: 'pull', title: 'کشش', muscleGroups: ['upper_back', 'lats', 'traps', 'rear_delts', 'biceps', 'forearms'] },
+      ] as SplitSession[]).slice(0, days);
+
+    case 'torso_limbs':
+      return ([
+        { focus: 'torso', title: 'تنه', muscleGroups: ['chest', 'upper_back', 'lats', 'front_delts', 'side_delts', 'rear_delts'] },
+        { focus: 'limbs', title: 'اندام', muscleGroups: ['biceps', 'triceps', 'forearms', 'quads', 'hamstrings', 'glutes', 'calves', 'abs'] },
+        { focus: 'torso', title: 'تنه', muscleGroups: ['chest', 'upper_back', 'lats', 'front_delts', 'side_delts', 'rear_delts'] },
+        { focus: 'limbs', title: 'اندام', muscleGroups: ['biceps', 'triceps', 'forearms', 'quads', 'hamstrings', 'glutes', 'calves', 'abs'] },
+      ] as SplitSession[]).slice(0, days);
+
+    case 'arnold_split':
+      return ([
+        { focus: 'chest_back', title: 'سینه و پشت ۱', muscleGroups: ['chest', 'upper_back', 'lats', 'traps'] },
+        { focus: 'shoulders_arms', title: 'سرشانه و بازو ۱', muscleGroups: ['front_delts', 'side_delts', 'rear_delts', 'biceps', 'triceps', 'forearms'] },
+        { focus: 'legs', title: 'پا ۱', muscleGroups: ['quads', 'hamstrings', 'glutes', 'calves', 'abs'] },
+        { focus: 'chest_back', title: 'سینه و پشت ۲', muscleGroups: ['chest', 'upper_back', 'lats', 'traps'] },
+        { focus: 'shoulders_arms', title: 'سرشانه و بازو ۲', muscleGroups: ['front_delts', 'side_delts', 'rear_delts', 'biceps', 'triceps', 'forearms'] },
+        { focus: 'legs', title: 'پا ۲', muscleGroups: ['quads', 'hamstrings', 'glutes', 'calves', 'abs'] },
+      ] as SplitSession[]).slice(0, days);
     case 'bro_split':
-      return [
-        { focus: 'chest_back', title: 'سینه و پشت', muscleGroups: ['chest', 'upper_back', 'lats'] },
-        { focus: 'shoulders_arms', title: 'سرشانه و بازو', muscleGroups: ['front_delts', 'side_delts', 'rear_delts', 'biceps', 'triceps'] },
-        { focus: 'legs', title: 'پا', muscleGroups: ['quads', 'hamstrings', 'glutes', 'calves'] },
-        { focus: 'chest_triceps', title: 'سینه و پشت‌بازو', muscleGroups: ['chest', 'triceps'] },
-        { focus: 'back_biceps', title: 'پشت و جلوبازو', muscleGroups: ['upper_back', 'lats', 'biceps'] },
-      ];
+      return ([
+        { focus: 'chest', title: 'روز سینه', muscleGroups: ['chest'] },
+        { focus: 'back', title: 'روز پشت', muscleGroups: ['upper_back', 'lats', 'traps'] },
+        { focus: 'shoulders', title: 'روز سرشانه', muscleGroups: ['front_delts', 'side_delts', 'rear_delts'] },
+        { focus: 'arms', title: 'روز بازو', muscleGroups: ['biceps', 'triceps', 'forearms'] },
+        { focus: 'legs', title: 'روز پا', muscleGroups: ['quads', 'hamstrings', 'glutes', 'calves', 'abs'] },
+      ] as SplitSession[]).slice(0, days);
 
     default:
       return [];
