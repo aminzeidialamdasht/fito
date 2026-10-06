@@ -85,35 +85,6 @@ function getMuscleFrequency(
 }
 
 /**
- * تخصیص حجم برای کل برنامه
- */
-export function allocateVolume(
-  muscles: MuscleGroup[],
-  splitType: SplitType,
-  trainingDays: number,
-  experience: ExperienceLevel,
-  goal: Goal,
-  priorityMuscles: string[] = []
-): VolumeAllocation {
-  const weeklyTargets: Partial<Record<MuscleGroup, number>> = {};
-  const exerciseCounts: Record<number, Partial<Record<MuscleGroup, number>>> = {};
-
-  // ۱. محاسبه هدف هفتگی برای هر عضله
-  for (const muscle of muscles) {
-    const isPriority = priorityMuscles.includes(muscle);
-    const target = getTargetWeeklyVolume(muscle, experience, goal, isPriority);
-    weeklyTargets[muscle] = target.target;
-  }
-
-  return {
-    weeklyTargets,
-    sessionBudgets: [], // بعداً پر می‌شود
-    exerciseCounts,
-  };
-}
-
-
-/**
  * ضریب تبدیل Effective Target به Direct Target
  *
  * چون Effective Sets = Direct + (Secondary × 0.5)، باید Target Effective
