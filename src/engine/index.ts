@@ -83,3 +83,47 @@ export {
 export { analyzeProfile } from './core/profileAnalyzer';
 export { selectSplit, getSplitName } from './core/splitSelector';
 export { selectExercisesForMuscle, selectExercisesForSession } from './core/exerciseSelector';
+
+// ============================================
+// Phase 6 — Advanced Training Systems
+// ============================================
+
+// Types
+export type {
+  TrainingTechnique,
+  TechniqueConfig,
+  WeeklyProgressionStep,
+} from './types/program';
+
+export type {
+  ProgramSystemId,
+  ProgramSystemRule,
+  TechniqueRule,
+} from './data/rules/trainingSystems';
+
+export type {
+  ExerciseSlot,
+} from './core/systemSelector';
+
+// Data
+export {
+  PROGRAM_SYSTEMS,
+  TECHNIQUES,
+  TECHNIQUES_BASIC,
+  TECHNIQUES_ADVANCED,
+} from './data/rules/trainingSystems';
+
+// Functions
+export {
+  getTechniqueRule,
+  getProgramSystem,
+} from './data/rules/trainingSystems';
+
+export {
+  selectProgramSystem,
+  planSessionTechniques,
+} from './core/systemSelector';
+
+export {
+  applyTechniquesToExercises,
+} from './core/techniqueApplier';
