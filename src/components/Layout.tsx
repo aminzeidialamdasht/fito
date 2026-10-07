@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, User, Dumbbell, Calendar,
   Trophy, Menu, X, Sun, Moon, Home,
-  Sparkles, Apple, Pill, Zap, FileText
+  Sparkles, Apple, Pill, Zap, FileText, Settings as SettingsIcon
 } from 'lucide-react';
 import { useState } from 'react';
 import { getPersianDate } from '../utils/jalali';
@@ -106,6 +106,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <button onClick={() => navigate('/settings')} className={'p-2 rounded-xl transition-all ' + (isDark ? 'bg-white/5 border border-white/10 text-[#d4af37]' : 'bg-[#f5f3ff] border border-[#a78bfa]/30 text-[#8b5cf6]')} title="تنظیمات">
+              <SettingsIcon size={18} />
+            </button>
             <button onClick={toggleTheme} className={'p-2 rounded-xl transition-all ' + (isDark ? 'bg-white/5 border border-white/10 text-[#d4af37]' : 'bg-[#f5f3ff] border border-[#a78bfa]/30 text-[#8b5cf6]')} title={isDark ? 'تم روشن' : 'تم تاریک'}>
               {isDark ? <Sun size={18} /> : <Moon size={18} />}
             </button>

@@ -26,6 +26,7 @@ import GeneratorEntry from './pages/generators/GeneratorEntry';
 import Onboarding from './pages/Onboarding';
 import ProgramDetail from './pages/program/ProgramDetail';
 import Subscription from './pages/Subscription';
+import Settings from './pages/Settings';
 import PremiumGate from './components/PremiumGate';
 import { initializeBilling } from './billing';
 
@@ -93,6 +94,7 @@ function AppContent({ showWelcome, onContinue }: { showWelcome: boolean; onConti
         <Route path="/generate" element={<Navigate to="/generate/workout" replace />} />
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/subscription" element={<Layout><Subscription /></Layout>} />
+        <Route path="/settings" element={<Layout><Settings /></Layout>} />
         <Route path="/generate/:type" element={<GeneratorEntry />} />
         <Route path="/generate/:type/ready" element={<Layout><OfflineGenerator /></Layout>} />
         <Route path="/nutrition" element={<Layout><PremiumGate feature="nutrition"><Nutrition /></PremiumGate></Layout>} />
