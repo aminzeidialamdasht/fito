@@ -5,7 +5,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { soundEffects } from '../../utils/sound';
 import { toPersianNumber } from '../../utils/jalali';
 import {
-  ChevronLeft, Dumbbell, Play, ChevronDown, ChevronUp,
+  ChevronLeft, Dumbbell, Play, ChevronDown, ChevronUp, Calendar,
   CheckCircle2, ArrowRightLeft, RefreshCw,
 } from 'lucide-react';
 import SubstituteModal from '../../components/SubstituteModal';
@@ -15,14 +15,21 @@ import ProgramIdentityCard from '../../components/program/ProgramIdentityCard';
 import DeloadBadge from '../../components/program/DeloadBadge';
 import PeriodizationCard from '../../components/program/PeriodizationCard';
 import TechniqueBadge from '../../components/program/TechniqueBadge';
+import Card from '../../components/ui/Card';
+import Badge from '../../components/ui/Badge';
+import SectionHeader from '../../components/ui/SectionHeader';
 import { analyzeProgramSafety } from '../../engine/core/injurySafetyEngine';
 import { analyzeProfile } from '../../engine/core/profileAnalyzer';
 import { normalizeSets, countTotalSets } from '../../utils/programHelpers';
 import type { WorkoutProgram, WorkoutDay, Exercise } from '../../types';
 import type { TrainingTechnique } from '../../engine/types/program';
 import { generateWorkoutProgram } from '../../engine/generators/workoutGenerator';
-import { getCurrentWeek } from '../../utils/weekCalculator';
 import { convertGeneratedToWorkout } from '../../utils/programConverter';
+import {
+  getCurrentWeek,
+  getDaysUntilNextWeek,
+  getWeekScheme,
+} from '../../utils/weekCalculator';
 
 const PERSIAN_WEEKDAYS = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
 
@@ -108,6 +115,14 @@ export default function ProgramDetail() {
   }
 
   const isActive = state.activeProgram === program.id;
+
+  // Phase 11d: شاخص هفته
+  const currentWeek = getCurrentWeek(program as any);
+  const totalWeeks = (program as any).durationWeeks
+    || program.metadata?.weeklyProgression?.length
+    || 4;
+  const weekScheme = getWeekScheme(program as any, currentWeek);
+  const daysUntilNext = getDaysUntilNextWeek(program as any);
   const days = (program as WorkoutProgram).days || [];
 
   const handleStartDay = (dayIndex: number) => {
@@ -164,6 +179,33 @@ export default function ProgramDetail() {
 
         {/* Phase 10: Deload Badge */}
         <DeloadBadge program={program} />
+
+        {/* Phase 11d: Week Indicator */}
+        {currentWeek > 0 && (
+          <Card className="space-y-3">
+            <SectionHeader
+              icon={<Calendar size={18} />}
+              title={`هفته ${toPersianNumber(currentWeek)} از ${toPersianNumber(totalWeeks)}`}
+              subtitle={weekScheme?.label ? `فاز: ${weekScheme.label}` : 'فاز جاری'}
+            />
+            <div className="flex flex-wrap gap-2">
+              {weekScheme?.reps && (
+                <Badge color="info">{weekScheme.reps} تکرار</Badge>
+              )}
+              {typeof weekScheme?.rir === 'number' && (
+                <Badge color="warning">RIR {toPersianNumber(weekScheme.rir)}</Badge>
+              )}
+              {daysUntilNext !== null && daysUntilNext > 0 && (
+                <Badge color="priority">
+                  {toPersianNumber(daysUntilNext)} روز تا هفته بعد
+                </Badge>
+              )}
+              {daysUntilNext === 0 && (
+                <Badge color="success">هفته جدید شروع شد</Badge>
+              )}
+            </div>
+          </Card>
+        )}
 
         {/* Phase 10: Periodization Card */}
         <PeriodizationCard program={program} />
