@@ -16,6 +16,9 @@ import { formatDateJalali, toPersianNumber, getProgramTimelineDetails } from '..
 import AnatomySVG from '../components/AnatomySVG';
 import Card from '../components/ui/Card';
 import ProgressBar from '../components/ui/ProgressBar';
+import PrimaryButton from '../components/ui/PrimaryButton';
+import Input from '../components/ui/Input';
+import EmptyState from '../components/ui/EmptyState';
 import { getTokens } from '../styles/designTokens';
 
 type MeasurementKey = 'weight' | 'chest' | 'waist' | 'hips' | 'arms' | 'thighs' | 'calves' | 'shoulders' | 'neck';
@@ -123,11 +126,13 @@ export default function Progress() {
             <p className={`text-xs mt-0.5 ${textSub}`}>بدن‌سازی · پیشرفت مداوم، انگیزه همیشگی</p>
           </div>
         </div>
-        <button onClick={() => setShowForm(!showForm)}
-          className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-bold text-sm text-black shadow-lg active:scale-95 transition-transform`}
-          style={{ background: teal }}>
+        <PrimaryButton
+          variant="accent"
+          size="md"
+          onClick={() => setShowForm(!showForm)}
+        >
           <Plus size={16} /> ثبت اندازه‌گیری
-        </button>
+        </PrimaryButton>
       </div>
 
       {/* Program Timeline Card */}
@@ -154,9 +159,13 @@ export default function Progress() {
                 <Bell size={22} className="text-amber-500 shrink-0" />
                 <p className="text-xs font-bold">هشدار پایان برنامه — {toPersianNumber(Math.max(0, activeProgramTimeline.daysRemaining))} روز باقی‌مانده</p>
               </div>
-              <button onClick={() => navigate('/prompt')} className="px-3 py-2 rounded-xl text-xs font-bold bg-amber-500 text-black flex items-center gap-1">
+              <PrimaryButton
+                variant="gold"
+                size="sm"
+                onClick={() => navigate('/prompt')}
+              >
                 <Brain size={14} /> پرامپت جدید
-              </button>
+              </PrimaryButton>
             </div>
           )}
           <ProgressBar
@@ -195,16 +204,25 @@ export default function Progress() {
           <h3 className={`font-bold mb-4 flex items-center gap-2`} style={{ color: teal }}><Save size={18}/> ثبت اندازه‌گیری جدید</h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {([['weight','وزن','kg'],['chest','سینه','cm'],['waist','کمر','cm'],['hips','باسن','cm'],['arms','بازو','cm'],['thighs','ران','cm'],['calves','ساق','cm'],['shoulders','شانه','cm'],['neck','گردن','cm']] as const).map(([key, label, unit]) => (
-              <label key={key} className={`text-xs ${textSub}`}>
-                {label} ({unit})
-                <input type="number" value={(form as any)[key] || ''} onChange={e => setForm({ ...form, [key]: Number(e.target.value) })}
-                  className={`mt-1 w-full rounded-lg px-3 py-2 outline-none focus:ring-2 ${isDark ? 'bg-[#0f172a] text-white border border-white/10 focus:ring-violet-500/50' : 'bg-white border border-gray-200 focus:ring-violet-500/30'}`} />
-              </label>
+              <Input
+                key={key}
+                label={`${label} (${unit})`}
+                type="number"
+                inputSize="sm"
+                value={(form as any)[key] || ''}
+                onChange={e => setForm({ ...form, [key]: Number(e.target.value) })}
+              />
             ))}
           </div>
-          <button onClick={save} className="mt-4 px-5 py-2.5 rounded-xl font-bold text-white flex items-center gap-2 w-full justify-center" style={{ background: teal }}>
+          <PrimaryButton
+            variant="accent"
+            size="lg"
+            fullWidth
+            onClick={save}
+            className="mt-4"
+          >
             ذخیره اطلاعات
-          </button>
+          </PrimaryButton>
         </Card>
       )}
 
@@ -212,10 +230,11 @@ export default function Progress() {
       <Card variant="elevated" className="p-5">
         <h3 className={`font-bold flex items-center gap-2 mb-4 ${textMain}`}><TrendingUp size={18} style={{color: teal}}/> روند وزن</h3>
         {weightChartData.length < 2 ? (
-          <div className="text-center py-8" style={{color: textSub}}>
-            <Scale size={36} className="mx-auto mb-2 opacity-40" />
-            <p className="text-sm">حداقل دو اندازه‌گیری لازم است.</p>
-          </div>
+          <EmptyState
+            icon={<Scale size={36} />}
+            title="داده کافی نیست"
+            subtitle="حداقل دو اندازه‌گیری لازم است."
+          />
         ) : (
           <ResponsiveContainer width="100%" height={220}>
             <AreaChart data={weightChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
@@ -260,10 +279,11 @@ export default function Progress() {
         <Card variant="elevated" className="p-5">
           <h3 className={`font-bold flex items-center gap-2 mb-4 ${textMain}`}><Target size={18} style={{color: teal}}/> بالانس عضلانی</h3>
           {balanceData.every(d => d.A === 0) ? (
-            <div className="text-center py-12" style={{color: textSub}}>
-              <Dumbbell size={36} className="mx-auto mb-2 opacity-40" />
-              <p className="text-sm">هنوز جلسه‌ای تکمیل نشده است.</p>
-            </div>
+            <EmptyState
+              icon={<Dumbbell size={36} />}
+              title="هنوز جلسه‌ای تکمیل نشده"
+              subtitle="با تکمیل جلسات تمرینی، بالانس عضلانی نمایش داده می‌شود."
+            />
           ) : (
             <ResponsiveContainer width="100%" height={260}>
               <RadarChart cx="50%" cy="50%" outerRadius="75%" data={balanceData}>
