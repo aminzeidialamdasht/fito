@@ -4,6 +4,7 @@ import { useAppContext } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { soundEffects } from '../utils/sound';
 import type { AthleteProfile } from '../types';
+import { EQUIPMENT_OPTIONS, EQUIPMENT_TYPES } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 import {
   ChevronLeft,
@@ -305,7 +306,7 @@ export default function Onboarding() {
               <Input type="number" value={form.targetWeight} onChange={(v) => updateForm('targetWeight', Number(v))} placeholder="اختیاری" isDark={isDark} />
             </FormField>
 
-            <FormField label="سطح فعالیت روزانه">
+            <FormField label="سطح فعالیت روزانه" hint="برای محاسبه کالری روزانه (TDEE)">
               <Select
                 value={form.activityLevel || 'moderate'}
                 onChange={(v) => updateForm('activityLevel', v)}
@@ -316,6 +317,30 @@ export default function Onboarding() {
                   { value: 'active', label: 'فعال (ورزش ۶-۷ روز)' },
                   { value: 'very_active', label: 'خیلی فعال (کار بدنی سنگین)' },
                 ]}
+                isDark={isDark}
+              />
+            </FormField>
+
+            <FormField label="سطح تجربه تمرینی" hint="برای تعیین نوع اسپلیت و حجم تمرین">
+              <Select
+                value={form.experience || 'intermediate'}
+                onChange={(v) => updateForm('experience', v)}
+                options={[
+                  { value: 'beginner', label: 'مبتدی (کمتر از ۱ سال)' },
+                  { value: 'intermediate', label: 'متوسط (۱-۳ سال)' },
+                  { value: 'advanced', label: 'پیشرفته (۳-۵ سال)' },
+                  { value: 'professional', label: 'حرفه‌ای (بیش از ۵ سال)' },
+                ]}
+                isDark={isDark}
+              />
+            </FormField>
+
+            <FormField label="سابقه تمرینی" hint="برای تنظیم دقیق حجم تمرین">
+              <TextArea
+                value={form.trainingHistory || ''}
+                onChange={(v) => updateForm('trainingHistory', v)}
+                placeholder="مثلاً: ۳ سال بدنسازی، تمرکز روی پرس سینه و اسکوات..."
+                rows={2}
                 isDark={isDark}
               />
             </FormField>
@@ -380,11 +405,58 @@ export default function Onboarding() {
               </FormField>
             </div>
 
-            <FormField label="سابقه آسیب‌ها یا محدودیت‌ها" hint="با Enter یا کاما اضافه کنید">
+            <FormField label="سابقه آسیب‌ها" hint="برای انتخاب حرکات ایمن — با Enter یا کاما اضافه کنید">
               <ArrayInput
                 value={form.injuries || []}
                 onChange={(v) => updateForm('injuries', v)}
                 placeholder="مثلاً: دیسک کمر، زانوی چپ"
+                isDark={isDark}
+              />
+            </FormField>
+
+            <FormField label="جزئیات آسیب‌ها" hint="اختیاری — تاریخ، شدت، وضعیت فعلی">
+              <TextArea
+                value={form.injuryDetails || ''}
+                onChange={(v) => updateForm('injuryDetails', v)}
+                placeholder="مثلاً: پارگی ACL راست ۲ سال پیش، جراحی شده..."
+                rows={2}
+                isDark={isDark}
+              />
+            </FormField>
+
+            <FormField label="محدودیت‌ها" hint="محدودیت‌های حرکتی — با Enter یا کاما">
+              <ArrayInput
+                value={form.limitations || []}
+                onChange={(v) => updateForm('limitations', v)}
+                placeholder="مثلاً: محدودیت دامنه شانه"
+                isDark={isDark}
+              />
+            </FormField>
+
+            <FormField label="تمرینات ممنوع" hint="تمریناتی که نمی‌تونی انجام بدی">
+              <ArrayInput
+                value={form.avoidedExercises || []}
+                onChange={(v) => updateForm('avoidedExercises', v)}
+                placeholder="مثلاً: اسکوات پشت پا، پرس نظامی"
+                isDark={isDark}
+              />
+            </FormField>
+
+            <FormField label="شرایط پزشکی" hint="بیماری‌های زمینه‌ای — با Enter یا کاما">
+              <ArrayInput
+                value={form.healthConditions || []}
+                onChange={(v) => updateForm('healthConditions', v)}
+                placeholder="مثلاً: دیابت، فشار خون"
+                isDark={isDark}
+              />
+            </FormField>
+
+            <FormField label="یادداشت دارو / هورمون" hint="اختیاری — برای تنظیم ریکاوری">
+              <TextArea
+                value={form.hormoneMedNotes || ''}
+                onChange={(v) => updateForm('hormoneMedNotes', v)}
+                placeholder="مثلاً: مصرف مولتی‌ویتامین، تستوسترون..."
+                rows={2}
                 isDark={isDark}
               />
             </FormField>
@@ -393,7 +465,7 @@ export default function Onboarding() {
 
         {currentStep.key === 'training' && (
           <>
-            <FormField label="هدف اصلی تمرین">
+            <FormField label="هدف اصلی تمرین" hint="برای تعیین نوع اسپلیت و حجم">
               <Select
                 value={form.primaryGoal || 'hypertrophy'}
                 onChange={(v) => updateForm('primaryGoal', v)}
@@ -409,15 +481,19 @@ export default function Onboarding() {
               />
             </FormField>
 
-            <FormField label="سطح تجربه">
+            <FormField label="هدف دوم (اختیاری)" hint="برای تکمیل هدف اصلی — نمی‌تونه با هدف اول یکسان باشه">
               <Select
-                value={form.experience || 'intermediate'}
-                onChange={(v) => updateForm('experience', v)}
+                value={form.secondaryGoal || ''}
+                onChange={(v) => updateForm('secondaryGoal', v)}
                 options={[
-                  { value: 'beginner', label: 'مبتدی (کمتر از ۱ سال)' },
-                  { value: 'intermediate', label: 'متوسط (۱-۳ سال)' },
-                  { value: 'advanced', label: 'پیشرفته (۳-۵ سال)' },
-                  { value: 'professional', label: 'حرفه‌ای (بیش از ۵ سال)' },
+                  { value: '', label: 'بدون هدف دوم' },
+                  ...([
+                    { value: 'hypertrophy', label: 'حجم عضلانی' },
+                    { value: 'strength', label: 'قدرت' },
+                    { value: 'fat_loss', label: 'کاهش چربی' },
+                    { value: 'recomposition', label: 'بازترکیب بدن' },
+                    { value: 'general_fitness', label: 'تناسب اندام' },
+                  ].filter(opt => opt.value !== (form.primaryGoal || 'hypertrophy'))),
                 ]}
                 isDark={isDark}
               />
@@ -431,11 +507,11 @@ export default function Onboarding() {
               />
             </FormField>
 
-            <FormField label="مدت هر جلسه (دقیقه)">
+            <FormField label="مدت هر جلسه (دقیقه)" hint="برای تنظیم حجم تمرین">
               <Input type="number" value={form.sessionDuration} onChange={(v) => updateForm('sessionDuration', Number(v))} isDark={isDark} />
             </FormField>
 
-            <FormField label="محل تمرین">
+            <FormField label="محل تمرین" hint="برای انتخاب نوع حرکات">
               <Select
                 value={form.location || 'gym'}
                 onChange={(v) => updateForm('location', v)}
@@ -449,6 +525,43 @@ export default function Onboarding() {
               />
             </FormField>
 
+            <FormField label="نوع تجهیزات" hint="برای انتخاب حرکات قابل انجام">
+              <Select
+                value={form.equipmentType || 'full_gym'}
+                onChange={(v) => updateForm('equipmentType', v)}
+                options={Object.entries(EQUIPMENT_TYPES).map(([value, label]) => ({ value, label }))}
+                isDark={isDark}
+              />
+            </FormField>
+
+            <FormField label="تجهیزات در دسترس" hint="با کلیک انتخاب کنید — برای انتخاب دقیق‌تر حرکات">
+              <div className="flex flex-wrap gap-2">
+                {EQUIPMENT_OPTIONS.map((eq) => {
+                  const isSelected = (form.equipment || []).includes(eq);
+                  return (
+                    <button
+                      key={eq}
+                      type="button"
+                      onClick={() => {
+                        const current = form.equipment || [];
+                        const next = isSelected
+                          ? current.filter((e: string) => e !== eq)
+                          : [...current, eq];
+                        updateForm('equipment', next);
+                      }}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                        isSelected
+                          ? (isDark ? 'bg-violet-500 text-white' : 'bg-violet-500 text-white')
+                          : (isDark ? 'bg-white/5 text-gray-400 border border-white/10' : 'bg-gray-50 text-gray-600 border border-gray-200')
+                      }`}
+                    >
+                      {eq}
+                    </button>
+                  );
+                })}
+              </div>
+            </FormField>
+
             <FormField label="عضلات اولویت‌دار" hint="با کلیک اضافه کنید — با فلش‌ها اولویت را تغییر دهید">
               <PrioritySelect
                 value={form.targetMuscles || []}
@@ -459,9 +572,68 @@ export default function Onboarding() {
               />
             </FormField>
 
-            <FormField label="مدت برنامه (Timeline)">
+            <FormField label="مدت برنامه (Timeline)" hint="دوره برنامه تمرینی">
               <Input value={form.timeline} onChange={(v) => updateForm('timeline', v)} placeholder="مثلاً: ۳ ماه" isDark={isDark} />
             </FormField>
+
+            {/* ═══ بخش ریکاوری ═══ */}
+            <div className={`mt-6 p-4 rounded-2xl border ${isDark ? 'bg-white/5 border-white/10' : 'bg-violet-50 border-violet-100'}`}>
+              <h3 className={`font-bold text-sm mb-4 ${isDark ? 'text-violet-300' : 'text-violet-700'}`}>
+                🛌 اطلاعات ریکاوری
+              </h3>
+
+              <div className="space-y-3">
+                <FormField label="ساعت خواب روزانه" hint="برای تنظیم حجم و ریکاوری">
+                  <Input
+                    type="number"
+                    value={form.sleepHours || 7}
+                    onChange={(v) => updateForm('sleepHours', Number(v))}
+                    isDark={isDark}
+                  />
+                </FormField>
+
+                <FormField label="کیفیت ریکاوری" hint="برای تنظیم حجم تمرین">
+                  <Select
+                    value={form.recoveryQuality || 'good'}
+                    onChange={(v) => updateForm('recoveryQuality', v)}
+                    options={[
+                      { value: 'poor', label: 'ضعیف' },
+                      { value: 'fair', label: 'متوسط' },
+                      { value: 'good', label: 'خوب' },
+                      { value: 'excellent', label: 'عالی' },
+                    ]}
+                    isDark={isDark}
+                  />
+                </FormField>
+
+                <FormField label="سطح استرس روزانه" hint="برای تنظیم شدت تمرین">
+                  <Select
+                    value={form.jobStress || 'medium'}
+                    onChange={(v) => updateForm('jobStress', v)}
+                    options={[
+                      { value: 'low', label: 'کم' },
+                      { value: 'medium', label: 'متوسط' },
+                      { value: 'high', label: 'زیاد' },
+                    ]}
+                    isDark={isDark}
+                  />
+                </FormField>
+
+                <FormField label="شیفت کاری" hint="برای تعیین زمان تمرین">
+                  <Select
+                    value={form.workShift || 'day'}
+                    onChange={(v) => updateForm('workShift', v)}
+                    options={[
+                      { value: 'day', label: 'روز' },
+                      { value: 'evening', label: 'عصر' },
+                      { value: 'night', label: 'شب' },
+                      { value: 'rotating', label: 'شیفتی' },
+                    ]}
+                    isDark={isDark}
+                  />
+                </FormField>
+              </div>
+            </div>
           </>
         )}
       </div>
