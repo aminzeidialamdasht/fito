@@ -14,6 +14,12 @@ import {
 } from '../billing';
 import { soundEffects } from '../utils/sound';
 import { toPersianNumber } from '../utils/jalali';
+import { getTokens } from '../styles/designTokens';
+import Card from '../components/ui/Card';
+import Badge from '../components/ui/Badge';
+import PrimaryButton from '../components/ui/PrimaryButton';
+import Toast from '../components/ui/Toast';
+import LoadingSkeleton from '../components/ui/LoadingSkeleton';
 
 export default function Subscription() {
   const navigate = useNavigate();
@@ -24,15 +30,18 @@ export default function Subscription() {
   const [products, setProducts] = useState<Record<string, Product>>({});
   const [loading, setLoading] = useState<string | null>(null);
   const [initializing, setInitializing] = useState(true);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState<'success' | 'error'>('success');
 
-  const teal = isDark ? '#a78bfa' : '#8b5cf6';
-  const gold = isDark ? '#fbbf24' : '#f59e0b';
-  const bgMain = isDark ? '#0f0e1f' : '#f8fafc';
-  const cardBg = isDark
-    ? 'bg-[#1e1b4b]/70 backdrop-blur-md'
-    : 'bg-white/80 backdrop-blur-md shadow-sm';
-  const textMain = isDark ? '#ffffff' : '#0f172a';
-  const textSub = isDark ? '#94a3b8' : '#64748b';
+  const tokens = getTokens(isDark);
+
+  const teal = tokens.accent;
+  const gold = tokens.gold;
+  const bgMain = tokens.bg;
+  const cardBg = '';
+  const textMain = tokens.textMain;
+  const textSub = tokens.textSub;
 
   // مقداردهی اولیه + بارگذاری محصولات
   useEffect(() => {
@@ -72,12 +81,17 @@ export default function Subscription() {
     try {
       const result = await purchase(sku);
       sub.onPurchaseSuccess(result);
+      setToastMessage('خرید با موفقیت انجام شد!');
+      setToastType('success');
+      setShowToast(true);
       setTimeout(() => {
         navigate('/');
       }, 1500);
     } catch (e: any) {
       console.error('Purchase failed:', e);
-      alert('خرید ناموفق بود. لطفاً دوباره تلاش کنید.');
+      setToastMessage('خرید ناموفق بود. لطفاً دوباره تلاش کنید.');
+      setToastType('error');
+      setShowToast(true);
     } finally {
       setLoading(null);
     }
@@ -89,7 +103,9 @@ export default function Subscription() {
         {/* Back button */}
         <button
           onClick={() => navigate(-1)}
-          className={`flex items-center gap-1 text-xs mb-6 ${textSub}`}
+          className="flex items-center gap-1 text-xs mb-6 transition-colors"
+          style={{ color: tokens.textSub }}
+          aria-label="بازگشت"
         >
           <ChevronRight size={16} />
           بازگشت
@@ -128,19 +144,21 @@ export default function Subscription() {
 
         {/* Personal note */}
         {IS_PERSONAL && (
-          <div className={`p-4 rounded-2xl mb-5 ${cardBg} text-center`}>
-            <p className={`text-xs ${textSub}`}>
+          <Card variant="soft" className="p-4 text-center mb-5">
+            <p className="text-xs" style={{ color: tokens.textSub }}>
               این نسخه شخصی است — همه امکانات باز است ✅
             </p>
-          </div>
+          </Card>
         )}
 
         {/* Loading */}
         {initializing && !IS_PERSONAL && (
-          <div className={`p-8 rounded-2xl ${cardBg} text-center`}>
-            <Loader2 size={32} className="animate-spin mx-auto mb-3" style={{ color: teal }} />
-            <p className={`text-xs ${textSub}`}>در حال اتصال به فروشگاه...</p>
-          </div>
+          <Card variant="elevated" className="p-8 text-center">
+            <Loader2 size={32} className="animate-spin mx-auto mb-3" style={{ color: tokens.accent }} />
+            <p className="text-xs" style={{ color: tokens.textSub }}>
+              در حال اتصال به فروشگاه...
+            </p>
+          </Card>
         )}
 
         {/* Plans */}
@@ -152,53 +170,56 @@ export default function Subscription() {
               const isLoading = loading === plan.sku;
 
               return (
-                <button
+                <Card
                   key={plan.sku}
-                  onClick={() => handlePurchase(plan.sku)}
-                  disabled={!!loading}
-                  className={`w-full p-4 rounded-2xl border text-right transition-all ${cardBg} ${
-                    plan.best ? 'border-2' : isDark ? 'border-white/10' : 'border-violet-200/60'
-                  } active:scale-[0.98]`}
-                  style={plan.best ? { borderColor: teal } : undefined}
+                  variant={plan.best ? 'soft' : 'elevated'}
+                  className={`p-4 transition-all ${plan.best ? 'border-2' : ''}`}
                 >
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-3">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <p className={`font-black ${textMain}`}>{plan.label}</p>
+                        <p className="font-black" style={{ color: tokens.textMain }}>
+                          {plan.label}
+                        </p>
                         {plan.best && (
-                          <span
-                            className="text-[10px] font-black px-2 py-0.5 rounded"
-                            style={{ background: `${teal}20`, color: teal }}
-                          >
-                            پیشنهاد ویژه
-                          </span>
+                          <Badge color="priority" size="sm">پیشنهاد ویژه</Badge>
                         )}
                       </div>
-                      <p className={`text-xs ${textSub}`}>
+                      <p className="text-xs" style={{ color: tokens.textSub }}>
                         {displayPrice} / {plan.period}
                       </p>
                       {plan.saves && (
-                        <p className="text-[10px] mt-1" style={{ color: gold }}>
+                        <p className="text-[10px] mt-1" style={{ color: tokens.gold }}>
                           {plan.saves}
                         </p>
                       )}
                     </div>
-                    {isLoading ? (
-                      <Loader2 size={20} className="animate-spin" style={{ color: teal }} />
-                    ) : (
-                      <Zap size={20} style={{ color: teal }} />
-                    )}
+                    <PrimaryButton
+                      variant={plan.best ? 'gold' : 'accent'}
+                      size="sm"
+                      disabled={!!loading}
+                      onClick={() => handlePurchase(plan.sku)}
+                    >
+                      {isLoading ? (
+                        <Loader2 size={16} className="animate-spin" />
+                      ) : (
+                        <Zap size={16} />
+                      )}
+                      خرید
+                    </PrimaryButton>
                   </div>
-                </button>
+                </Card>
               );
             })}
           </div>
         )}
 
         {/* Benefits */}
-        <div className={`mt-6 p-5 rounded-2xl ${cardBg}`}>
-          <p className={`text-sm font-black mb-3 ${textMain}`}>با اشتراک فیتو:</p>
-          <ul className={`text-xs space-y-2 ${textSub}`}>
+        <Card variant="elevated" className="mt-6 p-5">
+          <p className="text-sm font-black mb-3" style={{ color: tokens.textMain }}>
+            با اشتراک فیتو:
+          </p>
+          <ul className="text-xs space-y-2" style={{ color: tokens.textSub }}>
             <li className="flex items-center gap-2">
               <Check size={14} style={{ color: teal }} /> برنامه تمرینی نامحدود
             </li>
@@ -215,16 +236,24 @@ export default function Subscription() {
               <Check size={14} style={{ color: teal }} /> ذخیره بی‌نهایت برنامه
             </li>
             <li className="flex items-center gap-2">
-              <Check size={14} style={{ color: teal }} /> تمام آپدیت‌های آینده
+              <Check size={14} style={{ color: tokens.accent }} /> تمام آپدیت‌های آینده
             </li>
           </ul>
-        </div>
+        </Card>
 
         {/* Footer note */}
-        <p className={`text-center text-[10px] mt-5 ${textSub}`}>
+        <p className="text-center text-[10px] mt-5" style={{ color: tokens.textSub }}>
           پرداخت امن از طریق {currentBilling.provider === 'myket' ? 'مایکت' : currentBilling.provider === 'bazaar' ? 'کافه‌بازار' : '—'}
         </p>
       </div>
+
+      <Toast
+        isOpen={showToast}
+        onClose={() => setShowToast(false)}
+        message={toastMessage}
+        type={toastType}
+        duration={2500}
+      />
     </div>
   );
 }
