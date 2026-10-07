@@ -5,6 +5,10 @@ import { useAppContext } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { toPersianNumber } from '../utils/jalali';
 import type { WorkoutDay as BaseWorkoutDay } from '../types';
+import { getTokens } from '../styles/designTokens';
+import Card from '../components/ui/Card';
+import PrimaryButton from '../components/ui/PrimaryButton';
+import EmptyState from '../components/ui/EmptyState';
 
 interface ExtendedWorkoutDay extends BaseWorkoutDay {
   totalSets?: number;
@@ -64,6 +68,7 @@ export default function Calendar() {
   const { activeProgramData } = useAppContext();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+  const tokens = getTokens(isDark);
 
   const [activeDay, setActiveDay] = useState<string | null>(null);
   const todayName = getDayName(new Date());
@@ -82,11 +87,17 @@ export default function Calendar() {
   // ✅ مدیریت حالت بدون برنامه
   if (!activeProgramData) {
     return (
-      <div className={`min-h-screen flex flex-col items-center justify-center p-6 text-center ${isDark ? 'bg-[#0f172a] text-white' : 'bg-[#f8fafc] text-gray-900'}`}>
-        <CalendarIcon size={48} className="mb-4 opacity-50" />
-        <h2 className="text-xl font-bold mb-2">برنامه تمرینی فعال نیست</h2>
-        <p className="text-sm opacity-70 mb-6">لطفاً ابتدا یک برنامه وارد کنید یا بسازید.</p>
-        <button onClick={() => navigate('/import')} className="px-6 py-2 rounded-xl bg-violet-500 text-white font-bold">ورود برنامه</button>
+      <div className="min-h-screen flex items-center justify-center p-6">
+        <EmptyState
+          icon={<CalendarIcon size={48} />}
+          title="برنامه تمرینی فعال نیست"
+          subtitle="لطفاً ابتدا یک برنامه وارد کنید یا بسازید."
+          action={
+            <PrimaryButton variant="accent" onClick={() => navigate('/import')}>
+              ورود برنامه
+            </PrimaryButton>
+          }
+        />
       </div>
     );
   }
@@ -111,7 +122,7 @@ export default function Calendar() {
 
       <div className="p-4 space-y-4">
         {hasExercises ? (
-          <div className={`rounded-2xl p-5 border shadow-sm relative overflow-hidden ${isDark ? 'bg-[#1e293b] border-violet-500/30' : 'bg-white border-violet-200'}`}>
+          <Card variant="elevated" className="relative overflow-hidden">
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-4">
                 <div>
@@ -138,11 +149,11 @@ export default function Calendar() {
                 <span className="flex items-center gap-1"><Dumbbell size={12} />{toPersianNumber(currentDayPlan!.totalSets || 0)} ست کل</span>
               </div>
             </div>
-          </div>
+          </Card>
         ) : (
-          <div className={`rounded-2xl p-8 text-center border ${isDark ? 'bg-[#1e293b] border-white/5' : 'bg-white border-gray-200'}`}>
+          <Card variant="elevated" className="p-8 text-center">
             <p className="font-bold opacity-70">امروز ({todayName}) روز استراحت است 🎉</p>
-          </div>
+          </Card>
         )}
 
         <div className="space-y-3">
@@ -158,7 +169,7 @@ export default function Calendar() {
             if (isToday) return null;
 
             return (
-              <div key={index} className={`rounded-xl border transition-all overflow-hidden ${isRest ? (isDark ? 'bg-[#1e293b]/50 border-white/5 opacity-60' : 'bg-gray-50 border-gray-100 opacity-60') : (isDark ? 'bg-[#1e293b] border-white/5' : 'bg-white border-gray-100')}`}>
+              <Card key={index} variant={isRest ? 'soft' : 'elevated'} className={`overflow-hidden transition-all ${isRest ? 'opacity-60' : ''}`}>
                 <button onClick={() => !isRest && toggleDay(dayName)} disabled={isRest} className={`w-full flex items-center justify-between p-4 text-right ${isRest ? 'cursor-default' : 'cursor-pointer hover:bg-black/5 dark:hover:bg-white/5'}`}>
                   <div className="flex items-center gap-3">
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xs font-black shrink-0 ${isRest ? (isDark ? 'bg-gray-800 text-gray-600' : 'bg-gray-200 text-gray-400') : (isOpen ? 'bg-violet-500 text-white' : (isDark ? 'bg-violet-500/20 text-violet-400' : 'bg-violet-50 text-violet-700'))}`}>
@@ -188,7 +199,7 @@ export default function Calendar() {
                     </div>
                   </div>
                 )}
-              </div>
+              </Card>
             );
           })}
         </div>
