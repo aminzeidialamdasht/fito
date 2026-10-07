@@ -15,6 +15,7 @@ import { FEATURE_FLAGS } from '../engine/version';
 import { getTokens } from '../styles/designTokens';
 import Card from '../components/ui/Card';
 import Toast from '../components/ui/Toast';
+import Badge from '../components/ui/Badge';
 
 const isStoreBuild = ['bazaar', 'myket'].includes(import.meta.env.VITE_APP_FLAVOR || '');
 
@@ -261,9 +262,9 @@ export default function Dashboard() {
             <Sparkles size={18} style={{ color: gold }} />
             تولید برنامه با یک کلیک
           </h2>
-          <span className={`text-[10px] font-bold px-2 py-1 rounded-full`} style={{ background: `${teal}15`, color: teal }}>
+          <Badge color="info" size="sm">
             آفلاین
-          </span>
+          </Badge>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
@@ -417,9 +418,9 @@ export default function Dashboard() {
                   </div>
                 </div>
                 {p.id === state.activeProgram && (
-                  <span className="text-[9px] font-bold px-2 py-0.5 rounded-full" style={{ background: `${gold}20`, color: gold }}>
+                  <Badge color="success" size="sm">
                     فعال
-                  </span>
+                  </Badge>
                 )}
               </button>
             ))}
