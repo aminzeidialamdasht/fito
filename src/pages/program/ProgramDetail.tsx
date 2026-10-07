@@ -16,6 +16,10 @@ import DeloadBadge from '../../components/program/DeloadBadge';
 import PeriodizationCard from '../../components/program/PeriodizationCard';
 import TechniqueBadge from '../../components/program/TechniqueBadge';
 import Card from '../../components/ui/Card';
+import { getTokens } from '../../styles/designTokens';
+import EmptyState from '../../components/ui/EmptyState';
+import PrimaryButton from '../../components/ui/PrimaryButton';
+import Toast from '../../components/ui/Toast';
 import Badge from '../../components/ui/Badge';
 import SectionHeader from '../../components/ui/SectionHeader';
 import { analyzeProgramSafety } from '../../engine/core/injurySafetyEngine';
@@ -94,22 +98,29 @@ export default function ProgramDetail() {
     dayIdx: number; exIdx: number; exerciseId: string; exerciseName: string;
   } | null>(null);
 
-  const teal = isDark ? '#a78bfa' : '#8b5cf6';
-  const gold = isDark ? '#d4af37' : '#f59e0b';
-  const bgMain = isDark ? '#0f172a' : '#f8fafc';
-  const cardBg = isDark ? 'bg-[#1e1b4b]/50 backdrop-blur-md' : 'bg-violet-50/70 backdrop-blur-md';
-  const textMain = isDark ? '#ffffff' : '#0f172a';
-  const textSub = isDark ? '#94a3b8' : '#64748b';
-  const borderCard = isDark ? 'border-white/10' : 'border-violet-200/60';
+  const tokens = getTokens(isDark);
+
+  const teal = tokens.accent;
+  const gold = tokens.gold;
+  const bgMain = tokens.bg;
+  const cardBg = '';
+  const textMain = tokens.textMain;
+  const textSub = tokens.textSub;
+  const borderCard = '';
 
   if (!program) {
     return (
-      <div className={`min-h-screen flex flex-col items-center justify-center p-6 ${bgMain}`}>
-        <Dumbbell size={48} className="opacity-30 mb-4" />
-        <h2 className={`text-xl font-black mb-2 ${textMain}`}>برنامه یافت نشد</h2>
-        <button onClick={() => navigate('/programs')} className="mt-4 px-6 py-3 rounded-xl font-bold text-white" style={{ background: teal }}>
-          بازگشت به برنامه‌ها
-        </button>
+      <div className="min-h-screen flex items-center justify-center p-6">
+        <EmptyState
+          icon={<Dumbbell size={48} />}
+          title="برنامه یافت نشد"
+          subtitle="این برنامه حذف شده یا وجود ندارد."
+          action={
+            <PrimaryButton variant="accent" onClick={() => navigate('/programs')}>
+              بازگشت به برنامه‌ها
+            </PrimaryButton>
+          }
+        />
       </div>
     );
   }
@@ -237,7 +248,7 @@ export default function ProgramDetail() {
           const dayName = day.weekday || day.day || PERSIAN_WEEKDAYS[idx % 7];
 
           return (
-            <div key={idx} className={`rounded-2xl border overflow-hidden transition-all ${borderCard} ${cardBg}`}>
+            <Card key={idx} variant="elevated" className="overflow-hidden transition-all">
               <button
                 onClick={() => { soundEffects.playClick(); setExpandedDay(isExpanded ? null : idx); }}
                 className="w-full p-4 flex items-center justify-between text-right"
@@ -298,14 +309,16 @@ export default function ProgramDetail() {
                     );
                   })}
 
-                  <button
+                  <PrimaryButton
+                    variant="gold"
+                    size="lg"
+                    fullWidth
                     onClick={() => handleStartDay(idx)}
-                    className="w-full mt-3 py-3 rounded-xl font-black text-sm text-white flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-md min-h-[48px]"
-                    style={{ background: `linear-gradient(135deg, ${teal} 0%, ${gold} 100%)` }}
+                    className="mt-3"
                   >
                     <Play size={16} />
                     شروع جلسه {dayName}
-                  </button>
+                  </PrimaryButton>
 
                   <button
                     onClick={() => { soundEffects.playClick(); navigate(`/tracker/${idx}?day=${idx}&autoStart=true`); }}
@@ -316,15 +329,16 @@ export default function ProgramDetail() {
                   </button>
                 </div>
               )}
-            </div>
+            </Card>
           );
         })}
 
         {days.length === 0 && (
-          <div className={`rounded-2xl p-8 text-center ${borderCard} ${cardBg}`}>
-            <Dumbbell size={40} className="mx-auto mb-3 opacity-30" />
-            <p className={`text-sm ${textSub}`}>این برنامه هیچ روز تمرینی ندارد</p>
-          </div>
+          <EmptyState
+            icon={<Dumbbell size={40} />}
+            title="روز تمرینی وجود ندارد"
+            subtitle="این برنامه هیچ روز تمرینی ندارد."
+          />
         )}
       </div>
 
@@ -337,22 +351,14 @@ export default function ProgramDetail() {
         />
       )}
 
-      {/* Phase 11c: Snackbar اطلاع هفته جدید */}
-      {weekUpdate && (
-        <div
-          role="status"
-          className="fixed bottom-5 left-1/2 z-50 -translate-x-1/2 rounded-lg bg-slate-900 px-4 py-3 text-sm text-white shadow-lg"
-        >
-          {weekUpdate}
-          <button
-            type="button"
-            className="mr-3 underline"
-            onClick={() => setWeekUpdate(null)}
-          >
-            بستن
-          </button>
-        </div>
-      )}
+      {/* Phase 11c: Toast اطلاع هفته جدید */}
+      <Toast
+        isOpen={!!weekUpdate}
+        onClose={() => setWeekUpdate(null)}
+        message={weekUpdate || ''}
+        type="info"
+        duration={3000}
+      />
     </div>
   );
 }
