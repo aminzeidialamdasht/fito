@@ -5,6 +5,7 @@ import { useSubscription } from '../hooks/useSubscription';
 import { useTheme } from '../context/ThemeContext';
 import { soundEffects } from '../utils/sound';
 import { toPersianNumber } from '../utils/jalali';
+import { getTokens } from '../styles/designTokens';
 import {
   User,
   Plus,
@@ -16,6 +17,12 @@ import {
   Dumbbell,
   Ruler,
 } from 'lucide-react';
+import Card from '../components/ui/Card';
+import Badge from '../components/ui/Badge';
+import EmptyState from '../components/ui/EmptyState';
+import PrimaryButton from '../components/ui/PrimaryButton';
+import Modal from '../components/ui/Modal';
+import Toast from '../components/ui/Toast';
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -23,21 +30,12 @@ export default function Profile() {
   const sub = useSubscription();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+  const tokens = getTokens(isDark);
+
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
 
-  const teal = isDark ? '#a78bfa' : '#8b5cf6';
-  const gold = isDark ? '#d4af37' : '#f59e0b';
-  const bgMain = isDark ? '#0f172a' : '#f8fafc';
-  const cardBg = isDark
-    ? 'bg-[#1e1b4b]/50 backdrop-blur-md'
-    : 'bg-white/70 backdrop-blur-md shadow-sm';
-  const textMain = isDark ? '#ffffff' : '#0f172a';
-  const textSub = isDark ? '#94a3b8' : '#64748b';
-  const borderCard = isDark
-    ? 'border-white/10'
-    : 'border-violet-200/60';
-
-  // Phase 10 Step 6c: Strength records
   const strengthRecords = (activeProfile?.strengthRecordsExtended as any) || {};
   const strengthEntries = Object.entries(strengthRecords)
     .filter(([key, value]) => key !== 'lastUpdated' && value)
@@ -49,17 +47,17 @@ export default function Profile() {
     soundEffects.playClick();
     deleteProfile(id);
     setConfirmDelete(null);
+    setToastMessage('پروفایل حذف شد');
+    setShowToast(true);
   };
 
   const handleEdit = (id: string) => {
     soundEffects.playClick();
-    // TODO: پیاده‌سازی ویرایش با Onboarding
     navigate(`/onboarding?mode=edit&id=${id}`);
   };
 
   const handleCreateNew = () => {
     soundEffects.playClick();
-    // محدودیت: ۱ پروفایل رایگان
     if (!sub.canCreateProfile(profiles.length)) {
       navigate('/subscription');
       return;
@@ -68,85 +66,94 @@ export default function Profile() {
   };
 
   return (
-    <div className={`min-h-screen pb-24 ${bgMain}`}>
-      {/* Header */}
-      <div className={`sticky top-0 z-30 backdrop-blur-md border-b px-4 py-4 ${isDark ? 'bg-[#0f172a]/90 border-white/10' : 'bg-white/90 border-gray-200'}`}>
-        <div className="flex items-center gap-3 max-w-2xl mx-auto">
-          <button onClick={() => navigate(-1)} className="p-2 rounded-full hover:bg-black/5">
-            <ChevronLeft size={24} className={isDark ? 'text-white' : 'text-gray-800'} />
-          </button>
-          <div className="flex-1">
-            <h1 className={`font-black text-lg ${textMain}`}>پروفایل‌ها</h1>
-            <p className={`text-xs ${textSub}`}>{toPersianNumber(profiles.length)} پروفایل</p>
-          </div>
-          <button
-            onClick={handleCreateNew}
-            className="w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-lg active:scale-95 transition-all"
-            style={{ background: `linear-gradient(135deg, ${teal} 0%, ${gold} 100%)` }}
-          >
-            <Plus size={20} />
-          </button>
+    <div className="min-h-screen pb-24">
+      <div className="mb-4 flex items-center gap-3">
+        <button
+          onClick={() => navigate(-1)}
+          className="p-2 rounded-full transition-colors"
+          style={{ color: tokens.textMain }}
+          aria-label="بازگشت"
+        >
+          <ChevronLeft size={24} />
+        </button>
+        <div className="flex-1">
+          <h1 className="font-black text-lg" style={{ color: tokens.textMain }}>
+            پروفایل‌ها
+          </h1>
+          <p className="text-xs" style={{ color: tokens.textSub }}>
+            {toPersianNumber(profiles.length)} پروفایل
+          </p>
         </div>
+        <button
+          onClick={handleCreateNew}
+          className="w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-lg active:scale-95 transition-all"
+          style={{ background: `linear-gradient(135deg, ${tokens.accent} 0%, ${tokens.gold} 100%)` }}
+          aria-label="ایجاد پروفایل"
+        >
+          <Plus size={20} />
+        </button>
       </div>
 
-      {/* Main */}
-      <div className="p-4 space-y-3 max-w-2xl mx-auto">
-      {activeProfile && (
-        <div className={`rounded-2xl p-4 border ${borderCard} ${cardBg}`}>
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `${gold}20`, color: gold }}>
-              <Dumbbell size={20} />
+      <div className="space-y-3">
+        {activeProfile && (
+          <Card variant="elevated">
+            <div className="flex items-center gap-3 mb-3">
+              <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center"
+                style={{ background: tokens.accentSoft, color: tokens.gold }}
+              >
+                <Dumbbell size={20} />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-black text-sm" style={{ color: tokens.textMain }}>
+                  رکوردهای قدرت
+                </h3>
+                <p className="text-[11px]" style={{ color: tokens.textSub }}>
+                  {recordCount > 0
+                    ? `${toPersianNumber(recordCount)} رکورد ثبت شده — ${new Date(strengthRecords.lastUpdated || '').toLocaleDateString('fa-IR')}`
+                    : 'هنوز رکوردی ثبت نکرده‌اید'}
+                </p>
+              </div>
             </div>
-            <div className="flex-1">
-              <h3 className={`font-black text-sm ${textMain}`}>رکوردهای قدرت</h3>
-              <p className={`text-[11px] ${textSub}`}>
-                {recordCount > 0
-                  ? `${toPersianNumber(recordCount)} رکورد ثبت شده — ${new Date(strengthRecords.lastUpdated || '').toLocaleDateString('fa-IR')}`
-                  : 'هنوز رکوردی ثبت نکرده‌اید'}
-              </p>
-            </div>
-          </div>
-          {recordCount > 0 && (
-            <div className="grid grid-cols-3 gap-2 mb-3">
-              {strengthEntries.map(([key, value]: [string, any]) => (
-                <div key={key} className="rounded-xl bg-black/10 p-2 text-center">
-                  <p className={`text-[10px] ${textSub}`}>{key}</p>
-                  <p className="text-sm font-black" style={{ color: gold }}>
-                    {toPersianNumber(Number(value.estimated1RM || value.weight).toFixed(1))}
-                  </p>
-                  <p className={`text-[10px] ${textSub}`}>کیلوگرم</p>
-                </div>
-              ))}
-            </div>
-          )}
-          <button
-            onClick={() => { soundEffects.playClick(); navigate('/strength-records'); }}
-            className="w-full py-2.5 rounded-xl font-bold text-xs min-h-[44px]"
-            style={{ background: gold, color: '#0f172a' }}
-            aria-label="ویرایش رکوردهای قدرت"
-          >
-            {recordCount > 0 ? 'ویرایش رکوردها' : 'ثبت رکوردها'}
-          </button>
-        </div>
-      )}
-        {profiles.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="w-20 h-20 rounded-full flex items-center justify-center mb-4" style={{ background: `${teal}15` }}>
-              <User size={40} style={{ color: teal }} />
-            </div>
-            <h3 className={`font-black text-lg mb-2 ${textMain}`}>هنوز پروفایلی ندارید</h3>
-            <p className={`text-sm ${textSub} mb-6 max-w-xs leading-6`}>
-              برای شروع، یک پروفایل جدید ایجاد کنید تا برنامه تمرینی و تغذیه اختصاصی دریافت کنید
-            </p>
-            <button
-              onClick={handleCreateNew}
-              className="px-6 py-3.5 rounded-2xl font-black text-white shadow-lg active:scale-95 transition-all flex items-center gap-2"
-              style={{ background: `linear-gradient(135deg, ${teal} 0%, ${gold} 100%)` }}
+            {recordCount > 0 && (
+              <div className="grid grid-cols-3 gap-2 mb-3">
+                {strengthEntries.map(([key, value]: [string, any]) => (
+                  <div
+                    key={key}
+                    className="rounded-xl p-2 text-center"
+                    style={{ background: tokens.surfaceElevated }}
+                  >
+                    <p className="text-[10px]" style={{ color: tokens.textSub }}>{key}</p>
+                    <p className="text-sm font-black" style={{ color: tokens.gold }}>
+                      {toPersianNumber(Number(value.estimated1RM || value.weight).toFixed(1))}
+                    </p>
+                    <p className="text-[10px]" style={{ color: tokens.textSub }}>کیلوگرم</p>
+                  </div>
+                ))}
+              </div>
+            )}
+            <PrimaryButton
+              variant="gold"
+              fullWidth
+              onClick={() => { soundEffects.playClick(); navigate('/strength-records'); }}
             >
-              <Plus size={20} />
-              ایجاد پروفایل جدید
-            </button>
-          </div>
+              {recordCount > 0 ? 'ویرایش رکوردها' : 'ثبت رکوردها'}
+            </PrimaryButton>
+          </Card>
+        )}
+
+        {profiles.length === 0 ? (
+          <EmptyState
+            icon={<User size={48} />}
+            title="هنوز پروفایلی ندارید"
+            subtitle="برای شروع، یک پروفایل جدید ایجاد کنید تا برنامه تمرینی و تغذیه اختصاصی دریافت کنید"
+            action={
+              <PrimaryButton variant="accent" onClick={handleCreateNew}>
+                <Plus size={18} />
+                ایجاد پروفایل جدید
+              </PrimaryButton>
+            }
+          />
         ) : (
           profiles.map((profile) => {
             const isActive = profile.id === activeProfile?.id;
@@ -154,107 +161,102 @@ export default function Profile() {
             const bmCount = Object.values(bm).filter((v) => v != null && v !== '').length;
 
             return (
-              <div
+              <Card
                 key={profile.id}
-                className={`rounded-2xl border overflow-hidden transition-all ${
-                  isActive
-                    ? isDark
-                      ? 'border-[#d4af37]/40 bg-[#d4af37]/5'
-                      : 'border-violet-300 bg-violet-50/50'
-                    : `${borderCard} ${cardBg}`
-                }`}
+                variant={isActive ? 'soft' : 'elevated'}
+                className="overflow-hidden"
               >
-                <div className="p-4">
-                  {/* Header */}
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-start gap-3 flex-1 min-w-0">
-                      <div
-                        className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 text-lg font-black"
-                        style={{ background: `${teal}20`, color: teal }}
-                      >
-                        {profile.name.charAt(0)}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <h3 className={`font-black text-sm truncate ${textMain}`}>{profile.name}</h3>
-                        <p className={`text-[11px] ${textSub} mt-0.5`}>
-                          {profile.age} سال · {profile.height} cm · {profile.weight} kg
-                        </p>
-                      </div>
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-start gap-3 flex-1 min-w-0">
+                    <div
+                      className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 text-lg font-black"
+                      style={{ background: tokens.accentSoft, color: tokens.accent }}
+                    >
+                      {profile.name.charAt(0)}
                     </div>
-
-                    {isActive && (
-                      <span className="text-[10px] font-black px-2.5 py-1 rounded-full flex-shrink-0" style={{ background: `${gold}20`, color: gold }}>
-                        فعال
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Stats */}
-                  <div className="grid grid-cols-3 gap-2 mb-3">
-                    <div className={`p-2 rounded-lg text-center ${isDark ? 'bg-white/5' : 'bg-gray-50'}`}>
-                      <Target size={12} className="mx-auto mb-0.5" style={{ color: teal }} />
-                      <p className={`text-[10px] font-black ${textMain}`}>{getGoalLabel(profile.primaryGoal)}</p>
-                    </div>
-                    <div className={`p-2 rounded-lg text-center ${isDark ? 'bg-white/5' : 'bg-gray-50'}`}>
-                      <Dumbbell size={12} className="mx-auto mb-0.5" style={{ color: teal }} />
-                      <p className={`text-[10px] font-black ${textMain}`}>{toPersianNumber(profile.trainingDays)} روز/هفته</p>
-                    </div>
-                    <div className={`p-2 rounded-lg text-center ${isDark ? 'bg-white/5' : 'bg-gray-50'}`}>
-                      <Ruler size={12} className="mx-auto mb-0.5" style={{ color: teal }} />
-                      <p className={`text-[10px] font-black ${textMain}`}>{toPersianNumber(bmCount)} اندازه</p>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-black text-sm truncate" style={{ color: tokens.textMain }}>
+                        {profile.name}
+                      </h3>
+                      <p className="text-[11px] mt-0.5" style={{ color: tokens.textSub }}>
+                        {profile.age} سال · {profile.height} cm · {profile.weight} kg
+                      </p>
                     </div>
                   </div>
+                  {isActive && (
+                    <Badge color="success" size="sm">فعال</Badge>
+                  )}
+                </div>
 
-                  {/* Actions */}
-                  <div className="flex gap-2">
-                    {!isActive ? (
-                      <button
-                        onClick={() => { soundEffects.playClick(); setActiveProfile(profile.id); }}
-                        className="flex-1 py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 text-white active:scale-95 transition-all"
-                        style={{ background: teal }}
-                      >
-                        <CheckCircle2 size={16} />
-                        فعال‌سازی
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => handleEdit(profile.id)}
-                        className="flex-1 py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 text-black active:scale-95 transition-all"
-                        style={{ background: gold }}
-                      >
-                        <Edit3 size={16} />
-                        ویرایش
-                      </button>
-                    )}
-                    <button
-                      onClick={() => handleEdit(profile.id)}
-                      className={`w-11 rounded-xl flex items-center justify-center active:scale-95 transition-all ${
-                        isDark ? 'bg-white/5 text-white' : 'bg-gray-100 text-gray-700'
-                      }`}
-                    >
-                      <Edit3 size={16} />
-                    </button>
-                    <button
-                      onClick={() => setConfirmDelete(profile.id)}
-                      className={`w-11 rounded-xl flex items-center justify-center active:scale-95 transition-all ${
-                        isDark ? 'bg-red-500/20 text-red-400' : 'bg-red-50 text-red-500'
-                      }`}
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                <div className="grid grid-cols-3 gap-2 mb-3">
+                  <div
+                    className="p-2 rounded-lg text-center"
+                    style={{ background: tokens.surfaceElevated }}
+                  >
+                    <Target size={12} className="mx-auto mb-0.5" style={{ color: tokens.accent }} />
+                    <p className="text-[10px] font-black" style={{ color: tokens.textMain }}>
+                      {getGoalLabel(profile.primaryGoal)}
+                    </p>
+                  </div>
+                  <div
+                    className="p-2 rounded-lg text-center"
+                    style={{ background: tokens.surfaceElevated }}
+                  >
+                    <Dumbbell size={12} className="mx-auto mb-0.5" style={{ color: tokens.accent }} />
+                    <p className="text-[10px] font-black" style={{ color: tokens.textMain }}>
+                      {toPersianNumber(profile.trainingDays)} روز/هفته
+                    </p>
+                  </div>
+                  <div
+                    className="p-2 rounded-lg text-center"
+                    style={{ background: tokens.surfaceElevated }}
+                  >
+                    <Ruler size={12} className="mx-auto mb-0.5" style={{ color: tokens.accent }} />
+                    <p className="text-[10px] font-black" style={{ color: tokens.textMain }}>
+                      {toPersianNumber(bmCount)} اندازه
+                    </p>
                   </div>
                 </div>
-              </div>
+
+                <div className="flex gap-2">
+                  {!isActive ? (
+                    <PrimaryButton
+                      variant="accent"
+                      fullWidth
+                      onClick={() => { soundEffects.playClick(); setActiveProfile(profile.id); }}
+                    >
+                      <CheckCircle2 size={16} />
+                      فعال‌سازی
+                    </PrimaryButton>
+                  ) : (
+                    <PrimaryButton
+                      variant="gold"
+                      fullWidth
+                      onClick={() => handleEdit(profile.id)}
+                    >
+                      <Edit3 size={16} />
+                      ویرایش
+                    </PrimaryButton>
+                  )}
+                  <button
+                    onClick={() => setConfirmDelete(profile.id)}
+                    className="w-11 rounded-xl flex items-center justify-center active:scale-95 transition-all"
+                    style={{ background: `${tokens.danger}20`, color: tokens.danger }}
+                    aria-label="حذف"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              </Card>
             );
           })
         )}
 
-        {/* Create New (Bottom) */}
         {profiles.length > 0 && (
           <button
             onClick={handleCreateNew}
-            className={`w-full py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-2 border-2 border-dashed transition-all active:scale-95 ${borderCard}`}
-            style={{ color: teal, borderColor: teal }}
+            className="w-full py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-2 border-2 border-dashed transition-all active:scale-95"
+            style={{ color: tokens.accent, borderColor: tokens.accent }}
           >
             <Plus size={20} />
             ایجاد پروفایل جدید
@@ -262,32 +264,43 @@ export default function Profile() {
         )}
       </div>
 
-      {/* Delete Confirmation */}
-      {confirmDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={() => setConfirmDelete(null)}>
-          <div className={`rounded-2xl p-5 max-w-sm w-full ${cardBg}`} onClick={(e) => e.stopPropagation()}>
-            <Trash2 size={40} className="text-red-500 mx-auto mb-3" />
-            <h3 className={`font-black text-lg text-center mb-2 ${textMain}`}>حذف پروفایل؟</h3>
-            <p className={`text-xs text-center mb-5 ${textSub}`}>
-              تمام برنامه‌ها و تاریخچه این پروفایل حذف خواهد شد.
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setConfirmDelete(null)}
-                className={`flex-1 py-3 rounded-xl font-bold ${isDark ? 'bg-white/10 text-white' : 'bg-gray-100 text-gray-700'}`}
-              >
-                انصراف
-              </button>
-              <button
-                onClick={() => handleDelete(confirmDelete)}
-                className="flex-1 py-3 rounded-xl font-bold bg-red-500 text-white"
-              >
-                حذف کن
-              </button>
-            </div>
+      <Modal
+        isOpen={!!confirmDelete}
+        onClose={() => setConfirmDelete(null)}
+        title="حذف پروفایل؟"
+        size="sm"
+      >
+        <div className="text-center">
+          <Trash2 size={40} style={{ color: tokens.danger }} className="mx-auto mb-3" />
+          <p className="text-xs mb-5" style={{ color: tokens.textSub }}>
+            تمام برنامه‌ها و تاریخچه این پروفایل حذف خواهد شد.
+          </p>
+          <div className="flex gap-3">
+            <PrimaryButton
+              variant="outline"
+              fullWidth
+              onClick={() => setConfirmDelete(null)}
+            >
+              انصراف
+            </PrimaryButton>
+            <PrimaryButton
+              variant="danger"
+              fullWidth
+              onClick={() => confirmDelete && handleDelete(confirmDelete)}
+            >
+              حذف کن
+            </PrimaryButton>
           </div>
         </div>
-      )}
+      </Modal>
+
+      <Toast
+        isOpen={showToast}
+        onClose={() => setShowToast(false)}
+        message={toastMessage}
+        type="success"
+        duration={2000}
+      />
     </div>
   );
 }
