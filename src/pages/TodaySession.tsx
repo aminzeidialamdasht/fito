@@ -11,6 +11,10 @@ import {
 } from '../utils/programHelpers';
 import TechniqueBadge from '../components/program/TechniqueBadge';
 import type { WorkoutDay as BaseWorkoutDay } from '../types';
+import { getTokens } from '../styles/designTokens';
+import Card from '../components/ui/Card';
+import PrimaryButton from '../components/ui/PrimaryButton';
+import EmptyState from '../components/ui/EmptyState';
 
 interface ExtendedWorkoutDay extends BaseWorkoutDay {
   totalSets?: number;
@@ -65,6 +69,7 @@ export default function TodaySession() {
   const { activeProgramData } = useAppContext();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+  const tokens = getTokens(isDark);
   const todayName = getDayName(new Date());
 
   const currentDayIndex = useMemo(() => {
@@ -84,23 +89,17 @@ export default function TodaySession() {
 
   if (!activeProgramData || !hasExercises) {
     return (
-      <div className={`min-h-screen flex flex-col items-center justify-center p-6 text-center ${
-        isDark ? 'bg-[#0f172a] text-white' : 'bg-[#f8fafc] text-gray-900'
-      }`}>
-        <Dumbbell size={48} className="mb-4 opacity-50" />
-        <h2 className="text-xl font-bold mb-2">
-          {!activeProgramData ? 'برنامه تمرینی فعال نیست' : `امروز (${todayName}) روز استراحت است!`}
-        </h2>
-        <p className="text-sm opacity-70 mb-6">
-          {!activeProgramData ? 'لطفاً ابتدا یک برنامه وارد کنید.' : 'بدن شما برای رشد نیاز به ریکاوری دارد.'}
-        </p>
-        <button
-          onClick={() => navigate('/')}
-          className="min-h-[44px] px-6 py-2 rounded-xl bg-violet-500 text-white font-bold"
-          aria-label="بازگشت به داشبورد"
-        >
-          بازگشت به داشبورد
-        </button>
+      <div className="min-h-screen flex items-center justify-center p-6">
+        <EmptyState
+          icon={<Dumbbell size={48} />}
+          title={!activeProgramData ? 'برنامه تمرینی فعال نیست' : `امروز (${todayName}) روز استراحت است!`}
+          subtitle={!activeProgramData ? 'لطفاً ابتدا یک برنامه وارد کنید.' : 'بدن شما برای رشد نیاز به ریکاوری دارد.'}
+          action={
+            <PrimaryButton variant="accent" onClick={() => navigate('/')}>
+              بازگشت به داشبورد
+            </PrimaryButton>
+          }
+        />
       </div>
     );
   }
@@ -130,10 +129,11 @@ export default function TodaySession() {
       }`}>
         <button
           onClick={() => navigate(-1)}
-          className="min-h-[44px] min-w-[44px] p-2 rounded-full hover:bg-black/5"
+          className="min-h-[44px] min-w-[44px] p-2 rounded-full transition-colors"
+          style={{ color: tokens.textMain }}
           aria-label="بازگشت"
         >
-          <ChevronLeft size={24} className={isDark ? 'text-white' : 'text-gray-800'} />
+          <ChevronLeft size={24} />
         </button>
         <div>
           <h1 className={`font-bold text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>
@@ -146,9 +146,7 @@ export default function TodaySession() {
       </div>
 
       <div className="p-4 space-y-4 max-w-2xl mx-auto">
-        <div className={`rounded-2xl p-5 border shadow-sm ${
-          isDark ? 'bg-[#1e293b] border-white/5' : 'bg-white border-violet-100'
-        }`}>
+        <Card variant="elevated" className="p-5">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
@@ -174,7 +172,7 @@ export default function TodaySession() {
               </p>
             </div>
           </div>
-        </div>
+        </Card>
 
         <div className="space-y-3">
           <h3 className={`font-bold text-sm px-1 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
@@ -185,11 +183,10 @@ export default function TodaySession() {
             const technique = exercise.loadMethod;
 
             return (
-              <div
+              <Card
                 key={exercise.id || exercise.name || index}
-                className={`flex items-center justify-between p-4 rounded-xl border ${
-                  isDark ? 'bg-[#1e293b] border-white/5' : 'bg-white border-gray-100'
-                }`}
+                variant="elevated"
+                className="flex items-center justify-between p-4"
               >
                 <div className="flex items-center gap-3">
                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold ${
@@ -211,7 +208,7 @@ export default function TodaySession() {
                     )}
                   </div>
                 </div>
-              </div>
+              </Card>
             );
           })}
         </div>
@@ -221,15 +218,16 @@ export default function TodaySession() {
         isDark ? 'bg-[#0f172a]/95 border-white/10' : 'bg-white/95 border-gray-200'
       }`}>
         <div className="max-w-2xl mx-auto">
-          <button
+          <PrimaryButton
+            variant="accent"
+            size="lg"
+            fullWidth
             onClick={handleStart}
-            className="min-h-[44px] w-full py-4 rounded-2xl font-black text-base text-white shadow-lg shadow-teal-500/20 active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
-            style={{ background: 'linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%)' }}
-            aria-label="شروع جلسه تمرینی"
+            ariaLabel="شروع جلسه تمرینی"
           >
             <Play size={20} fill="currentColor" />
             شروع جلسه تمرینی
-          </button>
+          </PrimaryButton>
         </div>
       </div>
     </div>
