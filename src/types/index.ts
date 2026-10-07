@@ -117,6 +117,8 @@ export interface WorkoutProgram {
     systemName?: string;
     systemNameFa?: string;
     periodizationPhase?: string;
+    currentWeek?: number;
+    weekPhase?: string;
     weeklyProgression?: Array<{ week: number; reps: string; rir: number; label: string }>;
     injuries?: string[];
     splitType?: string;

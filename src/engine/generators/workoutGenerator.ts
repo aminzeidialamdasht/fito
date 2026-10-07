@@ -69,7 +69,8 @@ const MUSCLE_TO_PERSIAN: Record<MuscleGroup, string> = {
  */
 export function generateWorkoutProgram(
   profile: AthleteProfile,
-  sessions: WorkoutSession[] = []
+  sessions: WorkoutSession[] = [],
+  currentWeek = 1
 ): GeneratedProgram {
   // ۱. تحلیل پروفایل
   const analysis = analyzeProfile(profile);
@@ -83,6 +84,7 @@ export function generateWorkoutProgram(
   // ۲. انتخاب Split
   // فاز ۶: انتخاب سیستم تمرینی سطح برنامه
   const programSystem = selectProgramSystem(profile, analysis, performance);
+  const safeWeek = Math.max(1, Math.min(Math.floor(currentWeek), programSystem.weeks || 1));
 
   const split = selectSplit(analysis.weeklyTrainingDays, analysis.experience, analysis.goal);
 
@@ -162,6 +164,7 @@ export function generateWorkoutProgram(
       programSystem,
       sessionBudget,
       usedAcrossWeek
+      ,safeWeek
     );
 
     // اضافه کردن به لیست هفتگی
@@ -214,7 +217,9 @@ export function generateWorkoutProgram(
       injuries: analysis.safeInjuries,
       systemName: analysis.deloadLevel === 'heavy' ? 'deload' : programSystem.id,
       systemNameFa: analysis.deloadLevel === 'heavy' ? 'بازیابی (دیلود)' : programSystem.nameFa,
-      periodizationPhase: analysis.deloadLevel === 'heavy' ? 'دیلود' : programSystem.weeklyScheme[0]?.label,
+      periodizationPhase: analysis.deloadLevel === 'heavy' ? 'دیلود' : programSystem.weeklyScheme[safeWeek - 1]?.label,
+      currentWeek: safeWeek,
+      weekPhase: programSystem.weeklyScheme[safeWeek - 1]?.label,
       weeklyProgression: programSystem.weeklyScheme.map((w, idx) => ({ week: idx + 1, ...w })),
     },
   };
@@ -245,6 +250,7 @@ function generateDay(
   programSystem: ProgramSystemRule,
   sessionBudget?: SessionBudget,
   usedAcrossWeek: string[] = []
+  ,currentWeek: number = 1
 ): GeneratedDay {
   // ═══════════════════════════════════════════════════════════
   // منطق انتخاب Exercise + تعیین Set بر اساس Budget
@@ -294,7 +300,7 @@ function generateDay(
 
       for (let idx = 0; idx < exercisesForMuscle.length; idx++) {
         const ex = exercisesForMuscle[idx];
-        const sets = generateSets(profile, ex, analysis, performance, setDistribution[idx], programSystem);
+        const sets = generateSets(profile, ex, analysis, performance, setDistribution[idx], programSystem, currentWeek);
 
         addEffectiveSetsToVolume(weeklyVolume, ex, sets.length);
 
@@ -324,7 +330,7 @@ function generateDay(
     );
 
     for (const ex of selectedExercises) {
-      const sets = generateSets(profile, ex, analysis, performance, 0, programSystem);
+      const sets = generateSets(profile, ex, analysis, performance, 0, programSystem, currentWeek);
       addEffectiveSetsToVolume(weeklyVolume, ex, sets.length);
       generatedExercises.push({
         exerciseId: ex.id,
@@ -449,7 +455,8 @@ function generateSets(
   analysis: ProfileAnalysis,
   performance: PerformanceAnalysis,
   overrideSetCount: number = 0,
-  programSystem?: ProgramSystemRule
+  programSystem?: ProgramSystemRule,
+  currentWeek = 1
 ): GeneratedSet[] {
   const setCount = overrideSetCount > 0
     ? overrideSetCount
@@ -491,11 +498,11 @@ function generateSets(
   }
 
 
-  const weekOneScheme = programSystem?.weeklyScheme?.[0];
+  const weekScheme = programSystem?.weeklyScheme?.[currentWeek - 1];
 
   // RIR پایه
-  let baseRIR = typeof weekOneScheme?.rir === 'number'
-    ? weekOneScheme.rir
+  let baseRIR = typeof weekScheme?.rir === 'number'
+    ? weekScheme.rir
     : rirRange.min;
   if (analysis.experience === 'beginner') baseRIR = Math.min(baseRIR + 1, rirRange.max);
 
@@ -504,7 +511,7 @@ function generateSets(
     baseRIR = Math.min(baseRIR + 2, rirRange.max + 2);
   }
 
-  const repsStr = weekOneScheme?.reps?.trim()
+  const repsStr = weekScheme?.reps?.trim()
     || `${repRange.min}-${repRange.max}`;
   const restSeconds = Math.round((exercise.restSeconds.min + exercise.restSeconds.max) / 2);
 
@@ -522,7 +529,7 @@ function generateSets(
       restSeconds,
       tempo: exercise.tempo,
       // وزنه پیشنهادی بر اساس Double Progression
-      week: 1,
+      week: currentWeek,
       suggestedWeight: suggestWeightForSet(
         exercise,
         repRange.min,

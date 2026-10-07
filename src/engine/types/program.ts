@@ -134,6 +134,8 @@ export interface GeneratedProgram {
     systemName?: string;
     systemNameFa?: string;
     periodizationPhase?: string;
+    currentWeek?: number;
+    weekPhase?: string;
     weeklyProgression?: WeeklyProgressionStep[];
   };
 }
