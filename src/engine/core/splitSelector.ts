@@ -24,9 +24,33 @@ export interface SplitPlan {
 function determineSplitType(
   days: number,
   experience: ExperienceLevel,
-  goal: Goal
+  goal: Goal,
+  competitionDate?: string
 ): SplitType {
   const strengthGoal = goal === 'strength' || goal === 'competition';
+  
+  // ═══ تنظیم بر اساس فاصله از مسابقه ═══
+  const weeksUntilCompetition = getWeeksUntilCompetition(competitionDate);
+  if (weeksUntilCompetition !== null) {
+    // کمتر از ۴ هفته: پیکینگ — تمرکز روی حرکات اصلی
+    if (weeksUntilCompetition < 4) {
+      if (days >= 4) return 'upper_lower';
+      return 'full_body';
+    }
+    // ۴-۸ هفته: قدرت
+    if (weeksUntilCompetition < 8) {
+      if (days >= 5) return 'upper_lower_push_pull_legs';
+      if (days >= 4) return 'push_pull';
+      return 'full_body';
+    }
+    // ۸-۱۲ هفته: قدرت + حجم
+    if (weeksUntilCompetition < 12) {
+      if (days >= 5) return 'ppl_ul_hybrid';
+      if (days >= 4) return 'torso_limbs';
+      return 'push_pull_legs';
+    }
+    // > ۱۲ هفته: برنامه معمولی
+  }
   const hypertrophyGoal = goal === 'hypertrophy' || goal === 'recomposition';
 
   if (days <= 2) return 'full_body';
@@ -215,9 +239,10 @@ function calculateRestDays(trainingDays: number[]): number[] {
 export function selectSplit(
   days: number,
   experience: ExperienceLevel,
-  goal: Goal
+  goal: Goal,
+  competitionDate?: string
 ): SplitPlan {
-  const splitType = determineSplitType(days, experience, goal);
+  const splitType = determineSplitType(days, experience, goal, competitionDate);
   const sessions = buildSessions(splitType, days);
   const trainingDays = distributeSessions(days);
   const restDays = calculateRestDays(trainingDays);
@@ -246,4 +271,25 @@ export function getSplitName(splitType: SplitType): string {
     ppl_ul_hybrid: 'ترکیبی PPL + بالاتنه/پایین‌تنه',
   };
   return names[splitType] || 'سفارشی';
+}
+
+/**
+ * محاسبه هفته‌های مانده تا مسابقه
+ * @returns تعداد هفته یا null اگر competitionDate موجود نباشه
+ */
+function getWeeksUntilCompetition(competitionDate?: string): number | null {
+  if (!competitionDate) return null;
+  
+  try {
+    const target = new Date(competitionDate);
+    if (isNaN(target.getTime())) return null;
+    
+    const now = new Date();
+    const diffMs = target.getTime() - now.getTime();
+    const weeks = Math.floor(diffMs / (1000 * 60 * 60 * 24 * 7));
+    
+    return weeks > 0 ? weeks : null;
+  } catch {
+    return null;
+  }
 }

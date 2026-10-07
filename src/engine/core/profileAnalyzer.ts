@@ -13,6 +13,9 @@ import { calculateOptimalTrainingDays, validateTrainingDaysChoice } from './trai
 
 export interface ProfileAnalysis {
   bmr: number;
+  bodyFatPercent?: number;
+  bodyComposition?: string;
+  trainingHistoryLevel: 'beginner' | 'intermediate' | 'advanced' | 'professional';
   tdee: number;
   bmi: number;
   bmiCategory: string;
@@ -35,6 +38,7 @@ export interface ProfileAnalysis {
   deloadLevel: DeloadLevel;
   equipmentType: string;
   customEquipment: string[];
+  location: 'gym' | 'home' | 'both' | 'park';
 }
 
 /**
@@ -168,9 +172,15 @@ export function analyzeProfile(profile: AthleteProfile): ProfileAnalysis {
 
   const programDurationWeeks = Math.min(52, Math.max(4, parseDurationToWeeks(profile.timeline)));
 
+  // تحلیل سابقه تمرینی برای تعیین سطح واقعی
+  const trainingHistoryLevel = determineTrainingHistoryLevel(profile);
+
   return {
     bmr,
     tdee,
+    bodyFatPercent: profile.bodyFatPercent,
+    bodyComposition: profile.bodyComposition,
+    trainingHistoryLevel,
     bmi,
     bmiCategory: categorizeBMI(bmi),
     experience,
@@ -192,5 +202,31 @@ export function analyzeProfile(profile: AthleteProfile): ProfileAnalysis {
     deloadLevel: 'none',
     equipmentType: profile.equipmentType || 'full_gym',
     customEquipment: profile.customEquipment || [],
+    location: (profile.location as any) || 'gym',
   };
+}
+
+/**
+ * تعیین سطح واقعی بر اساس سابقه تمرینی
+ * Schoenfeld et al. (2016) — Training Age
+ */
+function determineTrainingHistoryLevel(
+  profile: AthleteProfile
+): 'beginner' | 'intermediate' | 'advanced' | 'professional' {
+  const history = String(profile.trainingHistory || '').toLowerCase();
+  const experience = profile.experience || 'intermediate';
+
+  // اگر trainingHistory وجود داره، ازش استفاده کن
+  if (history.includes('مبتدی') || history.includes('کمتر از ۱') || history.includes('کمتر از 1')) {
+    return 'beginner';
+  }
+  if (history.includes('حرفه') || history.includes('بیش از ۵') || history.includes('بیش از 5') || history.includes('مسابقه')) {
+    return 'professional';
+  }
+  if (history.includes('پیشرفته') || history.includes('۳-۵') || history.includes('3-5')) {
+    return 'advanced';
+  }
+
+  // در غیر این صورت از experience استفاده کن
+  return experience as any;
 }

@@ -86,7 +86,12 @@ export function generateWorkoutProgram(
   const programSystem = selectProgramSystem(profile, analysis, performance);
   const safeWeek = Math.max(1, Math.min(Math.floor(currentWeek), programSystem.weeks || 1));
 
-  const split = selectSplit(analysis.weeklyTrainingDays, analysis.experience, analysis.goal);
+  const split = selectSplit(
+    analysis.weeklyTrainingDays,
+    analysis.experience,
+    analysis.goal,
+    profile.competitionDate,
+  );
 
   // ۳. تولید جلسات
   const sessionDayIndices = getTrainingDayIndices(analysis.weeklyTrainingDays);

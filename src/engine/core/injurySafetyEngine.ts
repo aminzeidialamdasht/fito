@@ -239,3 +239,45 @@ export function isExerciseSafeFor(
   const injuries = normalizeInjuries(safeInjuries);
   return getSafetyLevel(exercise, injuries) !== 'forbidden';
 }
+
+/**
+ * تحلیل شرایط پزشکی و یادداشت دارو/هورمون
+ * @returns هشدارهای ایمنی اضافی
+ */
+export function analyzeHealthConditions(profile: {
+  healthConditions?: string[];
+  hormoneMedNotes?: string;
+}): SafetyWarning[] {
+  const warnings: SafetyWarning[] = [];
+
+  const healthConditions = profile.healthConditions || [];
+  const hormoneNotes = (profile.hormoneMedNotes || '').toLowerCase();
+
+  // شرایط پزشکی که روی تمرین تأثیر دارن
+  const highRiskConditions = [
+    { keywords: ['فشار خون', 'فشارخون'], message: 'با فشار خون بالا، از حبس نفس در حرکات سنگین اجتناب کن.' },
+    { keywords: ['دیابت', 'قند'], message: 'با دیابت، قبل از تمرین قند خون رو چک کن.' },
+    { keywords: ['قلب', 'قلبی'], message: 'با مشکل قلبی، شدت تمرین باید تحت نظر پزشک باشه.' },
+    { keywords: ['آسم', 'تنفس'], message: 'با آسم، تمرینات هوازی طولانی باید با احتیاط انجام بشه.' },
+    { keywords: ['کمردرد', 'دیسک'], message: 'با مشکل کمر، از حرکات فشاری روی ستون فقرات اجتناب کن.' },
+  ];
+
+  for (const condition of highRiskConditions) {
+    if (healthConditions.some((hc: string) => condition.keywords.some((kw) => hc.includes(kw)))) {
+      warnings.push({
+        type: 'caution',
+        message: condition.message,
+      } as any);
+    }
+  }
+
+  // یادداشت دارو/هورمون
+  if (hormoneNotes.includes('استروئید') || hormoneNotes.includes('تستوسترون') || hormoneNotes.includes('هورمون')) {
+    warnings.push({
+      type: 'info',
+      message: 'مصرف هورمون، ریکاوری رو تسریع می‌کنه — برنامه می‌تونه شدیدتر باشه.',
+    } as any);
+  }
+
+  return warnings;
+}

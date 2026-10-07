@@ -177,6 +177,7 @@ export function selectExercisesForMuscle(
     if (!canPerform(ex, availableEquipment)) return false;
     if (!isSafeForUser(ex, analysis.safeInjuries)) return false;
     if (!isSuitableDifficulty(ex, analysis.experience)) return false;
+    if (!isSuitableForLocation(ex, analysis.location || 'gym')) return false;
     return true;
   });
 
@@ -273,4 +274,34 @@ export function selectExercisesForSession(
   }
 
   return selected;
+}
+
+/**
+ * فیلتر حرکات بر اساس محل تمرین
+ * - gym: همه حرکات مجاز
+ * - home: فقط حرکات با تجهیزات خانگی
+ * - park: فقط وزن بدن
+ * - both: همه حرکات
+ */
+function isSuitableForLocation(
+  exercise: Exercise,
+  location: string
+): boolean {
+  if (location === 'gym' || location === 'both') return true;
+
+  // در خانه: حرکات دستگاه‌محور سنگین حذف می‌شن
+  if (location === 'home') {
+    const gymOnlyEquipment: EquipmentType[] = [
+      'barbell', 'smith_machine', 'cable', 'machine',
+    ];
+    return !exercise.equipment.some((eq) => gymOnlyEquipment.includes(eq));
+  }
+
+  // در پارک: فقط وزن بدن و تجهیزات ساده
+  if (location === 'park') {
+    const parkAllowed: EquipmentType[] = ['bodyweight', 'pull_up_bar', 'dip_station', 'bench'];
+    return exercise.equipment.every((eq) => parkAllowed.includes(eq));
+  }
+
+  return true;
 }

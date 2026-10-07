@@ -34,6 +34,8 @@ export function calculateOptimalTrainingDays(
   const sessionMinutes = Number(profile.sessionDuration) || 60;
   const recoveryQuality = profile.recoveryQuality || 'good';
   const sleepHours = Number(profile.sleepHours) || 7;
+  const jobStress = profile.jobStress || 'medium';
+  const workShift = profile.workShift || 'day';
 
   // ═══════════════════════════════════════════════════════════
   //  مرحله ۱: بازه پایه بر اساس سطح تجربه
@@ -149,6 +151,21 @@ export function calculateOptimalTrainingDays(
     max = Math.max(min, max - 1);
     recommended = Math.max(min, recommended - 1);
     reason += ' کیفیت ریکاوری یا خواب پایین، کاهش یک روز رو ایجاب می‌کنه.';
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  //  مرحله ۴.۵: تنظیم بر اساس استرس و شیفت کاری
+  // ═══════════════════════════════════════════════════════════
+  if (jobStress === 'high') {
+    max = Math.max(min, max - 1);
+    recommended = Math.max(min, recommended - 1);
+    reason += ' استرس کاری بالا، کاهش یک روز رو ایجاب می‌کنه.';
+  }
+
+  if (workShift === 'night' || workShift === 'rotating') {
+    max = Math.max(min, max - 1);
+    recommended = Math.max(min, recommended - 1);
+    reason += ' شیفت شب یا شیفتی، ریکاوری رو کاهش می‌ده.';
   }
 
   // ═══════════════════════════════════════════════════════════
