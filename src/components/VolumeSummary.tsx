@@ -1,174 +1,121 @@
-/**
- * نمایش خلاصه حجم هفتگی (Effective Sets) برای هر عضله
- * نشان می‌دهد: MEV/MAV/MRV کجاست و کاربر الان کجاست
- */
-
+/** خلاصه حجم هفتگی مؤثر برای هر عضله */
 import { useMemo } from 'react';
-import { TrendingUp, AlertTriangle, CheckCircle2, Info } from 'lucide-react';
+import { Info, TrendingUp } from 'lucide-react';
 import type { MuscleGroup } from '../engine/types/exercise';
 import type { ExperienceLevel, Goal } from '../engine/types/program';
 import { getTargetWeeklyVolume } from '../engine/data/rules/volumeRules';
+import { getTokens } from '../styles/designTokens';
+import Card from './ui/Card';
+import Badge from './ui/Badge';
+import SectionHeader from './ui/SectionHeader';
 
 interface VolumeSummaryProps {
   weeklyVolume: Partial<Record<MuscleGroup, number>>;
   experience: ExperienceLevel;
   goal: Goal;
   priorityMuscles?: string[];
+  accessoryMuscles?: string[];
   isDark?: boolean;
 }
 
 const MUSCLE_LABELS: Record<MuscleGroup, string> = {
-  chest: 'سینه',
-  upper_back: 'پشت میانی',
-  lats: 'لت',
-  lower_back: 'پایین پشت',
-  traps: 'کول',
-  front_delts: 'سرشانه جلو',
-  side_delts: 'سرشانه کنار',
-  rear_delts: 'سرشانه پشت',
-  biceps: 'جلوبازو',
-  triceps: 'پشت بازو',
-  forearms: 'ساعد',
-  quads: 'چهارسر',
-  hamstrings: 'همسترینگ',
-  glutes: 'سرینی',
-  calves: 'ساق',
-  abs: 'شکم',
-  obliques: 'پهلو',
+  chest: 'سینه', upper_back: 'پشت میانی', lats: 'لت', lower_back: 'پایین پشت',
+  traps: 'کول', front_delts: 'سرشانه جلو', side_delts: 'سرشانه کنار',
+  rear_delts: 'سرشانه پشت', biceps: 'جلوبازو', triceps: 'پشت بازو',
+  forearms: 'ساعد', quads: 'چهارسر', hamstrings: 'همسترینگ',
+  glutes: 'سرینی', calves: 'ساق', abs: 'شکم', obliques: 'پهلو',
 };
+
+const ACCESSORY_MUSCLES = [
+  'calves', 'forearms', 'traps', 'abs', 'obliques',
+  'lower_back', 'side_delts', 'rear_delts',
+];
 
 type Status = 'below' | 'optimal' | 'high' | 'too_high';
 
-const STATUS_CONFIG: Record<Status, { color: string; label: string; icon: any }> = {
-  below: { color: '#fbbf24', label: 'کمتر از حد بهینه', icon: AlertTriangle },
-  optimal: { color: '#22c55e', label: 'بهینه', icon: CheckCircle2 },
-  high: { color: '#fb923c', label: 'بالاتر از بهینه', icon: TrendingUp },
-  too_high: { color: '#ef4444', label: 'بیش از حد', icon: AlertTriangle },
-};
-
 export default function VolumeSummary({
-  weeklyVolume,
-  experience,
-  goal,
-  priorityMuscles = [],
-  isDark = true,
+  weeklyVolume, experience, goal, priorityMuscles = [],
+  accessoryMuscles = ACCESSORY_MUSCLES, isDark = true,
 }: VolumeSummaryProps) {
-  const textMain = isDark ? '#ffffff' : '#0f172a';
-  const textSub = isDark ? '#94a3b8' : '#64748b';
-  const cardBg = isDark
-    ? 'bg-[#1e1b4b]/50 backdrop-blur-md'
-    : 'bg-white/70 backdrop-blur-md shadow-sm';
-  const border = isDark ? 'border-white/10' : 'border-violet-200/60';
-  const barBg = isDark ? 'bg-white/10' : 'bg-gray-200';
-
-  // محاسبه وضعیت هر عضله
-  const muscleStats = useMemo(() => {
-    return (Object.keys(weeklyVolume) as MuscleGroup[])
-      .filter((m) => (weeklyVolume[m] || 0) > 0)
+  const tokens = getTokens(isDark);
+  const muscleStats = useMemo(() => (
+    (Object.keys(weeklyVolume) as MuscleGroup[])
+      .filter((muscle) => (weeklyVolume[muscle] || 0) > 0)
       .map((muscle) => {
         const volume = weeklyVolume[muscle] || 0;
         const isPriority = priorityMuscles.includes(muscle);
         const target = getTargetWeeklyVolume(muscle, experience, goal, isPriority);
-
         let status: Status = 'optimal';
         if (volume < target.min) status = 'below';
         else if (volume > target.max) status = 'too_high';
         else if (volume > target.target * 1.15) status = 'high';
-
-        return { muscle, volume, target, status };
+        return { muscle, volume, target, status, isPriority };
       })
-      .sort((a, b) => b.volume - a.volume);
-  }, [weeklyVolume, experience, goal, priorityMuscles]);
+      .sort((a, b) => b.volume - a.volume)
+  ), [weeklyVolume, experience, goal, priorityMuscles]);
 
-  // آمار کلی
-  const summary = useMemo(() => {
-    const total = muscleStats.length;
-    const optimal = muscleStats.filter((s) => s.status === 'optimal').length;
-    const tooHigh = muscleStats.filter((s) => s.status === 'too_high').length;
-    const below = muscleStats.filter((s) => s.status === 'below').length;
-    return { total, optimal, tooHigh, below };
-  }, [muscleStats]);
+  if (!muscleStats.length) return null;
 
-  if (muscleStats.length === 0) return null;
+  const counts = {
+    optimal: muscleStats.filter((item) => item.status === 'optimal').length,
+    below: muscleStats.filter((item) => item.status === 'below').length,
+    tooHigh: muscleStats.filter((item) => item.status === 'too_high').length,
+  };
+  const statusColor: Record<Status, string> = {
+    below: tokens.warning, optimal: tokens.success,
+    high: tokens.warning, too_high: tokens.danger,
+  };
 
   return (
-    <div className={`rounded-2xl p-4 border ${border} ${cardBg}`}>
-      {/* Header */}
-      <div className="flex items-center gap-2 mb-3">
-        <TrendingUp size={18} className="text-violet-400" />
-        <h3 className={`font-black text-sm ${textMain}`}>حجم هفتگی مؤثر</h3>
+    <Card>
+      <SectionHeader icon={<TrendingUp size={18} />} title="حجم هفتگی مؤثر" />
+      <div className="flex flex-wrap gap-2 my-3">
+        <Badge color="success">{counts.optimal} بهینه</Badge>
+        {counts.below > 0 && <Badge color="warning">{counts.below} کم</Badge>}
+        {counts.tooHigh > 0 && <Badge color="danger">{counts.tooHigh} زیاد</Badge>}
       </div>
 
-      {/* Summary */}
-      <div className="flex gap-3 mb-4 text-[10px]">
-        <span className="flex items-center gap-1" style={{ color: '#22c55e' }}>
-          <CheckCircle2 size={10} /> {summary.optimal} بهینه
-        </span>
-        {summary.below > 0 && (
-          <span className="flex items-center gap-1" style={{ color: '#fbbf24' }}>
-            <AlertTriangle size={10} /> {summary.below} کم
-          </span>
-        )}
-        {summary.tooHigh > 0 && (
-          <span className="flex items-center gap-1" style={{ color: '#ef4444' }}>
-            <AlertTriangle size={10} /> {summary.tooHigh} زیاد
-          </span>
-        )}
-      </div>
-
-      {/* Muscles List */}
-      <div className="space-y-2">
-        {muscleStats.map(({ muscle, volume, target, status }) => {
-          const config = STATUS_CONFIG[status];
-          const Icon = config.icon;
-
-          // درصد نوار (نسبت به MRV برای نمایش)
+      <div className="space-y-3">
+        {muscleStats.map(({ muscle, volume, target, status, isPriority }) => {
+          const isAccessory = accessoryMuscles.includes(muscle);
+          const color = isPriority ? tokens.priority
+            : isAccessory ? tokens.accessory : statusColor[status];
           const percent = Math.min((volume / target.max) * 100, 100);
-          // موقعیت MEV/MAV/MRV روی نوار
           const mevPercent = Math.min((target.min / target.max) * 100, 100);
-
           return (
-            <div key={muscle} className="space-y-1">
-              <div className="flex items-center justify-between text-[11px]">
+            <div key={muscle} className="space-y-1.5">
+              <div className="flex items-center justify-between gap-2 text-xs">
                 <div className="flex items-center gap-1.5">
-                  <Icon size={11} style={{ color: config.color }} />
-                  <span className={`font-bold ${textMain}`}>
+                  <span className="font-bold" style={{ color: tokens.textMain }}>
                     {MUSCLE_LABELS[muscle]}
                   </span>
+                  {isPriority && <Badge color="priority" size="sm">اولویت</Badge>}
+                  {!isPriority && isAccessory && <Badge color="accessory" size="sm">فرعی</Badge>}
                 </div>
-                <span style={{ color: config.color }} className="font-bold">
+                <span className="font-bold whitespace-nowrap" style={{ color }}>
                   {volume.toFixed(1)} / {target.target} ست
                 </span>
               </div>
-
-              {/* Progress bar */}
-              <div className={`relative h-1.5 rounded-full overflow-hidden ${barBg}`}>
-                {/* MEV marker */}
-                <div
-                  className="absolute top-0 bottom-0 w-0.5 bg-yellow-500/40"
-                  style={{ left: `${mevPercent}%` }}
-                />
-                {/* Fill */}
-                <div
-                  className="absolute top-0 bottom-0 right-0 rounded-full transition-all"
-                  style={{
-                    width: `${percent}%`,
-                    background: config.color,
-                  }}
-                />
+              <div
+                className="relative h-2 overflow-hidden rounded-full"
+                style={{ backgroundColor: tokens.border }}
+                role="img"
+                aria-label={`${MUSCLE_LABELS[muscle]}: ${volume} از هدف ${target.target} ست`}
+              >
+                <div className="absolute inset-y-0 w-0.5" style={{ right: `${mevPercent}%`, backgroundColor: tokens.warning }} />
+                <div className="absolute inset-y-0 right-0 rounded-full transition-all" style={{ width: `${percent}%`, backgroundColor: color }} />
               </div>
             </div>
           );
         })}
       </div>
 
-      {/* Legend */}
-      <div className={`mt-4 pt-3 border-t ${border} flex items-center gap-2 text-[9px] ${textSub}`}>
-        <Info size={10} />
-        <span>
-          علامت زرد میانی = MEV. ست‌ها به‌صورت Effective محاسبه می‌شوند (شامل عضلات ثانویه).
-        </span>
+      <div className="flex flex-wrap gap-x-4 gap-y-2 mt-4 pt-3 border-t text-xs" style={{ borderColor: tokens.border, color: tokens.textSub }}>
+        <span><i className="inline-block w-2.5 h-2.5 rounded-full ml-1" style={{ backgroundColor: tokens.priority }} />اولویت‌دار</span>
+        <span><i className="inline-block w-2.5 h-2.5 rounded-full ml-1" style={{ backgroundColor: tokens.accessory }} />عضله فرعی</span>
+        <span><i className="inline-block w-2.5 h-2.5 rounded-full ml-1" style={{ backgroundColor: tokens.success }} />عادی</span>
+        <span className="flex items-center gap-1"><Info size={12} />خط زرد = MEV؛ ست‌ها شامل عضلات ثانویه‌اند.</span>
       </div>
-    </div>
+    </Card>
   );
 }
