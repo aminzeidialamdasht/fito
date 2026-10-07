@@ -16,6 +16,7 @@ import { getTokens } from '../styles/designTokens';
 import Card from '../components/ui/Card';
 import Toast from '../components/ui/Toast';
 import Badge from '../components/ui/Badge';
+import ProgressBar from '../components/ui/ProgressBar';
 
 const isStoreBuild = ['bazaar', 'myket'].includes(import.meta.env.VITE_APP_FLAVOR || '');
 
@@ -378,6 +379,17 @@ export default function Dashboard() {
               <span className={`text-sm font-black flex items-center gap-1 ${textMain}`}>
                 <Flame size={14} style={{ color: '#f59e0b' }} /> {toPersianNumber(Math.round(totalVolume * 0.1))}
               </span>
+            </div>
+
+            {/* ProgressBar پیشرفت هفتگی */}
+            <div className="pt-2 border-t" style={{ borderColor: tokens.border }}>
+              <ProgressBar
+                value={weeklyProgress}
+                color="accent"
+                size="sm"
+                showLabel
+                label="پیشرفت هفتگی"
+              />
             </div>
           </div>
         </Card>
