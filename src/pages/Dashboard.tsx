@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { useSubscription } from '../hooks/useSubscription';
 import { useTheme } from '../context/ThemeContext';
@@ -14,6 +14,7 @@ import { useNavigate } from 'react-router-dom';
 import { FEATURE_FLAGS } from '../engine/version';
 import { getTokens } from '../styles/designTokens';
 import Card from '../components/ui/Card';
+import Toast from '../components/ui/Toast';
 
 const isStoreBuild = ['bazaar', 'myket'].includes(import.meta.env.VITE_APP_FLAVOR || '');
 
@@ -25,6 +26,8 @@ export default function Dashboard() {
   const { theme } = useTheme();
   const navigate = useNavigate();
   const isDark = theme === 'dark';
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
   const tokens = getTokens(isDark);
 
   const profile = activeProfile;
@@ -140,7 +143,8 @@ export default function Dashboard() {
   const handleGeneratorClick = (gen: typeof generators[number]) => {
     if (!gen.enabled) {
       soundEffects.playClick();
-      alert(`${gen.title} به‌زودی در دسترس خواهد بود!`);
+      setToastMessage(`${gen.title} به‌زودی در دسترس خواهد بود!`);
+      setShowToast(true);
       return;
     }
 
@@ -423,6 +427,13 @@ export default function Dashboard() {
         </Card>
       )}
 
+      <Toast
+        isOpen={showToast}
+        onClose={() => setShowToast(false)}
+        message={toastMessage}
+        type="info"
+        duration={2500}
+      />
     </div>
   );
 }
