@@ -15,6 +15,7 @@ import { useTheme } from '../context/ThemeContext';
 import { formatDateJalali, toPersianNumber, getProgramTimelineDetails } from '../utils/jalali';
 import AnatomySVG from '../components/AnatomySVG';
 import Card from '../components/ui/Card';
+import ProgressBar from '../components/ui/ProgressBar';
 import { getTokens } from '../styles/designTokens';
 
 type MeasurementKey = 'weight' | 'chest' | 'waist' | 'hips' | 'arms' | 'thighs' | 'calves' | 'shoulders' | 'neck';
@@ -158,15 +159,13 @@ export default function Progress() {
               </button>
             </div>
           )}
-
-          <div className="flex justify-between text-xs font-bold mb-1">
-            <span className={textSub}>پیشرفت برنامه</span>
-            <span style={{ color: gold }}>{toPersianNumber(activeProgramTimeline.progressPercent)}٪</span>
-          </div>
-          <div className={`w-full h-2.5 rounded-full overflow-hidden ${isDark ? 'bg-gray-800' : 'bg-gray-100'}`}>
-            <div className="h-full rounded-full transition-all duration-500" 
-              style={{ width: `${activeProgramTimeline.progressPercent}%`, background: activeProgramTimeline.isAlarmRequired ? '#f59e0b' : gold }} />
-          </div>
+          <ProgressBar
+            value={activeProgramTimeline.progressPercent}
+            color={activeProgramTimeline.isAlarmRequired ? 'warning' : 'gold'}
+            size="md"
+            showLabel
+            label="پیشرفت برنامه"
+          />
         </Card>
       )}
 
