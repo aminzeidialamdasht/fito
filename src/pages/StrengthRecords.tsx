@@ -5,6 +5,12 @@ import { useAppContext } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { toPersianNumber } from '../utils/jalali';
 import { soundEffects } from '../utils/sound';
+import { getTokens } from '../styles/designTokens';
+import Card from '../components/ui/Card';
+import Input from '../components/ui/Input';
+import PrimaryButton from '../components/ui/PrimaryButton';
+import EmptyState from '../components/ui/EmptyState';
+import Toast from '../components/ui/Toast';
 
 type RecordKey = 'squat' | 'benchPress' | 'deadlift' | 'overheadPress' | 'barbellRow';
 type RecordValue = { weight: string; reps: string };
@@ -31,6 +37,8 @@ export default function StrengthRecords() {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
   const [records, setRecords] = useState<Record<RecordKey, RecordValue>>(() => {
     const existing = (activeProfile as any)?.strengthRecordsExtended ?? {};
     return exercises.reduce((result, { key }) => {
@@ -43,14 +51,16 @@ export default function StrengthRecords() {
     }, emptyRecords());
   });
 
+  const tokens = getTokens(isDark);
+
   const colors = {
-    teal: isDark ? '#a78bfa' : '#8b5cf6',
-    gold: isDark ? '#d4af37' : '#f59e0b',
-    bg: isDark ? '#0f172a' : '#f8fafc',
-    card: isDark ? 'bg-[#1e1b4b]/50 backdrop-blur-md' : 'bg-violet-50/70 backdrop-blur-md',
-    text: isDark ? '#ffffff' : '#0f172a',
-    sub: isDark ? '#94a3b8' : '#64748b',
-    border: isDark ? 'border-white/10' : 'border-violet-200/60',
+    teal: tokens.accent,
+    gold: tokens.gold,
+    bg: tokens.bg,
+    card: '',
+    text: tokens.textMain,
+    sub: tokens.textSub,
+    border: '',
   };
 
   const updateRecord = (key: RecordKey, field: keyof RecordValue, value: string) => {
@@ -83,16 +93,24 @@ export default function StrengthRecords() {
       },
     } as any);
     soundEffects.playClick();
-    navigate('/profile');
+    setToastMessage('رکوردها با موفقیت ذخیره شد');
+    setShowToast(true);
+    setTimeout(() => navigate('/profile'), 1500);
   };
 
   if (!activeProfile) {
     return (
-      <main
-        className="min-h-screen p-4"
-        style={{ background: colors.bg, color: colors.text }}
-      >
-        ابتدا یک پروفایل فعال انتخاب کنید.
+      <main className="min-h-screen p-4 flex items-center justify-center">
+        <EmptyState
+          icon={<Dumbbell size={48} />}
+          title="پروفایل فعالی انتخاب نشده"
+          subtitle="ابتدا یک پروفایل فعال انتخاب کنید."
+          action={
+            <PrimaryButton variant="accent" onClick={() => navigate('/profile')}>
+              رفتن به پروفایل‌ها
+            </PrimaryButton>
+          }
+        />
       </main>
     );
   }
@@ -109,12 +127,12 @@ export default function StrengthRecords() {
           <ArrowRight size={22} /> رکوردهای قدرت
         </button>
 
-        <section className={`rounded-3xl border ${colors.border} ${colors.card} p-4 shadow-lg`}>
+        <Card variant="elevated" className="p-4">
           <div className="mb-5 flex items-center gap-3">
-            <Dumbbell size={24} style={{ color: colors.gold }} />
+            <Dumbbell size={24} style={{ color: tokens.gold }} />
             <div>
               <h1 className="text-xl font-bold">رکوردهای قدرت</h1>
-              <p style={{ color: colors.sub }}>1RM تخمینی با فرمول Epley</p>
+              <p style={{ color: tokens.textSub }}>1RM تخمینی با فرمول Epley</p>
             </div>
           </div>
 
@@ -122,54 +140,54 @@ export default function StrengthRecords() {
             {exercises.map(({ key, label }) => {
               const oneRepMax = estimated(records[key]);
               return (
-                <div key={key} className="rounded-2xl border border-white/10 p-3">
+                <Card key={key} variant="soft" className="p-3">
                   <h2 className="mb-3 font-semibold">{label}</h2>
                   <div className="grid grid-cols-2 gap-3">
-                    <label className="text-sm" style={{ color: colors.sub }}>
-                      وزنه (کیلوگرم)
-                      <input
-                        type="number"
-                        min="0"
-                        step="0.5"
-                        value={records[key].weight}
-                        onChange={(event) => updateRecord(key, 'weight', event.target.value)}
-                        aria-label={`وزنه ${label}`}
-                        className="mt-1 min-h-[44px] w-full rounded-xl border border-white/10 bg-black/10 px-3 text-base"
-                      />
-                    </label>
-                    <label className="text-sm" style={{ color: colors.sub }}>
-                      تکرار
-                      <input
-                        type="number"
-                        min="1"
-                        step="1"
-                        value={records[key].reps}
-                        onChange={(event) => updateRecord(key, 'reps', event.target.value)}
-                        aria-label={`تکرار ${label}`}
-                        className="mt-1 min-h-[44px] w-full rounded-xl border border-white/10 bg-black/10 px-3 text-base"
-                      />
-                    </label>
+                    <Input
+                      label="وزنه (کیلوگرم)"
+                      type="number"
+                      inputSize="sm"
+                      value={records[key].weight}
+                      onChange={(event) => updateRecord(key, 'weight', event.target.value)}
+                    />
+                    <Input
+                      label="تکرار"
+                      type="number"
+                      inputSize="sm"
+                      value={records[key].reps}
+                      onChange={(event) => updateRecord(key, 'reps', event.target.value)}
+                    />
                   </div>
-                  <p className="mt-3 text-sm" style={{ color: oneRepMax ? colors.gold : colors.sub }}>
+                  <p className="mt-3 text-sm" style={{ color: oneRepMax ? tokens.gold : tokens.textSub }}>
                     {oneRepMax
                       ? `1RM تخمینی: ${toPersianNumber(oneRepMax.toFixed(1))} کیلوگرم`
                       : 'برای محاسبه، وزنه و تکرار را وارد کنید'}
                   </p>
-                </div>
+                </Card>
               );
             })}
           </div>
 
-          <button
+          <PrimaryButton
+            variant="accent"
+            size="lg"
+            fullWidth
             onClick={handleSave}
-            className="mt-5 flex min-h-[44px] w-full items-center justify-center gap-2 rounded-2xl px-4 font-bold text-white"
-            style={{ background: colors.teal }}
-            aria-label="ذخیره رکوردهای قدرت"
+            ariaLabel="ذخیره رکوردهای قدرت"
+            className="mt-5"
           >
             <Save size={20} /> ذخیره رکوردها
-          </button>
-        </section>
+          </PrimaryButton>
+        </Card>
       </div>
+
+      <Toast
+        isOpen={showToast}
+        onClose={() => setShowToast(false)}
+        message={toastMessage}
+        type="success"
+        duration={1500}
+      />
     </main>
   );
 }
