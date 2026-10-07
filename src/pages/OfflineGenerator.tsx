@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
+import { convertGeneratedToWorkout } from '../utils/programConverter';
 import { useTheme } from '../context/ThemeContext';
 import { soundEffects } from '../utils/sound';
 import { generateOfflineWorkout } from '../engine';
@@ -75,49 +76,12 @@ export default function OfflineGenerator() {
     if (!generatedProgram || !activeProfile) return;
     soundEffects.playClick();
 
-    // تبدیل به فرمت WorkoutProgram اپ
-    const programForApp: WorkoutProgram = {
-      id: generatedProgram.id,
-      profileId: activeProfile.id,
-      name: generatedProgram.name,
-      duration: `${generatedProgram.durationWeeks} هفته`,
-      createdAt: generatedProgram.createdAt,
-      trainingDays: generatedProgram.trainingDaysPerWeek,
-      splitType: generatedProgram.splitType,
-      goal: generatedProgram.goal,
-      experience: generatedProgram.experience,
-      days: generatedProgram.days.map((day) => ({
-        day: day.title,
-        weekday: day.dayName,
-        muscleGroups: day.exercises.map((e) => e.primaryMuscle),
-        muscle_groups: day.exercises.map((e) => e.primaryMuscle),
-        exercises: day.exercises.map((ex) => ({
-          id: ex.exerciseId,
-
-          exerciseId: ex.exerciseId,
-          name: ex.name,
-          sets: ex.sets.length,
-          reps: ex.sets[0]?.targetReps || '8-12',
-          rest: ex.sets[0]?.restSeconds || 90,
-          tempo: ex.sets[0]?.tempo,
-          rir: ex.sets[0]?.targetRIR,
-          loadMethod:
-            ex.sets.find((set) => set.technique)?.techniqueNameFa ||
-            ex.sets.find((set) => set.technique)?.technique ||
-            undefined,
-          targetMuscle: ex.primaryMuscle,
-          primaryMuscle: ex.primaryMuscle,
-          secondaryMuscles: ex.secondaryMuscles || [],
-          type: ex.type,
-          englishName: ex.englishName,
-          substitute: ex.substituteId,
-          notes: ex.notes,
-        })),
-      })),
-      weeklyVolumeSummary: generatedProgram.weeklyVolumeSummary || {},
-      restDays: generatedProgram.restDays || [],
-      metadata: generatedProgram.metadata,
-    };
+    // تبدیل به فرمت WorkoutProgram اپ (helper مشترک)
+    const programForApp = convertGeneratedToWorkout(
+      generatedProgram,
+      undefined,
+      activeProfile.id,
+    );
 
     addProgram(programForApp);
     setActiveProgram(generatedProgram.id);

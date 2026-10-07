@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAppContext } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -20,6 +20,9 @@ import { analyzeProfile } from '../../engine/core/profileAnalyzer';
 import { normalizeSets, countTotalSets } from '../../utils/programHelpers';
 import type { WorkoutProgram, WorkoutDay, Exercise } from '../../types';
 import type { TrainingTechnique } from '../../engine/types/program';
+import { generateWorkoutProgram } from '../../engine/generators/workoutGenerator';
+import { getCurrentWeek } from '../../utils/weekCalculator';
+import { convertGeneratedToWorkout } from '../../utils/programConverter';
 
 const PERSIAN_WEEKDAYS = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
 
@@ -31,11 +34,45 @@ function getExerciseTechnique(ex: Exercise): TrainingTechnique | undefined {
 export default function ProgramDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { programs, state, setActiveProgram, updateProgram, activeProfile } = useAppContext();
+  const { programs, state, setActiveProgram, updateProgram, activeProfile, sessions } = useAppContext();
+
+  const [weekUpdate, setWeekUpdate] = useState<string | null>(null);
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
   const program = programs.find((p) => p.id === id);
+
+  // Phase 11c: Auto-Regeneration در هفته جدید
+  useEffect(() => {
+    if (!program || !activeProfile) return;
+
+    const currentWeek = getCurrentWeek(program);
+    const storedWeek = program.metadata?.currentWeek ?? 1;
+
+    if (currentWeek === 0 || currentWeek === storedWeek) return;
+
+    try {
+      const generated = generateWorkoutProgram(
+        activeProfile,
+        sessions,
+        currentWeek,
+      );
+
+      const updated = convertGeneratedToWorkout(
+        generated,
+        program,
+        activeProfile.id,
+        currentWeek,
+      );
+
+      updateProgram(updated);
+      setWeekUpdate(
+        `برنامه برای هفته ${toPersianNumber(currentWeek)} بروزرسانی شد`,
+      );
+    } catch (err) {
+      console.error('Regeneration failed:', err);
+    }
+  }, [program, activeProfile, sessions, updateProgram]);
 
   const allInjuries: string[] = activeProfile ? analyzeProfile(activeProfile).safeInjuries : [];
   const safetyReport = program && allInjuries.length > 0
@@ -256,6 +293,23 @@ export default function ProgramDetail() {
           onSelect={handleSubstituteSelect}
           onClose={() => setSubstituteTarget(null)}
         />
+      )}
+
+      {/* Phase 11c: Snackbar اطلاع هفته جدید */}
+      {weekUpdate && (
+        <div
+          role="status"
+          className="fixed bottom-5 left-1/2 z-50 -translate-x-1/2 rounded-lg bg-slate-900 px-4 py-3 text-sm text-white shadow-lg"
+        >
+          {weekUpdate}
+          <button
+            type="button"
+            className="mr-3 underline"
+            onClick={() => setWeekUpdate(null)}
+          >
+            بستن
+          </button>
+        </div>
       )}
     </div>
   );
