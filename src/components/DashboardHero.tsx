@@ -1,10 +1,15 @@
-import { Dumbbell, Flame, CheckCircle2, Award } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { Award, CheckCircle2, Dumbbell, Flame } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 import { toPersianNumber } from '../utils/jalali';
 import { soundEffects } from '../utils/sound';
+import { getTokens } from '../styles/designTokens';
+import Card from './ui/Card';
+import PrimaryButton from './ui/PrimaryButton';
+import SectionHeader from './ui/SectionHeader';
 
 interface Props {
-  isDark: boolean;
+  isDark?: boolean;
   isPremium: boolean;
   profileName?: string;
   isTodayRest: boolean;
@@ -19,121 +24,121 @@ interface Props {
 }
 
 export default function DashboardHero({
-  isDark, isPremium, profileName, isTodayRest, todayDayIndex, nextTrainingDayIndex,
-  weeklyCompleted, weeklyGoal, weeklyProgress, currentStreak, lastSession, getSessionDuration,
+  isDark: isDarkProp, isPremium, profileName, isTodayRest, todayDayIndex,
+  nextTrainingDayIndex, weeklyCompleted, weeklyGoal, weeklyProgress,
+  currentStreak, lastSession, getSessionDuration,
 }: Props) {
+  const { theme } = useTheme();
+  const isDark = isDarkProp ?? theme === 'dark';
+  const tokens = getTokens(isDark);
   const navigate = useNavigate();
+  const progress = Math.max(0, Math.min(weeklyProgress, 100));
+  const progressColor = isDark ? tokens.gold : tokens.accent;
+
+  const startWorkout = () => {
+    soundEffects.playClick();
+    const day = isTodayRest
+      ? nextTrainingDayIndex
+      : todayDayIndex >= 0 ? todayDayIndex : nextTrainingDayIndex;
+    navigate(`/workout?day=${day}${isTodayRest ? '' : '&autoStart=true'}`);
+  };
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className={`text-xl font-black ${isDark ? 'text-white' : 'text-slate-800'}`}>
-            سلام، {profileName || 'مربی'} 👋
-          </h1>
-          <p className={`text-xs mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-            آماده‌ای برای پیشرفت؟
-          </p>
-        </div>
+      <div className="flex items-center justify-between gap-3">
+        <SectionHeader
+          title={`سلام، ${profileName || 'مربی'} 👋`}
+          subtitle="آماده‌ای برای پیشرفت؟"
+        />
         {!isPremium && (
           <button
+            type="button"
             onClick={() => navigate('/prompt')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold border ${
-              isDark ? 'border-[#d4af37]/40 text-[#d4af37] bg-[#d4af37]/10' : 'border-amber-400 text-amber-700 bg-amber-50'
-            }`}
+            aria-label="ارتقا به نسخه ویژه"
+            className="flex min-h-[44px] items-center gap-1.5 rounded-full border px-3 text-xs font-bold"
+            style={{ borderColor: tokens.gold, color: tokens.gold }}
           >
-            <Award size={14} /> ارتقا به ویژه
+            <Award size={15} /> ویژه
           </button>
         )}
       </div>
 
-      <button
-        onClick={() => {
-          soundEffects.playClick();
-          if (isTodayRest) {
-            navigate(`/workout?day=${nextTrainingDayIndex}`);
-          } else {
-            navigate(`/workout?day=${todayDayIndex >= 0 ? todayDayIndex : nextTrainingDayIndex}&autoStart=true`);
-          }
-        }}
-        className={`w-full py-4 rounded-2xl font-black text-base flex items-center justify-center gap-3 shadow-lg active:scale-[0.98] transition-transform ${
-          isDark
-            ? 'bg-gradient-to-l from-[#d4af37] to-amber-600 text-slate-950 shadow-[#d4af37]/25'
-            : 'bg-gradient-to-l from-violet-600 to-indigo-600 text-white shadow-teal-500/30'
-        }`}
+      <PrimaryButton
+        onClick={startWorkout}
+        variant="gold"
+        size="lg"
+        fullWidth
+        ariaLabel={isTodayRest ? 'شروع جلسه تمرینی بعدی' : 'شروع تمرین امروز'}
+        className="gap-3"
       >
-        <Dumbbell size={22} />
+        <Dumbbell size={21} />
         {isTodayRest ? 'شروع جلسه بعدی' : 'شروع تمرین امروز'}
-      </button>
+      </PrimaryButton>
 
       <div className="grid grid-cols-2 gap-3">
-        <div className={`rounded-2xl p-4 border flex flex-col items-center justify-center ${
-          isDark ? 'bg-[#1a1830] border-white/5' : 'bg-white border-violet-100 shadow-sm'
-        }`}>
-          <div className="relative w-16 h-16 mb-2">
-            <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
-              <circle cx="18" cy="18" r="15.5" fill="none" stroke={isDark ? '#334155' : '#e2e8f0'} strokeWidth="3" />
+        <Card className="flex flex-col items-center justify-center text-center">
+          <div className="relative mb-2 h-16 w-16">
+            <svg className="h-full w-full -rotate-90" viewBox="0 0 36 36" aria-hidden="true">
+              <circle cx="18" cy="18" r="15.5" fill="none" stroke={tokens.border} strokeWidth="3" />
               <circle
-                cx="18" cy="18" r="15.5" fill="none"
-                stroke={isDark ? '#d4af37' : '#8b5cf6'}
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeDasharray={`${weeklyProgress * 0.97} 100`}
+                cx="18" cy="18" r="15.5" fill="none" stroke={progressColor}
+                strokeWidth="3" strokeLinecap="round"
+                strokeDasharray={`${progress * 0.97} 100`}
               />
             </svg>
             <div className="absolute inset-0 flex items-center justify-center">
-              <span className={`text-sm font-black ${isDark ? 'text-[#d4af37]' : 'text-violet-600'}`}>
+              <span className="text-sm font-black" style={{ color: progressColor }}>
                 {toPersianNumber(weeklyCompleted)}/{toPersianNumber(weeklyGoal)}
               </span>
             </div>
           </div>
-          <p className={`text-[11px] font-bold ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>روزهای تکمیل‌شده</p>
-        </div>
+          <p className="text-xs font-bold" style={{ color: tokens.textSub }}>روزهای تکمیل‌شده</p>
+        </Card>
 
-        <div className={`rounded-2xl p-4 border flex flex-col items-center justify-center ${
-          isDark ? 'bg-[#1a1830] border-white/5' : 'bg-white border-orange-100 shadow-sm'
-        }`}>
-          <Flame size={28} className={currentStreak > 0 ? 'text-orange-400 mb-1' : 'text-slate-500 mb-1'} />
-          <p className={`text-2xl font-black ${isDark ? 'text-[#d4af37]' : 'text-orange-600'}`}>
+        <Card className="flex flex-col items-center justify-center text-center">
+          <Flame
+            size={28}
+            className="mb-1"
+            style={{ color: currentStreak > 0 ? tokens.warning : tokens.textSub }}
+          />
+          <p className="text-2xl font-black" style={{ color: progressColor }}>
             {toPersianNumber(currentStreak)}
           </p>
-          <p className={`text-[11px] font-bold ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>روز استریک تمرینی</p>
-        </div>
+          <p className="text-xs font-bold" style={{ color: tokens.textSub }}>روز استریک تمرینی</p>
+        </Card>
       </div>
 
       {lastSession && (
-        <div className={`rounded-2xl p-4 border ${
-          isDark ? 'bg-[#1a1830] border-white/5' : 'bg-white border-violet-100 shadow-sm'
-        }`}>
-          <div className="flex items-center justify-between mb-3">
-            <h3 className={`font-bold text-sm flex items-center gap-2 ${isDark ? 'text-white' : 'text-slate-800'}`}>
-              <CheckCircle2 size={16} className="text-indigo-400" /> آخرین جلسه
+        <Card>
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <h3 className="flex items-center gap-2 text-sm font-bold" style={{ color: tokens.textMain }}>
+              <CheckCircle2 size={16} style={{ color: tokens.success }} /> آخرین جلسه
             </h3>
-            <span className={`text-[10px] ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+            <span className="text-xs" style={{ color: tokens.textSub }}>
               {lastSession.date ? new Date(lastSession.date).toLocaleDateString('fa-IR') : ''}
             </span>
           </div>
           <div className="grid grid-cols-3 gap-2 text-center">
             <div>
-              <p className={`text-sm font-black ${isDark ? 'text-[#d4af37]' : 'text-violet-600'}`}>
+              <p className="text-sm font-black" style={{ color: tokens.accent }}>
                 {toPersianNumber(Math.round(lastSession.totalVolume || 0))}
               </p>
-              <p className="text-[10px] text-slate-500">حجم (kg)</p>
+              <p className="text-xs" style={{ color: tokens.textSub }}>حجم (kg)</p>
             </div>
             <div>
-              <p className={`text-sm font-black ${isDark ? 'text-violet-300' : 'text-violet-700'}`}>
+              <p className="text-sm font-black" style={{ color: tokens.accent }}>
                 {getSessionDuration(lastSession) || '—'}
               </p>
-              <p className="text-[10px] text-slate-500">مدت زمان</p>
+              <p className="text-xs" style={{ color: tokens.textSub }}>مدت زمان</p>
             </div>
             <div>
-              <p className={`text-sm font-black ${isDark ? 'text-indigo-400' : 'text-indigo-600'}`}>
-                {toPersianNumber((lastSession.sets || []).filter((s: any) => s.completed).length)}
+              <p className="text-sm font-black" style={{ color: tokens.accent }}>
+                {toPersianNumber((lastSession.sets || []).filter((set: any) => set.completed).length)}
               </p>
-              <p className="text-[10px] text-slate-500">ست تکمیل</p>
+              <p className="text-xs" style={{ color: tokens.textSub }}>ست تکمیل</p>
             </div>
           </div>
-        </div>
+        </Card>
       )}
     </div>
   );
