@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { FEATURE_FLAGS } from '../engine/version';
+import { getTokens } from '../styles/designTokens';
 
 const isStoreBuild = ['bazaar', 'myket'].includes(import.meta.env.VITE_APP_FLAVOR || '');
 
@@ -23,22 +24,19 @@ export default function Dashboard() {
   const { theme } = useTheme();
   const navigate = useNavigate();
   const isDark = theme === 'dark';
+  const tokens = getTokens(isDark);
 
   const profile = activeProfile;
 
-  // رنگ‌ها
-  const teal = isDark ? '#a78bfa' : '#7c3aed';      // یاسی اصلی
-  const tealLight = isDark ? '#c4b5fd' : '#8b5cf6'; // یاسی روشن
-  const gold = isDark ? '#fbbf24' : '#f59e0b';      // طلایی ملایم
-  const bgMain = isDark ? '#0f172a' : '#f8fafc';
-  const cardBg = isDark
-    ? 'bg-[#1e1b4b]/50 backdrop-blur-md'
-    : 'bg-white/70 backdrop-blur-md shadow-sm';
-  const textMain = isDark ? '#ffffff' : '#0f172a';
-  const textSub = isDark ? '#94a3b8' : '#64748b';
-  const borderCard = isDark
-    ? 'border-white/10'
-    : 'border-violet-200/60';
+  // رنگ‌ها از Design Tokens
+  const teal = tokens.accent;
+  const tealLight = tokens.accent;
+  const gold = tokens.gold;
+  const bgMain = tokens.bg;
+  const cardBg = '';
+  const textMain = tokens.textMain;
+  const textSub = tokens.textSub;
+  const borderCard = '';
 
   // آمار
   const completedSessions = sessions.filter(s => s.completed);
