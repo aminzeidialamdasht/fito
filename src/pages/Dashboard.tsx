@@ -13,6 +13,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { FEATURE_FLAGS } from '../engine/version';
 import { getTokens } from '../styles/designTokens';
+import Card from '../components/ui/Card';
 
 const isStoreBuild = ['bazaar', 'myket'].includes(import.meta.env.VITE_APP_FLAVOR || '');
 
@@ -173,7 +174,7 @@ export default function Dashboard() {
     <div className={`min-h-screen pb-24 space-y-5 ${bgMain}`}>
       {/* Profile Switcher */}
       {profiles.length > 1 && (
-        <div className={`rounded-2xl p-3 border ${borderCard} ${cardBg}`}>
+        <Card className="p-3">
           <div className="flex items-center gap-2 overflow-x-auto">
             <User size={16} style={{ color: teal }} />
             <div className="flex gap-2">
@@ -187,7 +188,7 @@ export default function Dashboard() {
               ))}
             </div>
           </div>
-        </div>
+        </Card>
       )}
 
       {/* Welcome Hero */}
@@ -317,18 +318,18 @@ export default function Dashboard() {
       )}
 
       {isTodayRest && activeProgram && (
-        <div className={`rounded-2xl p-4 border ${borderCard} ${cardBg} flex items-center gap-3`}>
+        <Card className="flex items-center gap-3 p-4">
           <Heart size={20} style={{ color: '#ef4444' }} />
           <div>
             <p className={`font-bold text-sm ${textMain}`}>امروز ({todayName}) روز استراحته 💪</p>
             <p className={`text-xs ${textSub}`}>ریکاوری کن تا فردا قوی‌تر باشی!</p>
           </div>
-        </div>
+        </Card>
       )}
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3">
-        <div className={`rounded-2xl p-4 border ${borderCard} ${cardBg}`}>
+        <Card className="p-4">
           <div className="flex items-center gap-2 mb-3">
             <Flame size={18} style={{ color: '#f59e0b' }} />
             <span className={`text-xs font-bold ${textSub}`}>استریک</span>
@@ -347,9 +348,9 @@ export default function Dashboard() {
               </div>
             ))}
           </div>
-        </div>
+        </Card>
 
-        <div className={`rounded-2xl p-4 border ${borderCard} ${cardBg}`}>
+        <Card className="p-4">
           <div className="flex items-center gap-2 mb-3">
             <BarChart3 size={18} style={{ color: teal }} />
             <span className={`text-xs font-bold ${textSub}`}>این هفته</span>
@@ -374,12 +375,12 @@ export default function Dashboard() {
               </span>
             </div>
           </div>
-        </div>
+        </Card>
       </div>
 
       {/* My Programs */}
       {programs.length > 0 && (
-        <div className={`rounded-2xl p-4 border ${borderCard} ${cardBg}`}>
+        <Card className="p-4">
           <div className="flex items-center justify-between mb-3">
             <h3 className={`font-black text-sm flex items-center gap-2 ${textMain}`}>
               <Target size={16} style={{ color: teal }} />
@@ -419,7 +420,7 @@ export default function Dashboard() {
               </button>
             ))}
           </div>
-        </div>
+        </Card>
       )}
 
     </div>
