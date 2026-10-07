@@ -9,6 +9,7 @@ import type { AthleteProfile } from '../../types';
 import type { ExperienceLevel, Goal } from '../types/program';
 import type { EquipmentType } from '../types/exercise';
 import { mapMusclesToEnglish, mapInjuriesToEnglish } from './persianMapping';
+import { calculateOptimalTrainingDays, validateTrainingDaysChoice } from './trainingDaysCalculator';
 
 export interface ProfileAnalysis {
   bmr: number;
@@ -141,8 +142,26 @@ export function analyzeProfile(profile: AthleteProfile): ProfileAnalysis {
   const goal = determineGoal(profile);
   const secondaryGoal = determineSecondaryGoal(profile);
 
-  const rawTrainingDays = Number(profile.trainingDays) || 4;
-  const weeklyTrainingDays = Math.min(7, Math.max(2, Math.round(rawTrainingDays)));
+  // محاسبه علمی تعداد روزهای تمرین
+  const trainingDaysRecommendation = calculateOptimalTrainingDays(profile);
+
+  // اعتبارسنجی انتخاب کاربر: اگه داخل بازه نبود، اصلاح کن
+  const userChoice = Number(profile.trainingDays);
+  let weeklyTrainingDays: number;
+
+  if (Number.isFinite(userChoice) && userChoice > 0) {
+    const validation = validateTrainingDaysChoice(userChoice, trainingDaysRecommendation);
+    weeklyTrainingDays = validation.corrected;
+    if (!validation.valid) {
+      console.log(`[profileAnalyzer] ${validation.message} (تنظیم به ${validation.corrected})`);
+    }
+  } else {
+    // کاربر عددی وارد نکرده → پیشنهاد موتور
+    weeklyTrainingDays = trainingDaysRecommendation.recommended;
+  }
+
+  // محدودسازی نهایی (۲-۷)
+  weeklyTrainingDays = Math.min(7, Math.max(2, Math.round(weeklyTrainingDays)));
 
   const rawSessionDuration = Number(profile.sessionDuration) || 60;
   const sessionMinutes = Math.min(120, Math.max(30, Math.round(rawSessionDuration)));

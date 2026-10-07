@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { AthleteProfile, GOAL_LABELS, EXPERIENCE_LABELS, EQUIPMENT_OPTIONS, MUSCLE_GROUPS, PROGRAM_TYPES, ACTIVITY_LEVELS, EQUIPMENT_TYPES, DIET_TYPES, IRANIAN_FOODS, SUPPLEMENT_CATEGORIES, BODY_COMPOSITION_LABELS, RECOVERY_QUALITY_LABELS, JOB_STRESS_LABELS, WORK_SHIFT_LABELS } from '../types';
 import { GripVertical, ChevronUp, ChevronDown, X } from 'lucide-react';
+import TrainingDaysSelector from '../components/TrainingDaysSelector';
 
 export function StepBasic({ form, setForm, isDark }: any) {
   return (
@@ -43,7 +44,13 @@ export function StepTraining({ form, setForm, toggleEquipment, isDark }: any) {
     <div className="space-y-4">
       <h3 className={'font-bold mb-4 ' + (isDark ? 'text-[#a78bfa]' : 'text-[#8b5cf6]')}>اطلاعات تمرینی</h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <NumberField label="روزهای تمرین در هفته" value={form.trainingDays} onChange={(v: number) => setForm({ ...form, trainingDays: v })} suffix="روز" isDark={isDark} />
+        <div className="sm:col-span-2">
+          <TrainingDaysSelector
+            profile={form}
+            value={form.trainingDays}
+            onChange={(v: number) => setForm({ ...form, trainingDays: v })}
+          />
+        </div>
         <NumberField label="مدت هر جلسه" value={form.sessionDuration} onChange={(v: number) => setForm({ ...form, sessionDuration: v })} suffix="دقیقه" isDark={isDark} />
         <SelectField label="محل تمرین" value={form.location} onChange={(v: string) => setForm({ ...form, location: v })} options={[{ value: 'gym', label: 'باشگاه' }, { value: 'home', label: 'خانه' }, { value: 'both', label: 'هر دو' }, { value: 'park', label: 'پارک' }]} isDark={isDark} />
         <SelectField label="نوع تجهیزات" value={form.equipmentType} onChange={(v: string) => setForm({ ...form, equipmentType: v })} options={Object.entries(EQUIPMENT_TYPES).map(([value, label]) => ({ value, label }))} isDark={isDark} />

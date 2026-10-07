@@ -17,6 +17,7 @@ import {
   Check,
   Save,
 } from 'lucide-react';
+import TrainingDaysSelector from '../components/TrainingDaysSelector';
 import {
   FormField,
   Input,
@@ -437,14 +438,17 @@ export default function Onboarding() {
               />
             </FormField>
 
-            <div className="grid grid-cols-2 gap-3">
-              <FormField label="روزهای تمرین در هفته">
-                <Input type="number" value={form.trainingDays} onChange={(v) => updateForm('trainingDays', Number(v))} isDark={isDark} />
-              </FormField>
-              <FormField label="مدت هر جلسه (دقیقه)">
-                <Input type="number" value={form.sessionDuration} onChange={(v) => updateForm('sessionDuration', Number(v))} isDark={isDark} />
-              </FormField>
-            </div>
+            <FormField label="روزهای تمرین در هفته">
+              <TrainingDaysSelector
+                profile={form}
+                value={form.trainingDays}
+                onChange={(v: number) => updateForm('trainingDays', v)}
+              />
+            </FormField>
+
+            <FormField label="مدت هر جلسه (دقیقه)">
+              <Input type="number" value={form.sessionDuration} onChange={(v) => updateForm('sessionDuration', Number(v))} isDark={isDark} />
+            </FormField>
 
             <FormField label="محل تمرین">
               <Select
