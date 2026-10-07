@@ -14,6 +14,7 @@ import { useAppContext } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { formatDateJalali, toPersianNumber, getProgramTimelineDetails } from '../utils/jalali';
 import AnatomySVG from '../components/AnatomySVG';
+import Card from '../components/ui/Card';
 import { getTokens } from '../styles/designTokens';
 
 type MeasurementKey = 'weight' | 'chest' | 'waist' | 'hips' | 'arms' | 'thighs' | 'calves' | 'shoulders' | 'neck';
@@ -130,7 +131,7 @@ export default function Progress() {
 
       {/* Program Timeline Card */}
       {activeProgram && activeProgramTimeline && (
-        <div className={`rounded-2xl p-5 border ${borderCard} ${cardBg}`}>
+        <Card variant="elevated" className="p-5">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <div className={`w-11 h-11 rounded-xl flex items-center justify-center`} style={{ background: `${gold}15`, color: gold }}>
@@ -166,7 +167,7 @@ export default function Progress() {
             <div className="h-full rounded-full transition-all duration-500" 
               style={{ width: `${activeProgramTimeline.progressPercent}%`, background: activeProgramTimeline.isAlarmRequired ? '#f59e0b' : gold }} />
           </div>
-        </div>
+        </Card>
       )}
 
       {/* Quick Stats Grid */}
@@ -180,18 +181,18 @@ export default function Progress() {
           })(), (v: string) => v.includes('+') ? '#f59e0b' : '#3b82f6'],
           ['تنوع حرکات', new Set(completedSessions.flatMap(s => s.sets.filter(x => x.completed).map(x => x.exerciseName))).size, teal],
         ].map(([label, value, colorFn]: any, i) => (
-          <div key={i} className={`rounded-xl p-4 border ${borderCard} ${cardBg}`}>
+          <Card key={i} variant="elevated" className="p-4">
             <p className={`${textSub} text-xs mb-1`}>{label}</p>
             <p className="text-2xl font-black" style={{ color: typeof colorFn === 'function' ? colorFn(value) : colorFn }}>
               {toPersianNumber(String(value))}
             </p>
-          </div>
+          </Card>
         ))}
       </div>
 
       {/* Form Modal */}
       {showForm && (
-        <div className={`rounded-2xl p-5 border ${borderCard} ${cardBg} animate-fade-in`}>
+        <Card variant="elevated" className="p-5 animate-fade-in">
           <h3 className={`font-bold mb-4 flex items-center gap-2`} style={{ color: teal }}><Save size={18}/> ثبت اندازه‌گیری جدید</h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {([['weight','وزن','kg'],['chest','سینه','cm'],['waist','کمر','cm'],['hips','باسن','cm'],['arms','بازو','cm'],['thighs','ران','cm'],['calves','ساق','cm'],['shoulders','شانه','cm'],['neck','گردن','cm']] as const).map(([key, label, unit]) => (
@@ -205,11 +206,11 @@ export default function Progress() {
           <button onClick={save} className="mt-4 px-5 py-2.5 rounded-xl font-bold text-white flex items-center gap-2 w-full justify-center" style={{ background: teal }}>
             ذخیره اطلاعات
           </button>
-        </div>
+        </Card>
       )}
 
       {/* Weight Trend Chart */}
-      <div className={`rounded-2xl p-5 border ${borderCard} ${cardBg}`}>
+      <Card variant="elevated" className="p-5">
         <h3 className={`font-bold flex items-center gap-2 mb-4 ${textMain}`}><TrendingUp size={18} style={{color: teal}}/> روند وزن</h3>
         {weightChartData.length < 2 ? (
           <div className="text-center py-8" style={{color: textSub}}>
@@ -233,12 +234,12 @@ export default function Progress() {
             </AreaChart>
           </ResponsiveContainer>
         )}
-      </div>
+      </Card>
 
       {/* Body Heatmap & Balance Section */}
       <div className="grid md:grid-cols-2 gap-5">
         {/* Body Heatmap */}
-        <div className={`rounded-2xl p-5 border ${borderCard} ${cardBg}`}>
+        <Card variant="elevated" className="p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className={`font-bold flex items-center gap-2 ${textMain}`}><Activity size={18} style={{color: gold}}/> نقشه حرارتی بدن</h3>
             <Info size={14} className={textSub} />
@@ -254,10 +255,10 @@ export default function Progress() {
               ))}
             </div>
           </div>
-        </div>
+        </Card>
 
         {/* Muscle Balance Radar Chart */}
-        <div className={`rounded-2xl p-5 border ${borderCard} ${cardBg}`}>
+        <Card variant="elevated" className="p-5">
           <h3 className={`font-bold flex items-center gap-2 mb-4 ${textMain}`}><Target size={18} style={{color: teal}}/> بالانس عضلانی</h3>
           {balanceData.every(d => d.A === 0) ? (
             <div className="text-center py-12" style={{color: textSub}}>
@@ -275,11 +276,11 @@ export default function Progress() {
               </RadarChart>
             </ResponsiveContainer>
           )}
-        </div>
+        </Card>
       </div>
 
       {/* Recent Measurements List */}
-      <div className={`rounded-2xl p-5 border ${borderCard} ${cardBg}`}>
+      <Card variant="elevated" className="p-5">
         <h3 className={`font-bold flex items-center gap-2 mb-4 ${textMain}`}><BarChart3 size={18} style={{color: gold}}/> آخرین اندازه‌گیری‌ها</h3>
         {sortedProgress.length === 0 ? (
           <p className="text-center text-sm py-4" style={{color: textSub}}>هنوز ثبت نشده.</p>
@@ -301,7 +302,7 @@ export default function Progress() {
             ))}
           </div>
         )}
-      </div>
+      </Card>
     </div>
   );
 }
