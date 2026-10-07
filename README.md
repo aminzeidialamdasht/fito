@@ -1,125 +1,104 @@
-# 🏋️ AI Fitness Coach | دستیار هوشمند بدنسازی
+# 🏋️ Fito | فیتو — AI-Powered Offline Fitness Coach
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/version-1.0.0-D4AF37?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-1.3.0-D4AF37?style=for-the-badge)
 ![Platform](https://img.shields.io/badge/platform-Android-14B8A6?style=for-the-badge)
 ![Min Android](https://img.shields.io/badge/min%20android-7.0-0D9488?style=for-the-badge)
 ![License](https://img.shields.io/badge/license-MIT-22C55E?style=for-the-badge)
+![Flavors](https://img.shields.io/badge/flavors-myket%20%7C%20bazaar%20%7C%20personal-8B5CF6?style=for-the-badge)
 
-**Professional AI-Powered Bodybuilding Assistant**
+**AI-Powered Offline Fitness Coach**
+**دستیار هوشمند بدنسازی کاملاً آفلاین**
 
 *An intelligent app for coaches and athletes*
 
-[📥 Download APK](#-download) • [📖 Documentation](#-documentation) • [🇮🇷 مستندات فارسی](README_FA.md)
+[📥 Download APK](../../releases) • [📖 Documentation](#-documentation) • [🇮🇷 مستندات فارسی](README_FA.md)
 
 </div>
 
 ---
 
-## 📋 Table of Contents
+## 🎯 Overview | معرفی
 
-- [Overview](#-overview)
-- [Features](#-features)
-- [Download](#-download)
-- [Installation](#-installation)
-- [Build from Source](#-build-from-source)
-- [Release Process](#-release-process)
-- [Cafe Bazaar](#-cafe-bazaar-publishing)
-- [Tech Stack](#-tech-stack)
+**Fito** is a professional bodybuilding app with a fully offline, scientifically-grounded workout engine that generates personalized training programs for athletes.
+
+Unlike previous versions that relied on online AI, **Fito v1.3.0** works completely offline using **16 engine modules** based on research by Schoenfeld, Helms, and Israetel.
 
 ---
 
-## 🎯 Overview
+## ✨ Features | ویژگی‌ها
 
-AI Fitness Coach is a professional application that uses artificial intelligence to generate personalized workout programs for athletes. This app helps coaches and athletes:
+### 🧠 Offline Engine (موتور آفلاین)
+- **16 Scientific Modules**: profileAnalyzer, splitSelector, volumeAllocator, progressionEngine, deloadEngine, injurySafetyEngine, substitutionEngine and more
+- **Database of 58 Exercises** across 6 muscle groups
+- **Zero Internet Required**
+- **Auto-Regeneration**: automatically rebuilds program based on current week (v1.3.0)
+- **Periodization + Deload**: automatic deload weeks
+- **Injury Safety Engine**: injury-aware workout generation
 
-- 📊 Collect and manage athlete information
-- 🧠 Generate professional AI prompts
-- 📋 Import and manage workout programs
-- 🏃 Track daily workouts
-- 📈 Analyze long-term progress
-- 📅 Plan with Persian calendar
+### 📅 Week-Based System (v1.3.0)
+- **Week Calculator**: advanced training week calculator
+- **Auto-Regeneration**: program adapts to current week automatically
+- **Week Indicator**: week display in ProgramDetail
+- **Progressive Overload**: automatic gradual overload
 
----
-
-## ✨ Features
-
-### 🤖 AI Integration
-- **Professional Prompt Generation**: Creates scientific prompts based on athlete data
-- **Compatible with ChatGPT, Gemini, Claude**: JSON output for all AI models
-- **Scientific Principles**: Based on Schoenfeld, Helms, Israetel research
+### 🤖 AI Prompt Generator
+- **Professional Prompt Generation** for ChatGPT, Gemini, Claude
+- **JSON Output** for all AI models
+- **Import AI-generated programs**
 
 ### 👥 Multi-Profile Management
-- **Unlimited Profiles**: Separate profile for each athlete
-- **Quick Switch**: Change between profiles with one click
-- **Independent Data**: Each profile has its own programs and stats
+- Unlimited profiles per athlete
+- One-click profile switching
+- Fully independent data per profile
 
 ### 🏋️ Professional Workout Tracker
-- **Today's Workout**: Auto-display of daily workout
-- **Rest Timer**: Auto-start after each set
-- **Weight & Rep Logging**: Accurate performance tracking
-- **Cancel Session**: Cancel without saving to history
-- **Live Progress**: Progress bar during workout
+- **TodaySession**: automatic daily workout display
+- **Rest Timer**: auto-start after each set
+- **WorkoutTracker**: live weight/rep logging
+- **SessionPreview**: preview before starting
+- **StrengthRecords**: strength record tracking
 
 ### 📊 Professional Dashboard
-- **Complete Stats**: Sessions, volume, streak, weekly goal
-- **Weight Chart**: Weight trend visualization
-- **Last Session**: Complete last workout info
-- **Weekly Progress**: Progress bar with 7-day view
+- **DashboardHero**: hero card with weekly progress
+- **Complete Stats**: sessions, volume, streak, weekly goal
+- **Weight Chart** and **Muscle Radar**
+- **SafetyReportCard**: training safety report
 
-### 📅 Persian Calendar
-- **Jalali Calendar**: Fully Persian
-- **Session Display**: Workout days marked
-- **Weekly Schedule**: View training program
+### 🥗 Nutrition & Supplements
+- **Nutrition**: nutrition management
+- **NutritionImport**: nutrition data import
+- **Supplements**: supplement management
+- **SupplementImport**: supplement data import
 
-### 📈 Progress & Analytics
-- **Body Measurements**: Weight, waist, arms, etc.
-- **Radar Chart**: Muscle analysis
-- **Complete History**: All measurements
+### 💳 Subscription System (v1.2+)
+- **3 Plans**: Monthly / Yearly / Lifetime
+- **3 Stores**: Cafe Bazaar, Myket, Personal
+- **30-day Free Trial**
+- **PremiumGate** for premium features
 
 ### 🎨 Professional Design
-- **Dark Theme**: Gold and blue
-- **Light Theme**: Green and teal
-- **Full RTL**: Complete Persian support
-- **Vazirmatn Font**: Professional typography
+- **Dark Theme**: navy + purple (#0f172a + #a78bfa)
+- **Light Theme**: white + purple (#f8fafc + #8b5cf6)
+- **Glassmorphism Cards**
+- **Framer Motion** animations
+- **Full RTL** + **Vazirmatn Font**
 
 ---
 
-## 📥 Download
+## 📥 Download | دانلود
 
-### Latest Release
-Download the latest APK from [GitHub Releases](../../releases/latest)
+| Store | Flavor | Link |
+|---|---|---|
+| **GitHub Releases** | myket / personal | [Releases](../../releases) |
+| **Cafe Bazaar** | bazaar | Coming soon |
+| **Myket** | myket | Coming soon |
 
-### All Versions
-All versions are available at [Releases Page](../../releases)
-
-### Build from Source
-See [Build from Source](#-build-from-source) section
-
----
-
-## 📱 Installation
-
-### Method 1: Direct APK Installation
-1. Download APK file from GitHub
-2. Tap on the APK file
-3. Grant "Install from Unknown Sources" permission
-4. Complete installation
-
-### Method 2: Using ADB
-```bash
-adb install AI-Fitness-Coach-v1.0.0.apk
-```
-
-### Enable Unknown Sources
-**Android 8.0+:**
-- Settings → Apps → Special Access → Install Unknown Apps
-- Select browser or File Manager
-- Enable "Allow from this source"
-
-**Android 7.0:**
-- Settings → Security → Unknown Sources → Enable
+### Latest Version: **v1.3.0**
+- VersionCode: 10300
+- App ID: com.fito.app
+- APK Size: ~15 MB
 
 ---
 
@@ -128,108 +107,84 @@ adb install AI-Fitness-Coach-v1.0.0.apk
 ### Prerequisites
 - Node.js 18+
 - npm 9+
-- Android Studio (for local build)
 - Java JDK 21
+- Android Studio (for local build)
 
-### Build Steps
+### Build for Different Stores
 
-```bash
-# Clone repository
-git clone https://github.com/your-username/ai-fitness-coach.git
-cd ai-fitness-coach
+    # Clone
+    git clone https://github.com/aminzeidialamdasht/fito.git
+    cd fito
 
-# Install dependencies
-npm install
+    # Install dependencies
+    npm install
 
-# Build web app
-npm run build
+    # Build for Myket
+    npm run android:myket
+    cd android && ./gradlew assembleRelease
 
-# Sync with Capacitor
-npx cap sync android
+    # Build for Cafe Bazaar
+    npm run android:bazaar
+    cd android && ./gradlew assembleRelease
 
-# Build APK
-cd android
-./gradlew assembleDebug
+    # Build Personal Version
+    npm run android:personal
+    cd android && ./gradlew assembleRelease
 
-# APK location:
-# android/app/build/outputs/apk/debug/app-debug.apk
-```
+### APK Location
 
-### Build Release APK
-
-```bash
-# Generate signing key
-keytool -genkey -v -keystore release-key.jks \
-  -keyalg RSA -keysize 2048 -validity 10000 \
-  -alias ai-fitness-key
-
-# Build release
-cd android
-./gradlew assembleRelease
-```
+    android/app/build/outputs/apk/release/app-release.apk
 
 ---
 
 ## 🚀 Release Process
 
-### 1. Update Version
-```bash
-# Update version in package.json
-npm version 1.0.1
-```
+This project uses **GitHub Actions** for automated APK builds:
 
-### 2. Create Tag
-```bash
-git tag v1.0.1
-git push origin v1.0.1
-```
+    # 1. Create tags for myket and personal
+    git tag v1.3.1-myket
+    git tag v1.3.1-personal
+    git push origin v1.3.1-myket v1.3.1-personal
 
-### 3. GitHub Actions
-- GitHub Actions runs automatically
-- Release APK is built
-- GitHub Release is created
-- APK is attached to Release
+    # 2. GitHub Actions automatically builds APKs
+    # 3. Release is created and APK is attached
 
-### 4. Download from Releases
-- Go to Releases tab
-- Download latest version
+**Important**: Version is read from **git tag**, not from package.json (see vite.config.js).
 
 ---
 
-## 📱 Cafe Bazaar Publishing
-
-See [CAFE_BAZAAR.md](CAFE_BAZAAR.md) for complete guide on publishing to Cafe Bazaar.
-
-### Quick Steps
-1. Build signed release APK
-2. Prepare 512x512 icon
-3. Take screenshots
-4. Write Persian description
-5. Upload to Cafe Bazaar developer console
-
----
-
-## 🛠 Tech Stack
+## 🏗 Tech Stack
 
 ### Frontend
-- **React 18** + **TypeScript**
-- **Vite** - Build tool
-- **Tailwind CSS 4** - Styling
-- **React Router** - Navigation
-- **Recharts** - Charts
-- **Lucide React** - Icons
-- **Jalaali JS** - Persian Calendar
+- **React 18** + **TypeScript 5.7**
+- **Vite 6.3.5** — Build tool
+- **Tailwind CSS 4.1.7** — Styling
+- **Framer Motion 11** — Animations
+- **React Router 6** — Navigation
+- **Recharts 2.10** — Charts
+- **Lucide React** — Icons
+- **jalaali-js** — Persian Calendar
+- **@dnd-kit** — Drag & Drop
+- **canvas-confetti** — Effects
+
+### Backend & Services
+- **Supabase 2.98** — Cloud Sync (future)
+
+### Billing
+- **@salarizadi/capacitor-cafebazaar-poolakey** — Cafe Bazaar
+- **@salarizadi/capacitor-myket** — Myket
 
 ### Android
-- **Capacitor 5** - Native bridge
-- **Kotlin** - Native code
-- **Material Design 3** - UI
-- **Android SDK 34** - Target
+- **Capacitor 8.5.2** — Native bridge
+- **Kotlin** — Native code
+- **Material Design 3** — UI
+- **Android SDK 34** — Target
+- **Min SDK 24** (Android 7.0)
 
 ### Build & CI/CD
-- **GitHub Actions** - Automated builds
-- **Gradle 8.13** - Build system
-- **Java 21** - Runtime
+- **GitHub Actions** — Automated builds
+- **Gradle 8.13**
+- **Java 21**
 
 ---
 
@@ -237,34 +192,54 @@ See [CAFE_BAZAAR.md](CAFE_BAZAAR.md) for complete guide on publishing to Cafe Ba
 
 | Item | Value |
 |---|---|
+| **Current Version** | v1.3.0 |
 | Min Android | 7.0 (API 24) |
 | Target Android | 14 (API 34) |
 | APK Size | ~15 MB |
 | Architecture | Universal |
 | Language | Persian (RTL) |
 | Font | Vazirmatn |
+| App ID | com.fito.app |
+| Storage Key | fito_state_v2 |
+| Engine Version | 1.0.0 |
+| Total Exercises | 58 |
 
 ---
 
-## 🎨 Design
+## 🎨 Design System
 
-### Dark Theme
-```
-Background: #0A0A15 → #0D0D1A
-Card: #1A1A2E → #16213E
-Accent: #D4AF37 (Gold)
-Secondary: #4A90D9 (Blue)
-Success: #22C55E (Green)
-```
+### Real Colors (based on designTokens.ts)
 
-### Light Theme
-```
-Background: #F0FDFA → #FFFFFF → #ECFDF5
-Card: #FFFFFF → #F0FDFA
-Accent: #14B8A6 (Teal)
-Secondary: #0D9488 (Dark Teal)
-Text: #134E4A (Dark Green)
-```
+**Dark Theme:**
+
+    bg: #0f172a
+    surface: #1e1b4b
+    surfaceElevated: #292554
+    accent: #a78bfa
+    accentSoft: rgba(167,139,250,0.16)
+    gold: #d4af37
+    success: #34d399
+    warning: #fbbf24
+    danger: #f87171
+    info: #60a5fa
+
+**Light Theme:**
+
+    bg: #f8fafc
+    surface: #ffffff
+    surfaceElevated: #f5f3ff
+    accent: #8b5cf6
+    accentSoft: rgba(139,92,246,0.1)
+    gold: #f59e0b
+    success: #16a34a
+    warning: #d97706
+    danger: #dc2626
+    info: #2563eb
+
+### Design Tokens
+- Central file: src/styles/designTokens.ts
+- Function: getTokens(isDark) → all colors
+- Font: **Vazirmatn** (full RTL)
 
 ---
 
@@ -274,14 +249,14 @@ Contributions are welcome!
 
 ### How to Contribute
 1. Fork the repository
-2. Create new branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open Pull Request
+2. Create a branch (git checkout -b feature/amazing-feature)
+3. Commit changes (git commit -m 'Add amazing feature')
+4. Push to branch (git push origin feature/amazing-feature)
+5. Open a Pull Request
 
 ### Report Issues
 - Use [Issues](../../issues)
-- Write detailed description
+- Write a detailed description
 - Add screenshots
 
 ---
@@ -294,27 +269,28 @@ This project is licensed under the MIT License.
 
 ## 📞 Contact
 
-- 📧 Email: info@aifitness-coach.com
-- 🌐 Website: aifitness-coach.com
-- 💬 Telegram: @aifitnesscoach
+- 🐙 GitHub: [@aminzeidialamdasht](https://github.com/aminzeidialamdasht)
 
 ---
 
 ## 🙏 Acknowledgments
 
-- **Vazirmatn Font** - Saber Rastikerdar
-- **Lucide Icons** - Lucide Contributors
-- **Capacitor** - Ionic Team
-- **React** - Meta
+- **Vazirmatn Font** — Saber Rastikerdar
+- **Lucide Icons** — Lucide Contributors
+- **Capacitor** — Ionic Team
+- **React** — Meta
+- **Recharts** — Recharts Team
+- **Framer Motion** — Framer
 
 ---
 
 <div align="center">
 
 **Made with ❤️ for the Iranian bodybuilding community**
+**ساخته شده با ❤️ برای جامعه بدنسازی ایران**
 
 ⭐ If this project is useful to you, give it a star!
 
-[⬆ Back to Top](#-ai-fitness-coach---)
+[⬆ Back to Top](#-fito--فیتو--ai-powered-offline-fitness-coach)
 
 </div>

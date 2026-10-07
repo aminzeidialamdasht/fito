@@ -1,236 +1,190 @@
-# 🏋️ دستیار هوشمند بدنسازی | AI Fitness Coach
+# 🏋️ فیتو | Fito — دستیار هوشمند بدنسازی آفلاین
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/version-1.0.0-D4AF37?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-1.3.0-D4AF37?style=for-the-badge)
 ![Platform](https://img.shields.io/badge/platform-Android-14B8A6?style=for-the-badge)
 ![Min Android](https://img.shields.io/badge/min%20android-7.0-0D9488?style=for-the-badge)
 ![License](https://img.shields.io/badge/license-MIT-22C55E?style=for-the-badge)
+![Flavors](https://img.shields.io/badge/flavors-myket%20%7C%20bazaar%20%7C%20personal-8B5CF6?style=for-the-badge)
 
-**دستیار هوشمند بدنسازی با هوش مصنوعی**
+**دستیار هوشمند بدنسازی کاملاً آفلاین**
+**AI-Powered Offline Fitness Coach**
 
-*یک اپلیکیشن حرفه‌ای برای مربیان و ورزشکاران بدنسازی*
+*یک اپلیکیشن حرفه‌ای برای مربیان و ورزشکاران*
 
-[دانلود APK](#-دانلود) • [مستندات](#-مستندات) • [نصب](#-نصب)
+[📥 دانلود APK](../../releases) • [📖 مستندات](#-مستندات) • [🇬🇧 English](README.md)
 
 </div>
-
----
-
-## 📋 فهرست مطالب
-
-- [معرفی](#-معرفی)
-- [ویژگی‌ها](#-ویژگی‌ها)
-- [دانلود](#-دانلود)
-- [نصب](#-نصب)
-- [تکنولوژی‌ها](#-تکنولوژی‌ها)
-- [اسکرین‌شات‌ها](#-اسکرین‌شات‌ها)
-- [مشارکت](#-مشارکت)
 
 ---
 
 ## 🎯 معرفی
 
-دستیار هوشمند بدنسازی یک اپلیکیشن حرفه‌ای است که با استفاده از هوش مصنوعی، برنامه‌های تمرینی شخصی‌سازی شده برای ورزشکاران تولید می‌کند. این اپلیکیشن به مربیان و ورزشکاران کمک می‌کند تا:
+**فیتو (Fito)** یک اپلیکیشن حرفه‌ای بدنسازی با موتور تمرینی **کاملاً آفلاین و علمی** است که برنامه‌های تمرینی شخصی‌سازی‌شده برای ورزشکاران تولید می‌کند.
 
-- 📊 اطلاعات ورزشکار را جمع‌آوری و مدیریت کنند
-- 🧠 پرامپت‌های حرفه‌ای برای مدل‌های هوش مصنوعی تولید کنند
-- 📋 برنامه‌های تمرینی را وارد و مدیریت کنند
-- 🏃 تمرینات روزانه را ردیابی کنند
-- 📈 پیشرفت بلندمدت را تحلیل کنند
-- 📅 تقویم شمسی برای برنامه‌ریزی داشته باشند
+برخلاف نسخه‌های قبلی که به AI آنلاین وابسته بودند، **فیتو نسخه ۱.۳.۰** کاملاً آفلاین کار می‌کند و از **۱۶ ماژول موتور تمرینی** بر پایه تحقیقات Schoenfeld، Helms و Israetel استفاده می‌کند.
 
 ---
 
 ## ✨ ویژگی‌ها
 
-### 🤖 هوش مصنوعی
-- **تولید پرامپت حرفه‌ای**: بر اساس اطلاعات ورزشکار، پرامپت علمی تولید می‌کند
-- **سازگار با ChatGPT، Gemini، Claude**: خروجی JSON برای تمام مدل‌های AI
-- **اصول علمی**: بر اساس Schoenfeld، Helms، Israetel
+### 🧠 موتور آفلاین
+- **۱۶ ماژول علمی**: profileAnalyzer، splitSelector، volumeAllocator، progressionEngine، deloadEngine، injurySafetyEngine، substitutionEngine و...
+- **دیتابیس ۵۸ حرکت** در ۶ گروه عضلانی
+- **بدون نیاز به اینترنت**
+- **Auto-Regeneration**: بازتولید خودکار برنامه بر اساس هفته جاری (نسخه ۱.۳.۰)
+- **Periodization + Deload**: پریودیزیشن و هفته‌های استراحت خودکار
+- **Injury Safety Engine**: موتور ایمنی آسیب‌دیدگی
+
+### 📅 سیستم هفته‌محور (نسخه ۱.۳.۰)
+- **Week Calculator**: محاسبه‌گر پیشرفته هفته تمرینی
+- **Auto-Regeneration**: تطبیق خودکار برنامه با هفته جاری
+- **Week Indicator**: نمایشگر هفته در ProgramDetail
+- **Progressive Overload**: اضافه‌بار تدریجی خودکار
+
+### 🤖 تولید پرامپت AI
+- **تولید پرامپت علمی** برای ChatGPT، Gemini، Claude
+- **خروجی JSON** برای همه مدل‌ها
+- **Import**: وارد کردن برنامه تولیدشده توسط AI
 
 ### 👥 مدیریت چند پروفایل
-- **پروفایل‌های نامحدود**: برای هر شاگرد پروفایل جداگانه
-- **سوئیچ سریع**: تغییر بین پروفایل‌ها با یک کلیک
-- **داده‌های مجزا**: هر پروفایل برنامه و آمار مستقل دارد
+- پروفایل‌های نامحدود برای هر شاگرد
+- سوئیچ سریع بین پروفایل‌ها
+- داده‌های کاملاً مجزا
 
 ### 🏋️ ردیاب تمرین حرفه‌ای
-- **تمرین امروز**: نمایش خودکار تمرین روز
-- **تایمر استراحت**: شروع خودکار بعد از هر ست
-- **ثبت وزن و تکرار**: ثبت دقیق عملکرد
-- **لغو جلسه**: امکان لغو بدون ذخیره در تاریخچه
-- **پیشرفت زنده**: نوار پیشرفت در حین تمرین
+- **TodaySession**: نمایش خودکار تمرین روز
+- **Rest Timer**: تایمر استراحت خودکار
+- **WorkoutTracker**: ردیاب زنده با ثبت وزن/تکرار
+- **SessionPreview**: پیش‌نمایش قبل از شروع
+- **StrengthRecords**: ثبت رکوردهای قدرتی
 
 ### 📊 داشبورد حرفه‌ای
+- **DashboardHero**: کارت هیرو با پیشرفت هفتگی
 - **آمار کامل**: جلسات، حجم، استریک، هدف هفتگی
-- **نمودار وزن**: روند تغییرات وزن
-- **آخرین جلسه**: اطلاعات کامل آخرین تمرین
-- **پیشرفت هفتگی**: نوار پیشرفت با نمایش ۷ روز
+- **نمودار وزن** و **رادار عضلانی**
+- **SafetyReportCard**: گزارش ایمنی تمرین
 
-### 📅 تقویم شمسی
-- **تقویم جلالی**: کاملاً فارسی
-- **نمایش جلسات**: روزهای تمرین مشخص
-- **برنامه هفتگی**: مشاهده برنامه تمرینی
+### 🥗 تغذیه و مکمل
+- **Nutrition**: مدیریت تغذیه
+- **NutritionImport**: ورود داده‌های تغذیه
+- **Supplements**: مدیریت مکمل‌ها
+- **SupplementImport**: ورود مکمل‌ها
 
-### 📈 پیشرفت و آمار
-- **ثبت اندازه‌گیری**: وزن، دور کمر، بازو و...
-- **نمودار رادار**: تحلیل عضلات
-- **تاریخچه کامل**: تمام اندازه‌گیری‌ها
+### 💳 سیستم اشتراک (نسخه ۱.۲+)
+- **۳ پلن**: ماهانه / سالانه / مادام‌العمر
+- **۳ فروشگاه**: کافه‌بازار، مایکت، نسخه شخصی
+- **Trial ۳۰ روزه** رایگان
+- **PremiumGate**: مدیریت دسترسی ویژه
 
 ### 🎨 طراحی حرفه‌ای
-- **تم تاریک**: طلایی و آبی
-- **تم روشن**: سبز و سبزآبی
-- **RTL کامل**: پشتیبانی کامل از فارسی
-- **فونت Vazirmatn**: تایپوگرافی حرفه‌ای
+- **تم تاریک**: سرمه‌ای + بنفش (#0f172a + #a78bfa)
+- **تم روشن**: سفید + بنفش (#f8fafc + #8b5cf6)
+- **Glassmorphism Cards**: کارت‌های شیشه‌ای
+- **Framer Motion**: انیمیشن‌های روان
+- **RTL کامل** + **فونت Vazirmatn**
 
 ---
 
 ## 📥 دانلود
 
-### GitHub Releases
-آخرین نسخه APK را از [GitHub Releases](../../releases/latest) دانلود کنید.
+| فروشگاه | Flavor | لینک |
+|---|---|---|
+| **GitHub Releases** | myket / personal | [Releases](../../releases) |
+| **کافه‌بازار** | bazaar | به‌زودی |
+| **مایکت** | myket | به‌زودی |
 
-### نسخه‌های قبلی
-تمام نسخه‌ها در [صفحه Releases](../../releases) موجود هستند.
-
----
-
-## 📱 نصب
-
-### روش ۱: نصب مستقیم APK
-1. فایل APK را از GitHub دانلود کنید
-2. روی فایل APK کلیک کنید
-3. مجوز "Install from Unknown Sources" را بدهید
-4. نصب را تکمیل کنید
-
-### روش ۲: با ADB
-```bash
-adb install AI-Fitness-Coach-v1.0.0.apk
-```
-
-### فعال‌سازی Unknown Sources
-**Android 8.0+:**
-- Settings → Apps → Special Access → Install Unknown Apps
-- مرورگر یا File Manager را انتخاب کنید
-- Allow from this source را فعال کنید
-
-**Android 7.0:**
-- Settings → Security → Unknown Sources → Enable
+### آخرین نسخه: **v1.3.0**
+- VersionCode: 10300
+- App ID: com.fito.app
+- حجم APK: ~۱۵ MB
 
 ---
 
-## 🛠 تکنولوژی‌ها
-
-### Frontend
-- **React 18** + **TypeScript**
-- **Vite** - Build tool
-- **Tailwind CSS 4** - Styling
-- **React Router** - Navigation
-- **Recharts** - Charts
-- **Lucide React** - Icons
-- **Jalaali JS** - Persian Calendar
-
-### Android
-- **Capacitor 5** - Native bridge
-- **Kotlin** - Native code
-- **Material Design 3** - UI
-- **Android SDK 34** - Target
-
-### Build & CI/CD
-- **GitHub Actions** - Automated builds
-- **Gradle 8.13** - Build system
-- **Java 21** - Runtime
-
----
-
-## 📸 اسکرین‌شات‌ها
-
-<div align="center">
-
-### تم تاریک
-| داشبورد | تمرین | پروفایل |
-|:---:|:---:|:---:|
-| ![Dashboard Dark](docs/screenshots/dashboard-dark.png) | ![Workout Dark](docs/screenshots/workout-dark.png) | ![Profile Dark](docs/screenshots/profile-dark.png) |
-
-### تم روشن
-| داشبورد | تمرین | پروفایل |
-|:---:|:---:|:---:|
-| ![Dashboard Light](docs/screenshots/dashboard-light.png) | ![Workout Light](docs/screenshots/workout-light.png) | ![Profile Light](docs/screenshots/profile-light.png) |
-
-</div>
-
----
-
-## 🔧 ساخت پروژه
+## 🛠 ساخت از سورس
 
 ### پیش‌نیازها
 - Node.js 18+
 - npm 9+
-- Android Studio (برای build محلی)
 - Java JDK 21
+- Android Studio (برای build محلی)
 
-### مراحل ساخت
+### ساخت برای فروشگاه‌های مختلف
 
-```bash
-# Clone repository
-git clone https://github.com/your-username/ai-fitness-coach.git
-cd ai-fitness-coach
+    # Clone
+    git clone https://github.com/aminzeidialamdasht/fito.git
+    cd fito
 
-# Install dependencies
-npm install
+    # نصب وابستگی‌ها
+    npm install
 
-# Build web app
-npm run build
+    # ساخت برای مایکت
+    npm run android:myket
+    cd android && ./gradlew assembleRelease
 
-# Sync with Capacitor
-npx cap sync android
+    # ساخت برای کافه‌بازار
+    npm run android:bazaar
+    cd android && ./gradlew assembleRelease
 
-# Build APK
-cd android
-./gradlew assembleDebug
+    # ساخت نسخه شخصی
+    npm run android:personal
+    cd android && ./gradlew assembleRelease
 
-# APK location:
-# android/app/build/outputs/apk/debug/app-debug.apk
-```
+### محل APK
 
-### ساخت Release APK
-
-```bash
-# Generate signing key
-keytool -genkey -v -keystore release-key.jks \
-  -keyalg RSA -keysize 2048 -validity 10000 \
-  -alias ai-fitness-key
-
-# Build release
-cd android
-./gradlew assembleRelease
-```
+    android/app/build/outputs/apk/release/app-release.apk
 
 ---
 
-## 🚀 انتشار نسخه جدید
+## 🚀 فرآیند انتشار
 
-### ۱. به‌روزرسانی نسخه
-```bash
-# Update version in package.json
-npm version 1.0.1
-```
+این پروژه از **GitHub Actions** برای ساخت خودکار APK استفاده می‌کند:
 
-### ۲. ایجاد Tag
-```bash
-git tag v1.0.1
-git push origin v1.0.1
-```
+    # ۱. ایجاد tag برای مایکت و شخصی
+    git tag v1.3.1-myket
+    git tag v1.3.1-personal
+    git push origin v1.3.1-myket v1.3.1-personal
 
-### ۳. GitHub Actions
-- GitHub Actions به صورت خودکار اجرا می‌شود
-- Release APK ساخته می‌شود
-- GitHub Release ایجاد می‌شود
-- APK به Release اضافه می‌شود
+    # ۲. GitHub Actions به‌صورت خودکار APK می‌سازد
+    # ۳. Release ایجاد می‌شود و APK ضمیمه می‌شود
 
-### ۴. دانلود از Releases
-- به تب Releases بروید
-- آخرین نسخه را دانلود کنید
+**نکته مهم**: نسخه از **git tag** خوانده می‌شود، نه از package.json (به vite.config.js نگاه کنید).
+
+---
+
+## 🏗 تکنولوژی‌ها
+
+### Frontend
+- **React 18** + **TypeScript 5.7**
+- **Vite 6.3.5** — Build tool
+- **Tailwind CSS 4.1.7** — Styling
+- **Framer Motion 11** — انیمیشن‌ها
+- **React Router 6** — ناوبری
+- **Recharts 2.10** — نمودارها
+- **Lucide React** — آیکون‌ها
+- **jalaali-js** — تقویم شمسی
+- **@dnd-kit** — Drag & Drop
+- **canvas-confetti** — افکت‌ها
+
+### Backend & Services
+- **Supabase 2.98** — همگام‌سازی ابری (آینده)
+
+### Billing (پرداخت)
+- **@salarizadi/capacitor-cafebazaar-poolakey** — کافه‌بازار
+- **@salarizadi/capacitor-myket** — مایکت
+
+### Android
+- **Capacitor 8.5.2** — Native bridge
+- **Kotlin** — کد نیتیو
+- **Material Design 3** — UI
+- **Android SDK 34** — Target
+- **Min SDK 24** (Android 7.0)
+
+### Build & CI/CD
+- **GitHub Actions** — بیلد خودکار
+- **Gradle 8.13**
+- **Java 21**
 
 ---
 
@@ -238,34 +192,54 @@ git push origin v1.0.1
 
 | مورد | مقدار |
 |---|---|
+| **نسخه فعلی** | v1.3.0 |
 | حداقل Android | 7.0 (API 24) |
 | هدف Android | 14 (API 34) |
-| حجم APK | ~15 MB |
+| حجم APK | ~۱۵ MB |
 | معماری | Universal |
 | زبان | فارسی (RTL) |
 | فونت | Vazirmatn |
+| App ID | com.fito.app |
+| Storage Key | fito_state_v2 |
+| نسخه موتور | 1.0.0 |
+| تعداد حرکات | ۵۸ |
 
 ---
 
-## 🎨 طراحی
+## 🎨 سیستم طراحی
 
-### تم تاریک
-```
-Background: #0A0A15 → #0D0D1A
-Card: #1A1A2E → #16213E
-Accent: #D4AF37 (Gold)
-Secondary: #4A90D9 (Blue)
-Success: #22C55E (Green)
-```
+### رنگ‌های واقعی (بر اساس designTokens.ts)
 
-### تم روشن
-```
-Background: #F0FDFA → #FFFFFF → #ECFDF5
-Card: #FFFFFF → #F0FDFA
-Accent: #14B8A6 (Teal)
-Secondary: #0D9488 (Dark Teal)
-Text: #134E4A (Dark Green)
-```
+**تم تاریک:**
+
+    bg: #0f172a
+    surface: #1e1b4b
+    surfaceElevated: #292554
+    accent: #a78bfa
+    accentSoft: rgba(167,139,250,0.16)
+    gold: #d4af37
+    success: #34d399
+    warning: #fbbf24
+    danger: #f87171
+    info: #60a5fa
+
+**تم روشن:**
+
+    bg: #f8fafc
+    surface: #ffffff
+    surfaceElevated: #f5f3ff
+    accent: #8b5cf6
+    accentSoft: rgba(139,92,246,0.1)
+    gold: #f59e0b
+    success: #16a34a
+    warning: #d97706
+    danger: #dc2626
+    info: #2563eb
+
+### Design Tokens
+- فایل مرکزی: src/styles/designTokens.ts
+- تابع: getTokens(isDark) → تمام رنگ‌ها
+- فونت: **Vazirmatn** (RTL کامل)
 
 ---
 
@@ -274,11 +248,11 @@ Text: #134E4A (Dark Green)
 مشارکت شما باعث خوشحالی ماست!
 
 ### نحوه مشارکت
-1. Fork کنید
-2. Branch جدید بسازید (`git checkout -b feature/amazing-feature`)
-3. Commit کنید (`git commit -m 'Add amazing feature'`)
-4. Push کنید (`git push origin feature/amazing-feature`)
-5. Pull Request باز کنید
+۱. Fork کنید
+۲. Branch جدید بسازید (git checkout -b feature/amazing-feature)
+۳. Commit کنید (git commit -m 'Add amazing feature')
+۴. Push کنید (git push origin feature/amazing-feature)
+۵. Pull Request باز کنید
 
 ### گزارش مشکل
 - از [Issues](../../issues) استفاده کنید
@@ -295,27 +269,28 @@ Text: #134E4A (Dark Green)
 
 ## 📞 ارتباط
 
-- 📧 Email: info@aifitness-coach.com
-- 🌐 Website: aifitness-coach.com
-- 💬 Telegram: @aifitnesscoach
+- 🐙 GitHub: [@aminzeidialamdasht](https://github.com/aminzeidialamdasht)
 
 ---
 
 ## 🙏 تشکر
 
-- **Vazirmatn Font** - Saber Rastikerdar
-- **Lucide Icons** - Lucide Contributors
-- **Capacitor** - Ionic Team
-- **React** - Meta
+- **Vazirmatn Font** — Saber Rastikerdar
+- **Lucide Icons** — Lucide Contributors
+- **Capacitor** — Ionic Team
+- **React** — Meta
+- **Recharts** — Recharts Team
+- **Framer Motion** — Framer
 
 ---
 
 <div align="center">
 
 **ساخته شده با ❤️ برای جامعه بدنسازی ایران**
+**Made with ❤️ for the Iranian bodybuilding community**
 
 ⭐ اگر این پروژه برایتان مفید بود، ستاره بدهید!
 
-[⬆ بازگشت به بالا](#-دستیار-هوشمند-بدنسازی--ai-fitness-coach)
+[⬆ بازگشت به بالا](#-فیتو--fito--دستیار-هوشمند-بدنسازی-آفلاین)
 
 </div>

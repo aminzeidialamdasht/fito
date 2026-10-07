@@ -38,3 +38,7 @@ keystore/
 
 # Scrappy AI indexes
 .scrappy/
+
+# Backup files
+*.backup-*
+.backup-ui-*/
