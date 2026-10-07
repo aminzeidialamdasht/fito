@@ -169,12 +169,22 @@ export default function Profile() {
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-start gap-3 flex-1 min-w-0">
                     <div
-                      className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 text-lg font-black"
+                      className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 text-lg font-black cursor-pointer"
                       style={{ background: tokens.accentSoft, color: tokens.accent }}
+                      onClick={() => {
+                        soundEffects.playClick();
+                        navigate(`/profile/${profile.id}`);
+                      }}
                     >
                       {profile.name.charAt(0)}
                     </div>
-                    <div className="min-w-0 flex-1">
+                    <div
+                      className="min-w-0 flex-1 cursor-pointer"
+                      onClick={() => {
+                        soundEffects.playClick();
+                        navigate(`/profile/${profile.id}`);
+                      }}
+                    >
                       <h3 className="font-black text-sm truncate" style={{ color: tokens.textMain }}>
                         {profile.name}
                       </h3>
