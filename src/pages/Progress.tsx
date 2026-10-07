@@ -2,7 +2,8 @@ import { useMemo, useState } from 'react';
 import {
   Trophy, TrendingUp, Save, Dumbbell, Scale,
   Activity, Clock, Bell, Brain, Ruler, Plus,
-  BarChart3, Target, ChevronRight, Info, ChevronLeft
+  BarChart3, Target, ChevronRight, Info, ChevronLeft,
+  Sparkles
 } from 'lucide-react';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -167,9 +168,9 @@ export default function Progress() {
               <PrimaryButton
                 variant="gold"
                 size="sm"
-                onClick={() => navigate('/prompt')}
+                onClick={() => navigate('/generate/workout')}
               >
-                <Brain size={14} /> پرامپت جدید
+                <Sparkles size={14} /> برنامه جدید
               </PrimaryButton>
             </div>
           )}
