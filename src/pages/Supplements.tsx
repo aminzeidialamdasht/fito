@@ -4,12 +4,20 @@ import { Pill, AlertTriangle, Plus, Trash2, Clock, DollarSign, Shield } from 'lu
 import { toPersianNumber } from '../utils/jalali';
 import { useNavigate } from 'react-router-dom';
 import { DEFAULT_SUPPLEMENT_PLAN, SAMPLE_PROFILE } from '../data/defaultPlans';
+import type { SupplementProfile } from '../types';
 
 export default function Supplements() {
   const { state, activeProfile, supplementPrograms, removeSupplementProgram, setActiveSupplementProgram } = useAppContext();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  const navigate = useNavigate();  const profile = activeProfile ?? SAMPLE_PROFILE;
+  const navigate = useNavigate();
+  const profile = activeProfile ?? SAMPLE_PROFILE;
+
+  const supplement: SupplementProfile = profile.supplement || {
+    supplementGoal: '',
+    currentSupplements: [],
+    supplementBudget: '',
+  };
 
   if (!profile) { // Bypass for non-premium to show sample data
     return (
@@ -252,16 +260,16 @@ export default function Supplements() {
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          {profile.supplementGoal && (
-            <InfoCard label="هدف مصرف" value={profile.supplementGoal} isDark={isDark} />
+          {supplement.supplementGoal && (
+            <InfoCard label="هدف مصرف" value={supplement.supplementGoal} isDark={isDark} />
           )}
-          {profile.supplementBudget && (
-            <InfoCard label="بودجه ماهانه" value={profile.supplementBudget} isDark={isDark} />
+          {supplement.supplementBudget && (
+            <InfoCard label="بودجه ماهانه" value={supplement.supplementBudget} isDark={isDark} />
           )}
           <InfoCard 
             label="مکمل‌های فعلی" 
-            value={profile.currentSupplements.length > 0 
-              ? `${toPersianNumber(profile.currentSupplements.length)} مورد` 
+            value={(supplement.currentSupplements?.length || 0) > 0 
+              ? `${toPersianNumber(supplement.currentSupplements.length)} مورد` 
               : 'هیچ'} 
             isDark={isDark} 
           />
@@ -269,7 +277,7 @@ export default function Supplements() {
       </div>
 
       {/* Current Supplements */}
-      {profile.currentSupplements.length > 0 && (
+      {(supplement.currentSupplements?.length || 0) > 0 && (
         <div className={`rounded-2xl p-5 border theme-transition ${
           isDark ? 'bg-[#1a1830] border-[#a78bfa]/10' : 'bg-white border-[#a78bfa]/15'
         }`}>
@@ -277,7 +285,7 @@ export default function Supplements() {
             مکمل‌های فعلی
           </h3>
           <div className="flex flex-wrap gap-2">
-            {profile.currentSupplements.map((supp: string, idx: number) => (
+            {(supplement.currentSupplements || []).map((supp: string, idx: number) => (
               <span key={idx} className={`px-3 py-1.5 rounded-lg text-sm ${
                 isDark ? 'bg-[#4a90d9]/20 text-[#6bb5ff]' : 'bg-[#a78bfa]/15 text-[#8b5cf6]'
               }`}>
@@ -318,17 +326,7 @@ export default function Supplements() {
             <Pill size={18} />
             برنامه‌های مکمل
           </h3>
-          <button
-            onClick={() => navigate('/supplement-import')}
-            className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-bold transition-all ${
-              isDark
-                ? 'bg-[#a78bfa]/20 text-[#a78bfa] hover:bg-[#a78bfa]/30'
-                : 'bg-[#a78bfa]/15 text-[#8b5cf6] hover:bg-[#a78bfa]/25'
-            }`}
-          >
-            <Plus size={14} />
-            ورود برنامه
-          </button>
+          {/* دکمه ورود JSON حذف شد — Fito آفلاین است */}
         </div>
 
         {supplementPrograms.length === 0 ? (

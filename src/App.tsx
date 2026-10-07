@@ -9,9 +9,7 @@ import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 import StrengthRecords from './pages/StrengthRecords';
 import Nutrition from './pages/Nutrition';
-import NutritionImport from './pages/NutritionImport';
 import Supplements from './pages/Supplements';
-import SupplementImport from './pages/SupplementImport';
 import WorkoutTracker from './pages/WorkoutTracker';
 import SessionPreview from './pages/SessionPreview';
 import History from './pages/History';
@@ -94,9 +92,7 @@ function AppContent({ showWelcome, onContinue }: { showWelcome: boolean; onConti
         <Route path="/generate/:type" element={<GeneratorEntry />} />
         <Route path="/generate/:type/ready" element={<Layout><OfflineGenerator /></Layout>} />
         <Route path="/nutrition" element={<Layout><PremiumGate feature="nutrition"><Nutrition /></PremiumGate></Layout>} />
-        <Route path="/nutrition-import" element={<Layout><PremiumGate feature="nutrition"><NutritionImport /></PremiumGate></Layout>} />
         <Route path="/supplements" element={<Layout><PremiumGate feature="supplement"><Supplements /></PremiumGate></Layout>} />
-        <Route path="/supplement-import" element={<Layout><PremiumGate feature="supplement"><SupplementImport /></PremiumGate></Layout>} />
 
         <Route path="/session/:id" element={<SessionPreview />} />
         <Route path="/tracker/:id" element={<WorkoutTracker />} />

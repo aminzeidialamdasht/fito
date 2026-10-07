@@ -4,6 +4,7 @@ import { Apple, AlertTriangle, Target, Utensils, Plus, Trash2, Droplets, Clock }
 import { toPersianNumber, getWeekdayName } from '../utils/jalali';
 import { useNavigate } from 'react-router-dom';
 import { DEFAULT_NUTRITION_PLAN, SAMPLE_PROFILE } from '../data/defaultPlans';
+import type { NutritionProfile } from '../types';
 
 const WEEKDAY_NAMES = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
 
@@ -31,7 +32,16 @@ export default function Nutrition() {
     );
   }
 
-  const hasNutritionInfo = profile.dietaryGoal || profile.dietType || profile.favoriteFoods.length > 0;
+  const nutrition: NutritionProfile = profile.nutrition || {
+    dietaryGoal: '',
+    dietType: '',
+    foodAllergies: [],
+    favoriteFoods: [],
+    dislikedFoods: [],
+    mealsPerDay: 4,
+    cookingSkill: 'basic',
+  };
+  const hasNutritionInfo = nutrition.dietaryGoal || nutrition.dietType || (nutrition.favoriteFoods?.length || 0) > 0;
   const activeProgram = nutritionPrograms.find(p => p.id === state.activeNutritionProgram) || nutritionPrograms[0] || DEFAULT_NUTRITION_PLAN;
 
   // Today's day name in Persian
@@ -235,22 +245,22 @@ export default function Nutrition() {
           </div>
         ) : (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            {profile.dietaryGoal && (
-              <InfoCard label="هدف رژیم" value={profile.dietaryGoal} isDark={isDark} />
+            {nutrition.dietaryGoal && (
+              <InfoCard label="هدف رژیم" value={nutrition.dietaryGoal} isDark={isDark} />
             )}
-            {profile.dietType && (
-              <InfoCard label="نوع رژیم" value={profile.dietType} isDark={isDark} />
+            {nutrition.dietType && (
+              <InfoCard label="نوع رژیم" value={nutrition.dietType} isDark={isDark} />
             )}
-            <InfoCard label="وعده‌های روزانه" value={`${toPersianNumber(profile.mealsPerDay || 3)} وعده`} isDark={isDark} />
-            {profile.calorieTarget && (
-              <InfoCard label="کالری هدف" value={`${toPersianNumber(profile.calorieTarget)} کالری`} isDark={isDark} />
+            <InfoCard label="وعده‌های روزانه" value={`${toPersianNumber(nutrition.mealsPerDay || 3)} وعده`} isDark={isDark} />
+            {nutrition.calorieTarget && (
+              <InfoCard label="کالری هدف" value={`${toPersianNumber(nutrition.calorieTarget)} کالری`} isDark={isDark} />
             )}
           </div>
         )}
       </div>
 
       {/* Favorite / Disliked / Allergies */}
-      {profile.favoriteFoods.length > 0 && (
+      {(nutrition.favoriteFoods?.length || 0) > 0 && (
         <div className={`rounded-2xl p-5 border theme-transition ${
           isDark ? 'bg-[#1a1830] border-[#a78bfa]/10' : 'bg-white border-[#a78bfa]/15'
         }`}>
@@ -259,7 +269,7 @@ export default function Nutrition() {
             غذاهای مورد علاقه
           </h3>
           <div className="flex flex-wrap gap-2">
-            {profile.favoriteFoods.map((food: string, idx: number) => (
+            {(nutrition.favoriteFoods || []).map((food: string, idx: number) => (
               <span key={idx} className={`px-3 py-1.5 rounded-lg text-sm ${
                 isDark ? 'bg-[#22c55e]/20 text-[#22c55e]' : 'bg-[#10b981]/15 text-[#059669]'
               }`}>
@@ -270,7 +280,7 @@ export default function Nutrition() {
         </div>
       )}
 
-      {profile.dislikedFoods.length > 0 && (
+      {(nutrition.dislikedFoods?.length || 0) > 0 && (
         <div className={`rounded-2xl p-5 border theme-transition ${
           isDark ? 'bg-[#1a1830] border-[#a78bfa]/10' : 'bg-white border-[#a78bfa]/15'
         }`}>
@@ -279,7 +289,7 @@ export default function Nutrition() {
             غذاهای مورد عدم علاقه
           </h3>
           <div className="flex flex-wrap gap-2">
-            {profile.dislikedFoods.map((food: string, idx: number) => (
+            {(nutrition.dislikedFoods || []).map((food: string, idx: number) => (
               <span key={idx} className={`px-3 py-1.5 rounded-lg text-sm ${
                 isDark ? 'bg-[#ef4444]/20 text-[#ef4444]' : 'bg-red-50 text-red-700'
               }`}>
@@ -290,7 +300,7 @@ export default function Nutrition() {
         </div>
       )}
 
-      {profile.foodAllergies.length > 0 && (
+      {(nutrition.foodAllergies?.length || 0) > 0 && (
         <div className={`rounded-2xl p-5 border theme-transition ${
           isDark ? 'bg-[#1a1830] border-[#ef4444]/20' : 'bg-white border-red-200'
         }`}>
@@ -299,7 +309,7 @@ export default function Nutrition() {
             آلرژی‌های غذایی
           </h3>
           <div className="flex flex-wrap gap-2">
-            {profile.foodAllergies.map((allergy: string, idx: number) => (
+            {(nutrition.foodAllergies || []).map((allergy: string, idx: number) => (
               <span key={idx} className={`px-3 py-1.5 rounded-lg text-sm font-bold ${
                 isDark ? 'bg-[#ef4444]/20 text-[#ef4444]' : 'bg-red-50 text-red-700'
               }`}>
@@ -319,17 +329,7 @@ export default function Nutrition() {
             <Utensils size={18} />
             برنامه‌های غذایی
           </h3>
-          <button
-            onClick={() => navigate('/nutrition-import')}
-            className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-bold transition-all ${
-              isDark
-                ? 'bg-[#a78bfa]/20 text-[#a78bfa] hover:bg-[#a78bfa]/30'
-                : 'bg-[#a78bfa]/15 text-[#8b5cf6] hover:bg-[#a78bfa]/25'
-            }`}
-          >
-            <Plus size={14} />
-            ورود برنامه
-          </button>
+          {/* دکمه ورود JSON حذف شد — Fito آفلاین است */}
         </div>
 
         {nutritionPrograms.length === 0 ? (

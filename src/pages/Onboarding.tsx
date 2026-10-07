@@ -41,9 +41,6 @@ const STEPS: StepInfo[] = [
   { key: 'basic', title: 'مشخصات پایه', subtitle: 'اطلاعات شخصی', icon: User, color: '#a78bfa' },
   { key: 'body', title: 'اطلاعات بدنی', subtitle: 'سایزبندی و ترکیب بدن', icon: Target, color: '#0ea5e9' },
   { key: 'training', title: 'اهداف تمرینی', subtitle: 'برنامه و تجهیزات', icon: Dumbbell, color: '#8b5cf6' },
-  { key: 'nutrition', title: 'اهداف تغذیه', subtitle: 'رژیم و غذاها', icon: Apple, color: '#10b981' },
-  { key: 'budget', title: 'وضعیت اقتصادی', subtitle: 'بودجه غذا و مکمل', icon: Wallet, color: '#f59e0b' },
-  { key: 'supplements', title: 'مکمل‌ها', subtitle: 'هدف و سابقه', icon: Pill, color: '#ec4899' },
 ];
 
 const MUSCLE_OPTIONS = [
@@ -94,16 +91,6 @@ export default function Onboarding() {
     trainingHistory: '',
     strengthRecords: {},
     bodyMeasurements: {},
-    dietaryGoal: '',
-    dietType: '',
-    foodAllergies: [],
-    favoriteFoods: [],
-    dislikedFoods: [],
-    mealsPerDay: 4,
-    cookingSkill: 'basic',
-    supplementGoal: '',
-    currentSupplements: [],
-    supplementBudget: '',
     healthConditions: [],
     bodyFatPercent: undefined,
     bodyComposition: '',
@@ -143,7 +130,16 @@ export default function Onboarding() {
     : 'border-violet-200/60';
 
   const updateForm = (key: keyof AthleteProfile, value: any) => {
-    setForm((prev) => ({ ...prev, [key]: value }));
+    setForm((prev) => {
+      // اگه key = 'nutrition' یا 'supplement' بود، merge کن
+      if (key === 'nutrition' || key === 'supplement') {
+        return {
+          ...prev,
+          [key]: { ...(prev[key] as any || {}), ...value },
+        };
+      }
+      return { ...prev, [key]: value };
+    });
   };
 
   const updateBodyMeasurement = (key: string, value: number) => {
@@ -202,17 +198,6 @@ export default function Onboarding() {
       trainingHistory: form.trainingHistory || '',
       strengthRecords: form.strengthRecords || {},
       bodyMeasurements: form.bodyMeasurements || {},
-      dietaryGoal: form.dietaryGoal || '',
-      dietType: form.dietType || '',
-      foodAllergies: form.foodAllergies || [],
-      favoriteFoods: form.favoriteFoods || [],
-      dislikedFoods: form.dislikedFoods || [],
-      mealsPerDay: form.mealsPerDay || 4,
-      calorieTarget: form.calorieTarget,
-      cookingSkill: form.cookingSkill || 'basic',
-      supplementGoal: form.supplementGoal || '',
-      currentSupplements: form.currentSupplements || [],
-      supplementBudget: form.supplementBudget || '',
       healthConditions: form.healthConditions || [],
       bodyFatPercent: form.bodyFatPercent,
       bodyComposition: form.bodyComposition || '',
@@ -476,156 +461,6 @@ export default function Onboarding() {
 
             <FormField label="مدت برنامه (Timeline)">
               <Input value={form.timeline} onChange={(v) => updateForm('timeline', v)} placeholder="مثلاً: ۳ ماه" isDark={isDark} />
-            </FormField>
-          </>
-        )}
-
-        {currentStep.key === 'nutrition' && (
-          <>
-            <FormField label="هدف تغذیه">
-              <Select
-                value={form.dietaryGoal || ''}
-                onChange={(v) => updateForm('dietaryGoal', v)}
-                options={[
-                  { value: 'fat_loss', label: 'کاهش چربی' },
-                  { value: 'muscle_gain', label: 'افزایش عضله' },
-                  { value: 'maintenance', label: 'حفظ وزن' },
-                  { value: 'recomposition', label: 'بازترکیب' },
-                ]}
-                placeholder="انتخاب کنید"
-                isDark={isDark}
-              />
-            </FormField>
-
-            <FormField label="نوع رژیم">
-              <Select
-                value={form.dietType || ''}
-                onChange={(v) => updateForm('dietType', v)}
-                options={[
-                  { value: 'balanced', label: 'متعادل' },
-                  { value: 'high_protein', label: 'پروتئین بالا' },
-                  { value: 'low_carb', label: 'کم‌کربوهیدرات' },
-                  { value: 'vegetarian', label: 'گیاه‌خواری' },
-                ]}
-                placeholder="انتخاب کنید"
-                isDark={isDark}
-              />
-            </FormField>
-
-            <div className="grid grid-cols-2 gap-3">
-              <FormField label="تعداد وعده در روز">
-                <Input type="number" value={form.mealsPerDay} onChange={(v) => updateForm('mealsPerDay', Number(v))} isDark={isDark} />
-              </FormField>
-              <FormField label="مهارت آشپزی">
-                <Select
-                  value={form.cookingSkill || 'basic'}
-                  onChange={(v) => updateForm('cookingSkill', v)}
-                  options={[
-                    { value: 'none', label: 'ندارم' },
-                    { value: 'basic', label: 'مقدماتی' },
-                    { value: 'intermediate', label: 'متوسط' },
-                    { value: 'advanced', label: 'پیشرفته' },
-                  ]}
-                  isDark={isDark}
-                />
-              </FormField>
-            </div>
-
-            <FormField label="غذاهای مورد علاقه" hint="با Enter یا کاما اضافه کنید">
-              <ArrayInput
-                value={form.favoriteFoods || []}
-                onChange={(v) => updateForm('favoriteFoods', v)}
-                placeholder="مثلاً: مرغ، برنج، تخم‌مرغ"
-                isDark={isDark}
-              />
-            </FormField>
-
-            <FormField label="غذاهای مورد تنفر" hint="با Enter یا کاما اضافه کنید">
-              <ArrayInput
-                value={form.dislikedFoods || []}
-                onChange={(v) => updateForm('dislikedFoods', v)}
-                placeholder="مثلاً: ماهی، عدس"
-                isDark={isDark}
-              />
-            </FormField>
-
-            <FormField label="آلرژی غذایی" hint="با Enter یا کاما اضافه کنید">
-              <ArrayInput
-                value={form.foodAllergies || []}
-                onChange={(v) => updateForm('foodAllergies', v)}
-                placeholder="مثلاً: لاکتوز، گلوتن"
-                isDark={isDark}
-              />
-            </FormField>
-          </>
-        )}
-
-        {currentStep.key === 'budget' && (
-          <>
-            <div className={`p-4 rounded-2xl ${isDark ? 'bg-white/5' : 'bg-gray-50'}`}>
-              <p className={`text-xs ${textSub} leading-6`}>
-                این اطلاعات کمک می‌کند پیشنهادات تغذیه‌ای و مکملی متناسب با بودجه شما ارائه شود.
-              </p>
-            </div>
-
-            <FormField label="بودجه ماهانه غذا و مکمل">
-              <Select
-                value={form.supplementBudget || ''}
-                onChange={(v) => updateForm('supplementBudget', v)}
-                options={[
-                  { value: 'low', label: 'کم (اقتصادی)' },
-                  { value: 'medium', label: 'متوسط' },
-                  { value: 'high', label: 'بالا (بدون محدودیت)' },
-                ]}
-                placeholder="انتخاب کنید"
-                isDark={isDark}
-              />
-            </FormField>
-          </>
-        )}
-
-        {currentStep.key === 'supplements' && (
-          <>
-            <FormField label="هدف مکمل">
-              <Select
-                value={form.supplementGoal || ''}
-                onChange={(v) => updateForm('supplementGoal', v)}
-                options={[
-                  { value: 'muscle_gain', label: 'افزایش عضله' },
-                  { value: 'fat_loss', label: 'کاهش چربی' },
-                  { value: 'recovery', label: 'ریکاوری' },
-                  { value: 'general_health', label: 'سلامت عمومی' },
-                ]}
-                placeholder="انتخاب کنید"
-                isDark={isDark}
-              />
-            </FormField>
-
-            <FormField label="مکمل‌های فعلی" hint="با Enter یا کاما اضافه کنید">
-              <ArrayInput
-                value={form.currentSupplements || []}
-                onChange={(v) => updateForm('currentSupplements', v)}
-                placeholder="مثلاً: پروتئین وی، کراتین"
-                isDark={isDark}
-              />
-            </FormField>
-
-            <FormField label="شرایط پزشکی" hint="با Enter یا کاما اضافه کنید">
-              <ArrayInput
-                value={form.healthConditions || []}
-                onChange={(v) => updateForm('healthConditions', v)}
-                placeholder="مثلاً: دیابت، فشار خون"
-                isDark={isDark}
-              />
-            </FormField>
-
-            <FormField label="یادداشت دارویی">
-              <TextArea
-                value={form.hormoneMedNotes || ''}
-                onChange={(v) => updateForm('hormoneMedNotes', v)}
-                placeholder="داروهای مصرفی، هورمون‌ها"
-                isDark={isDark}
-              />
             </FormField>
           </>
         )}

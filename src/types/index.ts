@@ -1,5 +1,28 @@
 export type DeloadLevel = 'none' | 'light' | 'medium' | 'heavy';
 
+// ═══════════════════════════════════════════════════════════
+//  Nutrition Profile (زیر-پروفایل تغذیه)
+// ═══════════════════════════════════════════════════════════
+export interface NutritionProfile {
+  dietaryGoal: string;
+  dietType: string;
+  foodAllergies: string[];
+  favoriteFoods: string[];
+  dislikedFoods: string[];
+  mealsPerDay: number;
+  calorieTarget?: number;
+  cookingSkill: 'none' | 'basic' | 'intermediate' | 'advanced';
+}
+
+// ═══════════════════════════════════════════════════════════
+//  Supplement Profile (زیر-پروفایل مکمل)
+// ═══════════════════════════════════════════════════════════
+export interface SupplementProfile {
+  supplementGoal: string;
+  currentSupplements: string[];
+  supplementBudget: string;
+}
+
 export interface AthleteProfile {
   id: string;
   name: string;
@@ -37,17 +60,9 @@ export interface AthleteProfile {
     lastUpdated?: string;
   };
   bodyMeasurements: BodyMeasurements;
-  dietaryGoal: string;
-  dietType: string;
-  foodAllergies: string[];
-  favoriteFoods: string[];
-  dislikedFoods: string[];
-  mealsPerDay: number;
-  calorieTarget?: number;
-  cookingSkill: 'none' | 'basic' | 'intermediate' | 'advanced';
-  supplementGoal: string;
-  currentSupplements: string[];
-  supplementBudget: string;
+  // ═══ زیر-پروفایل‌ها ═══
+  nutrition?: NutritionProfile;
+  supplement?: SupplementProfile;
   healthConditions: string[];
   bodyFatPercent?: number;
   bodyComposition?: string;
