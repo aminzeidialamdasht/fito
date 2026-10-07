@@ -19,6 +19,7 @@ import ProgressBar from '../components/ui/ProgressBar';
 import PrimaryButton from '../components/ui/PrimaryButton';
 import Input from '../components/ui/Input';
 import EmptyState from '../components/ui/EmptyState';
+import Toast from '../components/ui/Toast';
 import { getTokens } from '../styles/designTokens';
 
 type MeasurementKey = 'weight' | 'chest' | 'waist' | 'hips' | 'arms' | 'thighs' | 'calves' | 'shoulders' | 'neck';
@@ -53,6 +54,8 @@ export default function Progress() {
     : null;
 
   const [showForm, setShowForm] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
   const [form, setForm] = useState({
     weight: 0, chest: 0, waist: 0, hips: 0, arms: 0, thighs: 0, calves: 0, shoulders: 0, neck: 0, notes: ''
   });
@@ -109,6 +112,8 @@ export default function Progress() {
     });
     setShowForm(false);
     setForm({ weight: 0, chest: 0, waist: 0, hips: 0, arms: 0, thighs: 0, calves: 0, shoulders: 0, neck: 0, notes: '' });
+    setToastMessage('اندازه‌گیری با موفقیت ذخیره شد');
+    setShowToast(true);
   };
 
   return (
@@ -322,6 +327,14 @@ export default function Progress() {
           </div>
         )}
       </Card>
+
+      <Toast
+        isOpen={showToast}
+        onClose={() => setShowToast(false)}
+        message={toastMessage}
+        type="success"
+        duration={2500}
+      />
     </div>
   );
 }
