@@ -45,9 +45,12 @@ export default function Badge({
     <span
       className={`inline-flex items-center rounded-full font-bold ${sizeClass} ${className}`}
       style={{
-        color: c,
-        backgroundColor: `${c}20`,
-        border: `1px solid ${c}50`,
+        ['--badge-color' as any]: c,
+        color: 'var(--badge-color)',
+        backgroundColor: 'color-mix(in srgb, var(--badge-color) 12%, transparent)',
+        borderWidth: '1px',
+        borderStyle: 'solid',
+        borderColor: 'color-mix(in srgb, var(--badge-color) 30%, transparent)',
       }}
     >
       {children}

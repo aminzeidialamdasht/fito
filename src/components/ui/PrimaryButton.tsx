@@ -5,7 +5,7 @@ import { getTokens } from '../../styles/designTokens';
 interface PrimaryButtonProps {
   onClick?: () => void;
   children: ReactNode;
-  variant?: 'accent' | 'gold';
+  variant?: 'accent' | 'gold' | 'danger' | 'success' | 'outline' | 'ghost';
   size?: 'sm' | 'md' | 'lg';
   fullWidth?: boolean;
   disabled?: boolean;
@@ -26,8 +26,18 @@ export default function PrimaryButton({
   const { theme } = useTheme();
   const tokens = getTokens(theme === 'dark');
 
-  const bg = variant === 'gold' ? tokens.gold : tokens.accent;
-  const fg = variant === 'gold' ? '#0f172a' : '#ffffff';
+  const variantStyles: Record<string, { bg: string; fg: string; extra?: string }> = {
+    accent:  { bg: tokens.accent,  fg: '#ffffff' },
+    gold:    { bg: tokens.gold,    fg: '#0f172a' },
+    danger:  { bg: tokens.danger,  fg: '#ffffff' },
+    success: { bg: tokens.success, fg: '#0f172a' },
+    outline: { bg: 'transparent',  fg: tokens.accent, extra: 'border-2' },
+    ghost:   { bg: 'transparent',  fg: tokens.textMain, extra: 'hover:bg-white/5' },
+  };
+  const vs = variantStyles[variant] || variantStyles.accent;
+  const bg = vs.bg;
+  const fg = vs.fg;
+  const extraClass = vs.extra || '';
 
   const sizeClass = {
     sm: 'py-2 px-3 text-xs',
@@ -41,10 +51,10 @@ export default function PrimaryButton({
       onClick={onClick}
       disabled={disabled}
       aria-label={ariaLabel}
-      className={`rounded-xl font-bold min-h-[44px] flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 disabled:active:scale-100 ${sizeClass} ${
+      className={`rounded-xl font-bold min-h-[44px] flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 disabled:active:scale-100 ${sizeClass} ${extraClass} ${
         fullWidth ? 'w-full' : ''
       } ${className}`}
-      style={{ backgroundColor: bg, color: fg }}
+      style={{ backgroundColor: bg, color: fg, ...(variant === 'outline' ? { borderColor: tokens.accent } : {}) }}
     >
       {children}
     </button>
