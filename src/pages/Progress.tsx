@@ -14,6 +14,7 @@ import { useAppContext } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { formatDateJalali, toPersianNumber, getProgramTimelineDetails } from '../utils/jalali';
 import AnatomySVG from '../components/AnatomySVG';
+import { getTokens } from '../styles/designTokens';
 
 type MeasurementKey = 'weight' | 'chest' | 'waist' | 'hips' | 'arms' | 'thighs' | 'calves' | 'shoulders' | 'neck';
 
@@ -31,18 +32,15 @@ export default function Progress() {
   const { theme } = useTheme();
   const navigate = useNavigate();
   const isDark = theme === 'dark';
+  const tokens = getTokens(isDark);
 
-  const gold = isDark ? '#d4af37' : '#f59e0b';
-  const teal = isDark ? '#a78bfa' : '#8b5cf6';
-  const bgMain = isDark ? '#0f172a' : '#ffffff';
-  const cardBg = isDark
-    ? 'bg-[#1e1b4b]/50 backdrop-blur-md'
-    : 'bg-white/70 backdrop-blur-md shadow-sm';
-  const textMain = isDark ? '#ffffff' : '#0f172a';
-  const textSub = isDark ? '#94a3b8' : '#64748b';
-  const borderCard = isDark
-    ? 'border-white/10'
-    : 'border-violet-200/60';
+  const gold = tokens.gold;
+  const teal = tokens.accent;
+  const bgMain = tokens.bg;
+  const cardBg = '';
+  const textMain = tokens.textMain;
+  const textSub = tokens.textSub;
+  const borderCard = '';
 
   const activeProgram = programs.find(p => p.id === state.activeProgram);
   const activeProgramTimeline = activeProgram
