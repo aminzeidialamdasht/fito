@@ -153,9 +153,9 @@ export default function Progress() {
                 <h3 className={`text-lg font-bold ${textMain}`}>{activeProgram.name}</h3>
               </div>
             </div>
-            <button onClick={() => navigate('/import')} className={`text-xs font-bold px-3 py-1.5 rounded-lg border ${isDark ? 'border-gray-700 text-gray-300' : 'border-violet-200 text-[#8b5cf6]'}`}>
+            <PrimaryButton variant="outline" size="sm" onClick={() => navigate('/generate/workout')}>
               تغییر برنامه
-            </button>
+            </PrimaryButton>
           </div>
           
           {activeProgramTimeline.isAlarmRequired && (

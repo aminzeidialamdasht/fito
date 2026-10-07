@@ -93,8 +93,8 @@ export default function Calendar() {
           title="برنامه تمرینی فعال نیست"
           subtitle="لطفاً ابتدا یک برنامه وارد کنید یا بسازید."
           action={
-            <PrimaryButton variant="accent" onClick={() => navigate('/import')}>
-              ورود برنامه
+            <PrimaryButton variant="accent" onClick={() => navigate('/generate/workout')}>
+              تولید برنامه
             </PrimaryButton>
           }
         />

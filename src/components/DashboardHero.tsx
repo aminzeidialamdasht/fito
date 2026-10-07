@@ -53,7 +53,7 @@ export default function DashboardHero({
         {!isPremium && (
           <button
             type="button"
-            onClick={() => navigate('/prompt')}
+            onClick={() => navigate('/generate/workout')}
             aria-label="ارتقا به نسخه ویژه"
             className="flex min-h-[44px] items-center gap-1.5 rounded-full border px-3 text-xs font-bold"
             style={{ borderColor: tokens.gold, color: tokens.gold }}

@@ -123,7 +123,7 @@ export default function SuggestedPrograms({ isDark, isPremium }: Props) {
                 بر اساس پروفایل و هدف شما ساخته می‌شود
               </p>
               <button
-                onClick={() => { soundEffects.playClick(); navigate('/prompt'); }}
+                onClick={() => { soundEffects.playClick(); navigate('/generate/workout'); }}
                 disabled={!isPremium}
                 className={`mt-2 text-xs font-bold px-3 py-1.5 rounded-lg transition-all ${
                   isPremium 

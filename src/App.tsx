@@ -8,8 +8,6 @@ import Welcome from './pages/Welcome';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 import StrengthRecords from './pages/StrengthRecords';
-import PromptGenerator from './pages/PromptGenerator';
-import ProgramImport from './pages/ProgramImport';
 import Nutrition from './pages/Nutrition';
 import NutritionImport from './pages/NutritionImport';
 import Supplements from './pages/Supplements';
@@ -88,9 +86,7 @@ function AppContent({ showWelcome, onContinue }: { showWelcome: boolean; onConti
         <Route path="/workouts" element={<Navigate to="/programs" replace />} />
         <Route path="/today-session" element={<TodaySession />} />
         
-        <Route path="/prompt" element={<Layout><PromptGenerator /></Layout>} />
         {/* ورود برنامه: صفحه باز است تا برنامه پیش‌فرض رایگان در دسترس باشد؛ JSON اختصاصی داخل صفحه قفل می‌شود */}
-        <Route path="/import" element={<Layout><ProgramImport /></Layout>} />
         <Route path="/generate" element={<Navigate to="/generate/workout" replace />} />
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/subscription" element={<Layout><Subscription /></Layout>} />
