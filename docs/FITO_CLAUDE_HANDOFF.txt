@@ -1,304 +1,42 @@
-═══════════════════════════════════════════════════════
-📸 اسنپ‌شات کامل پروژه Fito — انتقال به Claude
-═══════════════════════════════════════════════════════
+Fito — AI Handoff
+آخرین به‌روزرسانی: 2026-10-07
+نسخه هدف: v1.2.0
+HEAD مبنا: 0cf567ba (Phase 10 Step 7f)
+مسیر Git Bash: /d/Projects/fito
+GitHub: github.com/aminzeidialamdasht/fito
 
-آخرین به‌روزرسانی: ۱۴۰۵/۰۷/۱۳ (2026-10-06)
-نسخه: v1.1.3 | آخرین کامیت: c437f4cf
-مسیر ویندوز: /d/Projects/fito
-GitHub: https://github.com/aminzeidialamdasht/fito
+## پروژه
+React 18 + TypeScript + Vite 6 + Capacitor 8؛ فارسی RTL، Android، آفلاین.
+App ID: com.fito.app | storage key: fito_state_v2
+کار با Git Bash؛ بعد از هر تغییر npm run typecheck را اجرا کن.
+در تغییر UI از useTheme و getTokens(isDark) استفاده کن.
 
-═══════════════════════════════════════════════════════
-🎯 خلاصه پروژه
-═══════════════════════════════════════════════════════
+## وضعیت
+Phase 10 Steps 1–7 کامل: validator، UI برنامه/جلسه،
+Strength Records و Design System.
+Step 8: typecheck و build موفق؛ test:systems برابر 73 موفق و
+1 شکستِ مورد انتظار. Bundle حدود 1.1 MB.
+تگ‌های موجود: v1.1.0 تا v1.1.8؛
+v1.1.8-myket و v1.1.8-personal از origin دریافت شده‌اند.
+package-lock.json اکنون تغییر ندارد؛ working tree در بررسی اخیر clean بود.
 
-نام: Fito (فیتو)
-App ID: com.fito.app
-نسخه package.json: 1.1.0
+## معماری مهم
+Engine در src/engine: core، data/exercises، data/rules،
+generators/workoutGenerator.ts و types.
+Core شامل profileAnalyzer، splitSelector، exerciseSelector،
+volumeAllocator، stimulusCalculator، programValidator،
+progressionEngine، injurySafetyEngine، systemSelector،
+techniqueApplier و deloadEngine است.
+UI جدید: src/components/ui و src/components/program.
+صفحات مهم: ProgramDetail، TodaySession، SessionPreview،
+StrengthRecords؛ مسیر /strength-records در App.tsx.
+Design tokens: src/styles/designTokens.ts.
+Helpers: src/utils/programHelpers.ts؛ اعداد فارسی: utils/jalali.
 
-پلتفرم: React 18 + TS + Vite 6 + Capacitor 8 + Android
-زبان: فارسی RTL
-حالت: کاملاً آفلاین
-سیستم dev: Windows + Git Bash (MINGW64)
-
-═══════════════════════════════════════════════════════
-📊 وضعیت فازها
-═══════════════════════════════════════════════════════
-
-✅ فاز 0: Equipment واقعی + Double Progression
-✅ فاز 1: Effective Sets + Storage key fito_state_v2
-✅ فاز 1.5: UI Volume Summary
-✅ فاز 2: Volume Allocation (MEV/MAV/MRV)
-✅ فاز 2.5: توزیع Set دقیق per muscle
-✅ فاز 3: Program Validator (10 چک علمی)
-✅ فاز 3.5: Persian Mapping + Priority Propagation + Priority-aware Volume
-✅ فاز 4: Injury Safety Engine (injurySafetyEngine.ts + validator check #11)
-✅ فاز 4-UI: SafetyReportCard (رندر نمی‌شه — مشکل باز)
-✅ فاز 5: Progression Engine (progressionEngine.ts + NSCA %1RM + Epley)
-
-🔴 فاز 6: Advanced Training Systems (بعدی — مهم‌ترین)
-⏳ فاز 7: Profile Completeness (تمام فیلدهای پروفایل)
-⏳ فاز 8: Adaptive Deload
-⏳ تنوع Split (Bro Split, Arnold, Torso/Limbs)
-
-═══════════════════════════════════════════════════════
-🏗️ معماری پروژه
-═══════════════════════════════════════════════════════
-
-src/engine/
-├── core/
-│   ├── profileAnalyzer.ts       (BMR/TDEE/BMI + safeInjuries + priorityMuscles)
-│   ├── splitSelector.ts         (full_body/upper_lower/ppl/ppl_ul_hybrid)
-│   ├── exerciseSelector.ts      (with onlyPrimary + isSafeForUser)
-│   ├── volumeAllocator.ts       (distribute target between sessions)
-│   ├── stimulusCalculator.ts    (Effective Sets با coefficient)
-│   ├── programValidator.ts      (11 چک، نمره 0-100)
-│   ├── persianMapping.ts        (فارسی → انگلیسی)
-│   ├── performanceAnalyzer.ts   (از Tracker + Epley 1RM)
-│   ├── progressionEngine.ts     ⭐ فاز 5
-│   ├── substitutionEngine.ts    (جایگزینی هوشمند)
-│   ├── injurySafetyEngine.ts    ⭐ فاز 4
-│   └── techniqueApplier.ts      ⭐ فاز 6 (نیمه‌کاره)
-├── data/
-│   ├── exercises/               (122 حرکت)
-│   │   ├── chest.ts (20)  ├── back.ts (22)  ├── shoulders.ts (15)
-│   │   ├── arms.ts (28)   ├── legs.ts (22)  ├── abs.ts (15)
-│   │   └── index.ts (ALL_EXERCISES + STATS)
-│   ├── rules/volumeRules.ts     (MEV/MAV/MRV + getPriorityModifier)
-│   └── rules/trainingSystems.ts ⭐ فاز 6 (نیمه‌کاره)
-├── generators/workoutGenerator.ts
-└── types/
-    ├── exercise.ts              (Exercise + InjuryRisk + EquipmentType)
-    ├── program.ts               (GeneratedProgram + GeneratedSet + GeneratedDay)
-    └── injury.ts                ⭐ فاز 4 (SafetyReport + INJURY_FA)
-
-src/components/
-├── SafetyReportCard.tsx         ⭐ فاز 4
-└── VolumeSummary.tsx
-
-src/pages/
-├── OfflineGenerator.tsx         (ذخیره با splitType + metadata.injuries)
-└── program/ProgramDetail.tsx    (رندر VolumeSummary + SafetyReportCard)
-
-src/context/AppContext.tsx
-src/types/index.ts               (AthleteProfile + WorkoutProgram + WorkoutDay)
-
-Storage key: fito_state_v2
-RSA مایکت: src/billing/billingConfig.ts
-SKUها: fito_monthly, fito_yearly, fito_lifetime
-
-═══════════════════════════════════════════════════════
-📋 تایپ‌های کلیدی
-═══════════════════════════════════════════════════════
-
-AthleteProfile:
-  id, name, age, gender, height, weight, targetWeight?,
-  activityLevel, experience, trainingDays, sessionDuration,
-  location, equipmentType, customEquipment, equipment,
-  injuries[], limitations[], avoidedExercises[],
-  primaryGoal, secondaryGoal?, targetMuscles[],
-  programType, timeline, trainingHistory,
-  strengthRecords (legacy),
-  strengthRecordsExtended? (squat/bench/deadlift/ohp/row/pullUp/dip),
-  bodyMeasurements, dietaryGoal, dietType, foodAllergies, favoriteFoods,
-  bodyFrame? ('ectomorph'|'mesomorph'|'endomorph'),
-  dominantLimbLength? ('short'|'average'|'long')
-
-Exercise (engine):
-  id, name, englishName, aliases?, primaryMuscle, secondaryMuscles[],
-  type, movementPattern, equipment[], equipmentDetails?,
-  difficulty, injuryRisk (per-area), substitutes[], cues[],
-  repRanges {hypertrophy/strength/endurance}, rirRange,
-  restSeconds, tempo?, isCompound, isSpineSensitive, tags
-
-GeneratedSet (فعلی):
-  setNumber, targetReps, targetRIR, restSeconds,
-  tempo?, suggestedWeight?, lastWeight?
-  + باید اضافه شه: technique?, techniqueConfig?, week1RM?, week?
-
-GeneratedExercise:
-  exerciseId, name, englishName, primaryMuscle, secondaryMuscles[],
-  type, sets[], notes?, substituteId?
-
-GeneratedProgram:
-  id, name, goal, experience, splitType, trainingDaysPerWeek,
-  sessionDuration, durationWeeks, createdAt, days[], restDays[],
-  weeklyVolumeSummary,
-  metadata { engineVersion, generatedFrom, priorityMuscles?,
-             goal?, experience?, validationScore?, injuries?, splitType? }
-  + باید اضافه شه: systemName?, periodizationPhase?, weeklyProgression?
-
-WorkoutProgram (ذخیره در localStorage):
-  id, profileId, name, duration, createdAt, trainingDays,
-  splitType?, goal?, experience?, restDays?, weeklyVolumeSummary?,
-  days: WorkoutDay[], metadata (همان + injuries)
-
-WorkoutExercise (در WorkoutDay.exercises):
-  { id, exerciseId, name, sets, reps, rest, tempo, rir,
-    targetMuscle, primaryMuscle, secondaryMuscles[], type,
-    englishName, substitute?, notes? }
-
-═══════════════════════════════════════════════════════
-🔧 دستورات پروژه (Git Bash)
-═══════════════════════════════════════════════════════
-
-cd /d/Projects/fito
-
-npm run dev            → localhost:3000
-npm run typecheck      → tsc --noEmit
-npm run build          → build production
-npm run build:myket    → build + sync (مایکت)
-npm run build:personal → build + sync (personal)
-npm run test:engine    → تست موتور
-
-تگ جدید:
-  git tag v1.1.4-myket && git push origin v1.1.4-myket
-  → GitHub Actions خودکار APK امضا شده می‌سازد
-
-GitHub Secrets:
-  KEYSTORE_BASE64, KEYSTORE_PASSWORD, KEY_ALIAS, KEY_PASSWORD
-
-═══════════════════════════════════════════════════════
-🐛 مشکلات باز
-═══════════════════════════════════════════════════════
-
-1. SafetyReportCard در ProgramDetail رندر نمی‌شه
-   - safetyReport از activeProfile.injuries ساخته می‌شه
-   - analyzeProgramSafety خروجی درست می‌ده
-     (score=100, activeInjuries=['lowerBack'])
-   - ولی کامپوننت در UI دیده نمی‌شه
-   - کد رندر: {safetyReport && <SafetyReportCard report={safetyReport} />}
-   - محل: خط 210 ProgramDetail.tsx
-   - شک: کامپوننت SafetyReportCard در return inner return null داره
-     یا خطای runtime Map/Join
-
-2. فاز 6 نیمه‌کاره (techniqueApplier.ts + trainingSystems.ts ساخته
-   شدن ولی systemSelector.ts نیست و به generator وصل نشده)
-
-3. فیلدهای پروفایل که تأثیر ندارن در تولید برنامه:
-   - avoidedExercises → در exerciseSelector چک نمی‌شه
-   - bodyFrame → نادیده گرفته می‌شه
-   - dominantLimbLength → نادیده گرفته می‌شه
-   - secondaryGoal → استفاده نمی‌شه
-   - bodyMeasurements → استفاده نمی‌شه
-   - trainingHistory → فقط برای experience
-
-4. نبود سیستم‌های تمرینی کامل (13 سیستم هدف):
-   Periodization: Linear, DUP, Block, Conjugate
-   Intensity: RPT, Rest-Pause, Myo-Reps, Drop Sets, Cluster, Super/Giant
-   حجم بالا: GVT, 5/3/1, Bulgarian
-
-═══════════════════════════════════════════════════════
-📌 قانون طلایی پروژه (by user)
-═══════════════════════════════════════════════════════
-
-همه چیز باید از پروفایل کاربر جاری شود:
-- Demographics, Goals, Experience, Injuries
-- Equipment, Priority Muscles, Body Measurements
-- Strength Records, Performance History
-- BodyFrame, DominantLimbLength, AvoidedExercises
-
-نه از قواعد ثابت و generic.
-تمام فیلدهای پروفایل باید در برنامه تأثیر داشته باشن.
-سیستم‌های تمرینی باید بر اساس جدیدترین متدهای روز دنیا باشن.
-
-═══════════════════════════════════════════════════════
-🔚 END OF SNAPSHOT
-═══════════════════════════════════════════════════════
-
-
-████████████████████████████████████████████████████████
-████████████████████████████████████████████████████████
-████████████████████████████████████████████████████████
-████████████████████████████████████████████████████████
-████████████████████████████████████████████████████████
-
-
-═══════════════════════════════════════════════════════
-🎯 پرامپت برای Claude
-═══════════════════════════════════════════════════════
-
-سلام Claude. من در حال توسعه پروژه Fito هستم (اسنپ‌شات بالا رو کامل بخون).
-
-═══════════════════════════════════════════════════════
-⚠️ قوانین سختگیرانه همکاری
-═══════════════════════════════════════════════════════
-
-1. فقط دستور Git Bash بده — من کپی/پیست می‌کنم.
-   هیچ توضیح طولانی، هیچ کد مستقیم در چت نده.
-
-2. خلاصه و سریع — هر گام حداکثر 30 خط bash.
-
-3. گام به گام — بعد از هر دستور، منتظر خروجی من بمان.
-   قبل از رفتن به گام بعد، مطمئن شو typecheck پاس شده.
-
-4. Console/Debug تکراری ممنوع — من نمی‌تونم Console بزنم.
-   مشکل رو از روی کد تشخیص بده، نه runtime.
-
-5. فایل‌های جدید را کامل با cat > file << 'EOF' بساز —
-   نه sed پیچیده برای ساخت فایل از صفر.
-
-6. اصلاح فایل موجود با awk/sed — اگه فقط چند خط تغییر می‌کنه،
-   از awk استفاده کن. از python استفاده نکن (نصب نیست).
-
-7. هر گام باید typecheck تمیز بده —
-   بعد از هر تغییر: npm run typecheck 2>&1 | tail -10
-
-8. قبل از دستور، یک خط توضیح بده — «این چیکار می‌کنه» — نه بیشتر.
-
-9. Git flow: بعد از هر فاز → commit + tag + push خودکار.
-
-10. اگر خطای typecheck داد — خروجی رو می‌فرستم، دقیق fix کن،
-    نه راه‌حل generic.
-
-═══════════════════════════════════════════════════════
-🎯 اولویت‌های کاری (به ترتیب)
-═══════════════════════════════════════════════════════
-
-**اولویت ۱ (بحرانی — همین الان):**
-- رفع مشکل رندر SafetyReportCard در ProgramDetail
-  کد رو بررسی کن — احتمالاً خطای runtime در Map/Join یا INJURY_FA
-  یا کد رندر بعد از return اضافه شده.
-
-**اولویت ۲ (مهم‌ترین از نظر ارزش پروژه):**
-- کامل کردن فاز 6: Advanced Training Systems
-  - systemSelector.ts ساخته نشده
-  - techniqueApplier.ts به generator وصل نشده
-  - 13 سیستم هدف:
-    Periodization: Linear, DUP, Block, Conjugate
-    Intensity: RPT, Rest-Pause, Myo-Reps, Drop Sets, Cluster, Super/Giant
-    حجم بالا: GVT, 5/3/1, Bulgarian
-
-  انتخاب هوشمند بر اساس:
-  - goal, experience, trainingDays, sessionDuration
-  - recovery (از performanceAnalyzer.fatigue)
-  - bodyFrame (ecto/meso/endomorph → rep range)
-  - dominantLimbLength (short/average/long → exercise selection)
-
-  گسترش GeneratedSet با:
-  - technique?, techniqueConfig?, week1RM?, week?
-
-  گسترش WorkoutProgram.metadata با:
-  - systemName?, periodizationPhase?, weeklyProgression?
-
-**اولویت ۳ (کامل کردن تأثیر پروفایل):**
-- avoidedExercises → در exerciseSelector چک شه
-- bodyFrame → تعدیل rep range و volume
-- dominantLimbLength → تعدیل برخی حرکات
-- secondaryGoal → تعدیل حجم
-- bodyMeasurements → تعدیل کالری/حجم
-
-**اولویت ۴:**
-- فاز 8: Adaptive Deload (auto-regulation)
-- تنوع Split: Bro Split, Arnold, Torso/Limbs
-
-═══════════════════════════════════════════════════════
-🚀 شروع
-═══════════════════════════════════════════════════════
-
-اول از اولویت ۱ شروع کن (رفع SafetyReportCard).
-فقط کد ProgramDetail.tsx و SafetyReportCard.tsx رو بررسی کن.
-دلیل رندر نشدن رو از روی کد پیدا کن.
-بدون Console، بدون runtime — فقط با خوندن کد.
-
-دستور اول رو بده.
-
+## ادامه Step 8
+1. بازنویسی همین فایل به handoff ضروری و به‌روز.
+2. typecheck؛ سپس commit و push تغییرات.
+3. روی commit نهایی بساز و push کن:
+   v1.2.0-myket و v1.2.0-personal؛ بررسی اجرای GitHub Actions/APK.
+4. bundle پشتیبان در /d/Projects با تاریخ روز و نسخه v1.2.0 بساز.
+5. گزارش نهایی Phase 10 را ثبت کن.
