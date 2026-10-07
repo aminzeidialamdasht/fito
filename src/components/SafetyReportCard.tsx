@@ -1,152 +1,127 @@
-/**
- * کارت گزارش ایمنی — فاز 4 (نسخه ساده و مقاوم)
- */
+/** کارت گزارش ایمنی برنامه */
 import { useState } from 'react';
-import { AlertTriangle, ShieldCheck, ShieldAlert, ChevronDown, ChevronUp } from 'lucide-react';
+import { AlertTriangle, ChevronDown, ChevronUp, ShieldAlert, ShieldCheck } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { toPersianNumber } from '../utils/jalali';
 import type { SafetyReport } from '../engine/types/injury';
+import { getTokens } from '../styles/designTokens';
+import Card from './ui/Card';
+import Badge from './ui/Badge';
 
 interface Props {
   report: SafetyReport;
-  onApplySubstitution?: (originalId: string, alternativeId: string) => void;
 }
 
 const INJURY_FA_LOCAL: Record<string, string> = {
-  shoulder: 'شانه',
-  lowerBack: 'کمر',
-  upperBack: 'پشت بالایی',
-  neck: 'گردن',
-  knee: 'زانو',
-  hip: 'لگن',
-  hamstring: 'همسترینگ',
-  quad: 'چهارسر',
-  glute: 'سرینی',
-  elbow: 'آرنج',
-  wrist: 'مچ دست',
-  ankle: 'مچ پا',
-  biceps: 'جلوبازو',
-  triceps: 'پشت‌بازو',
+  shoulder: 'شانه', lowerBack: 'کمر', upperBack: 'پشت بالایی',
+  neck: 'گردن', knee: 'زانو', hip: 'لگن',
+  hamstring: 'همسترینگ', quad: 'چهارسر', glute: 'سرینی',
+  elbow: 'آرنج', wrist: 'مچ دست', ankle: 'مچ پا',
+  biceps: 'جلوبازو', triceps: 'پشت‌بازو',
 };
 
 export default function SafetyReportCard({ report }: Props) {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+  const tokens = getTokens(isDark);
   const [expanded, setExpanded] = useState(false);
 
-  if (!report || !report.activeInjuries || report.activeInjuries.length === 0) {
-    return null;
-  }
+  if (!report?.activeInjuries?.length) return null;
 
-  let scoreText = '100';
+  const score = typeof report.score === 'number' ? report.score : 100;
+  const scoreColor = score >= 80 ? tokens.success : score >= 50 ? tokens.warning : tokens.danger;
+  const ScoreIcon = score >= 80 ? ShieldCheck : score >= 50 ? ShieldAlert : AlertTriangle;
+  let scoreText: string;
   try {
-    scoreText = toPersianNumber(report.score);
+    scoreText = toPersianNumber(score);
   } catch {
-    scoreText = String(report.score);
+    scoreText = String(score);
   }
-
-  const scoreNum = typeof report.score === 'number' ? report.score : 100;
-  const scoreColor = scoreNum >= 80 ? 'emerald' : scoreNum >= 50 ? 'amber' : 'red';
-
-  const bgClass = {
-    emerald: isDark ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-emerald-50 border-emerald-200',
-    amber: isDark ? 'bg-amber-500/10 border-amber-500/30' : 'bg-amber-50 border-amber-200',
-    red: isDark ? 'bg-red-500/10 border-red-500/30' : 'bg-red-50 border-red-200',
-  }[scoreColor];
-
-  const textClass = {
-    emerald: isDark ? 'text-emerald-400' : 'text-emerald-600',
-    amber: isDark ? 'text-amber-400' : 'text-amber-600',
-    red: isDark ? 'text-red-400' : 'text-red-600',
-  }[scoreColor];
-
-  const ScoreIcon = scoreNum >= 80 ? ShieldCheck : scoreNum >= 50 ? ShieldAlert : AlertTriangle;
-
   const injuryNames = report.activeInjuries
-    .map((i) => INJURY_FA_LOCAL[i] || i)
+    .map((injury) => INJURY_FA_LOCAL[injury] || injury)
     .join('، ');
 
   return (
-    <div className={`rounded-2xl border p-4 ${bgClass}`}>
+    <Card className="space-y-3">
       <button
         type="button"
-        onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center gap-3 text-right"
+        onClick={() => setExpanded((value) => !value)}
+        aria-label={expanded ? 'بستن جزئیات گزارش ایمنی' : 'نمایش جزئیات گزارش ایمنی'}
+        aria-expanded={expanded}
+        aria-controls="safety-report-details"
+        className="flex min-h-[44px] w-full items-center gap-3 text-right"
       >
-        <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${isDark ? 'bg-white/10' : 'bg-white'}`}>
-          <ScoreIcon className={`w-5 h-5 ${textClass}`} />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <span className={`text-sm font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+        <span
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+          style={{ backgroundColor: `${scoreColor}20`, color: scoreColor }}
+        >
+          <ScoreIcon size={20} />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="flex flex-wrap items-center gap-2">
+            <span className="text-sm font-bold" style={{ color: tokens.textMain }}>
               گزارش ایمنی برنامه
             </span>
-            <span className={`text-xs font-black ${textClass}`}>
+            <Badge color={score >= 80 ? 'success' : score >= 50 ? 'warning' : 'danger'}>
               {scoreText}/۱۰۰
-            </span>
-          </div>
-          <div className={`text-[11px] mt-0.5 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+            </Badge>
+          </span>
+          <span className="mt-1 block text-xs" style={{ color: tokens.textSub }}>
             آسیب‌های فعال: {injuryNames}
-          </div>
-        </div>
-        {expanded ? (
-          <ChevronUp className={`w-4 h-4 ${isDark ? 'text-gray-400' : 'text-gray-500'}`} />
-        ) : (
-          <ChevronDown className={`w-4 h-4 ${isDark ? 'text-gray-400' : 'text-gray-500'}`} />
-        )}
+          </span>
+        </span>
+        {expanded
+          ? <ChevronUp size={18} style={{ color: tokens.textSub }} />
+          : <ChevronDown size={18} style={{ color: tokens.textSub }} />}
       </button>
 
-      {report.forbidden.length > 0 && (
-        <div className="flex gap-2 mt-3">
-          <div className={`flex-1 rounded-lg px-3 py-2 text-center ${isDark ? 'bg-red-500/10' : 'bg-red-50'}`}>
-            <div className={`text-lg font-black ${isDark ? 'text-red-400' : 'text-red-600'}`}>
-              {report.forbidden.length}
-            </div>
-            <div className={`text-[10px] ${isDark ? 'text-red-300' : 'text-red-500'}`}>پرخطر</div>
-          </div>
-          <div className={`flex-1 rounded-lg px-3 py-2 text-center ${isDark ? 'bg-amber-500/10' : 'bg-amber-50'}`}>
-            <div className={`text-lg font-black ${isDark ? 'text-amber-400' : 'text-amber-600'}`}>
-              {report.caution.length}
-            </div>
-            <div className={`text-[10px] ${isDark ? 'text-amber-300' : 'text-amber-500'}`}>احتیاط</div>
-          </div>
-        </div>
-      )}
+      <div className="flex flex-wrap gap-2" aria-label="خلاصه موارد ایمنی">
+        <Badge color="danger">پرخطر: {report.forbidden.length}</Badge>
+        <Badge color="warning">احتیاط: {report.caution.length}</Badge>
+      </div>
 
-      {expanded && report.warnings.length > 0 && (
-        <div className="mt-4 space-y-3">
-          {report.warnings.map((w, idx) => (
-            <div
-              key={idx}
-              className={`rounded-xl p-3 text-xs leading-6 ${
-                w.severity === 'error'
-                  ? isDark ? 'bg-red-500/10 text-red-300' : 'bg-red-50 text-red-700'
-                  : isDark ? 'bg-amber-500/10 text-amber-300' : 'bg-amber-50 text-amber-700'
-              }`}
-            >
-              {w.messageFa}
+      {expanded && (
+        <div id="safety-report-details" className="space-y-3">
+          {report.warnings.length > 0 && (
+            <div className="space-y-2">
+              {report.warnings.map((warning, index) => {
+                const color = warning.severity === 'error' ? tokens.danger : tokens.warning;
+                return (
+                  <div
+                    key={`${warning.messageFa}-${index}`}
+                    className="rounded-xl p-3 text-xs leading-6"
+                    style={{ color, backgroundColor: `${color}18` }}
+                  >
+                    {warning.messageFa}
+                  </div>
+                );
+              })}
             </div>
-          ))}
-        </div>
-      )}
+          )}
 
-      {expanded && report.substitutions.length > 0 && (
-        <div className="mt-3 space-y-2">
-          <div className={`text-[11px] font-bold ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-            جایگزین‌های پیشنهادی:
-          </div>
-          {report.substitutions.map((sub, idx) => (
-            <div key={idx} className={`rounded-xl p-3 ${isDark ? 'bg-white/5' : 'bg-white'}`}>
-              <div className={`text-xs font-bold mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                {sub.alternativeName}
-              </div>
-              <div className={`text-[10px] ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                {sub.reasonFa}
-              </div>
+          {report.substitutions.length > 0 && (
+            <div className="space-y-2">
+              <h4 className="text-xs font-bold" style={{ color: tokens.textSub }}>
+                جایگزین‌های پیشنهادی
+              </h4>
+              {report.substitutions.map((substitution, index) => (
+                <Card
+                  key={`${substitution.alternativeName}-${index}`}
+                  variant="soft"
+                  className="p-3"
+                >
+                  <p className="mb-1 text-sm font-bold" style={{ color: tokens.textMain }}>
+                    {substitution.alternativeName}
+                  </p>
+                  <p className="text-xs leading-5" style={{ color: tokens.textSub }}>
+                    {substitution.reasonFa}
+                  </p>
+                </Card>
+              ))}
             </div>
-          ))}
+          )}
         </div>
       )}
-    </div>
+    </Card>
   );
 }
