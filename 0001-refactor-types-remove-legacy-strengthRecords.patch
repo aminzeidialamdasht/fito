@@ -1,0 +1,118 @@
+From 8d7185f0fb71d041b7494d5092f9fdc371a761cf Mon Sep 17 00:00:00 2001
+From: "qwen.ai[bot]" <qwenlm-intl@service.alibaba.com>
+Date: Thu, 8 Oct 2026 11:43:11 +0000
+Subject: [PATCH] refactor(types): remove legacy strengthRecords from
+ AthleteProfile
+
+- Remove dead field strengthRecords: Record<string,string> (superseded by strengthRecordsExtended)
+- Clean references in Onboarding.tsx and defaultPlans.ts sample profile
+- Add migrateProfile() in storage.ts: best-effort converts legacy string
+  records (e.g. '100x5') to strengthRecordsExtended on load, then drops the key
+- tsc --noEmit passes; engine tests unaffected
+---
+ src/data/defaultPlans.ts |  1 -
+ src/pages/Onboarding.tsx |  2 --
+ src/types/index.ts       |  2 +-
+ src/utils/storage.ts     | 29 ++++++++++++++++++++++++++++-
+ 4 files changed, 29 insertions(+), 5 deletions(-)
+
+diff --git a/src/data/defaultPlans.ts b/src/data/defaultPlans.ts
+index 59516f37..e0d12b94 100644
+--- a/src/data/defaultPlans.ts
++++ b/src/data/defaultPlans.ts
+@@ -338,7 +338,6 @@ export const SAMPLE_PROFILE: AthleteProfile = {
+   programType: 'full_body',
+   timeline: '۱ ماه',
+   trainingHistory: 'مبتدی',
+-  strengthRecords: {},
+   bodyMeasurements: {},
+   nutrition: {
+     dietaryGoal: '',
+diff --git a/src/pages/Onboarding.tsx b/src/pages/Onboarding.tsx
+index 1b50a606..3092532d 100644
+--- a/src/pages/Onboarding.tsx
++++ b/src/pages/Onboarding.tsx
+@@ -91,7 +91,6 @@ export default function Onboarding() {
+     programType: 'ai_suggested',
+     timeline: '۳ ماه',
+     trainingHistory: '',
+-    strengthRecords: {},
+     bodyMeasurements: {},
+     healthConditions: [],
+     bodyFatPercent: undefined,
+@@ -198,7 +197,6 @@ export default function Onboarding() {
+       programType: form.programType || 'ai_suggested',
+       timeline: form.timeline || '۳ ماه',
+       trainingHistory: form.trainingHistory || '',
+-      strengthRecords: form.strengthRecords || {},
+       bodyMeasurements: form.bodyMeasurements || {},
+       healthConditions: form.healthConditions || [],
+       bodyFatPercent: form.bodyFatPercent,
+diff --git a/src/types/index.ts b/src/types/index.ts
+index 0ef19b93..ddd02b70 100644
+--- a/src/types/index.ts
++++ b/src/types/index.ts
+@@ -48,7 +48,7 @@ export interface AthleteProfile {
+   programType: 'full_body' | 'split' | 'push_pull_legs' | 'upper_lower' | 'ai_suggested';
+   timeline: string;
+   trainingHistory: string;
+-  strengthRecords: Record<string, string>;
++  // Note: legacy `strengthRecords: Record<string,string>` was removed (v2.0.2) — superseded by strengthRecordsExtended
+   strengthRecordsExtended?: {
+     squat?: { weight: number; reps: number; estimated1RM?: number };
+     benchPress?: { weight: number; reps: number; estimated1RM?: number };
+diff --git a/src/utils/storage.ts b/src/utils/storage.ts
+index 36cd6edc..cb08cd3c 100644
+--- a/src/utils/storage.ts
++++ b/src/utils/storage.ts
+@@ -17,12 +17,37 @@ function getInitialState(): AppState {
+   };
+ }
+ 
++// Migration: drop legacy `strengthRecords: Record<string,string>` from a profile.
++// It was superseded by `strengthRecordsExtended`. If legacy string entries exist and
++// extended records are missing, best-effort conversion (e.g. "100" or "100x5") is done
++// so nothing breaks; the legacy key is then removed.
++function migrateProfile(p: any): AthleteProfile {
++  if (!p || typeof p !== 'object') return p;
++  const legacy = p.strengthRecords;
++  if (legacy && typeof legacy === 'object' && Object.keys(legacy).length > 0) {
++    const ext = { ...(p.strengthRecordsExtended || {}) };
++    for (const [key, value] of Object.entries(legacy as Record<string, unknown>)) {
++      if (key === 'lastUpdated' || typeof value !== 'string' || !value.trim()) continue;
++      if (ext[key]) continue; // extended record wins
++      const m = value.trim().match(/^(\d+(?:[.,]\d+)?)(?:\s*[x×]\s*(\d+))?$/);
++      if (m) {
++        const weight = parseFloat(m[1].replace(',', '.'));
++        const reps = m[2] ? parseInt(m[2], 10) : 1;
++        (ext as any)[key] = { weight, reps };
++      }
++    }
++    p.strengthRecordsExtended = ext;
++  }
++  delete p.strengthRecords;
++  return p;
++}
++
+ // Migration: convert old single-profile format to new multi-profile format
+ function migrateState(data: any): AppState {
+   // Old format had `profile` (single) instead of `profiles` (array)
+   if (data.profile && !data.profiles) {
+     return {
+-      profiles: [data.profile],
++      profiles: [migrateProfile(data.profile)],
+       activeProfileId: data.profile.id,
+       programs: (data.programs || []).map((p: any) => ({
+         ...p,
+@@ -51,6 +76,8 @@ function migrateState(data: any): AppState {
+   }
+   return { 
+     ...data, 
++    // Drop legacy `strengthRecords` from stored profiles (superseded by strengthRecordsExtended)
++    profiles: Array.isArray(data.profiles) ? data.profiles.map(migrateProfile) : [],
+     activeProgram: data.activeProgram || null,
+     nutritionPrograms: data.nutritionPrograms || [],
+     supplementPrograms: data.supplementPrograms || [],
+-- 
+2.39.5
+
