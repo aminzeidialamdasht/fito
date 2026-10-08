@@ -338,7 +338,6 @@ export const SAMPLE_PROFILE: AthleteProfile = {
   programType: 'full_body',
   timeline: '۱ ماه',
   trainingHistory: 'مبتدی',
-  strengthRecords: {},
   bodyMeasurements: {},
   nutrition: {
     dietaryGoal: '',

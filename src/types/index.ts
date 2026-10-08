@@ -48,7 +48,7 @@ export interface AthleteProfile {
   programType: 'full_body' | 'split' | 'push_pull_legs' | 'upper_lower' | 'ai_suggested';
   timeline: string;
   trainingHistory: string;
-  strengthRecords: Record<string, string>;
+  // Note: legacy `strengthRecords: Record<string,string>` was removed (v2.0.2) — superseded by strengthRecordsExtended
   strengthRecordsExtended?: {
     squat?: { weight: number; reps: number; estimated1RM?: number };
     benchPress?: { weight: number; reps: number; estimated1RM?: number };

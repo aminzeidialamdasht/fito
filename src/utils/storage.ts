@@ -17,12 +17,37 @@ function getInitialState(): AppState {
   };
 }
 
+// Migration: drop legacy `strengthRecords: Record<string,string>` from a profile.
+// It was superseded by `strengthRecordsExtended`. If legacy string entries exist and
+// extended records are missing, best-effort conversion (e.g. "100" or "100x5") is done
+// so nothing breaks; the legacy key is then removed.
+function migrateProfile(p: any): AthleteProfile {
+  if (!p || typeof p !== 'object') return p;
+  const legacy = p.strengthRecords;
+  if (legacy && typeof legacy === 'object' && Object.keys(legacy).length > 0) {
+    const ext = { ...(p.strengthRecordsExtended || {}) };
+    for (const [key, value] of Object.entries(legacy as Record<string, unknown>)) {
+      if (key === 'lastUpdated' || typeof value !== 'string' || !value.trim()) continue;
+      if (ext[key]) continue; // extended record wins
+      const m = value.trim().match(/^(\d+(?:[.,]\d+)?)(?:\s*[x×]\s*(\d+))?$/);
+      if (m) {
+        const weight = parseFloat(m[1].replace(',', '.'));
+        const reps = m[2] ? parseInt(m[2], 10) : 1;
+        (ext as any)[key] = { weight, reps };
+      }
+    }
+    p.strengthRecordsExtended = ext;
+  }
+  delete p.strengthRecords;
+  return p;
+}
+
 // Migration: convert old single-profile format to new multi-profile format
 function migrateState(data: any): AppState {
   // Old format had `profile` (single) instead of `profiles` (array)
   if (data.profile && !data.profiles) {
     return {
-      profiles: [data.profile],
+      profiles: [migrateProfile(data.profile)],
       activeProfileId: data.profile.id,
       programs: (data.programs || []).map((p: any) => ({
         ...p,
@@ -51,6 +76,8 @@ function migrateState(data: any): AppState {
   }
   return { 
     ...data, 
+    // Drop legacy `strengthRecords` from stored profiles (superseded by strengthRecordsExtended)
+    profiles: Array.isArray(data.profiles) ? data.profiles.map(migrateProfile) : [],
     activeProgram: data.activeProgram || null,
     nutritionPrograms: data.nutritionPrograms || [],
     supplementPrograms: data.supplementPrograms || [],
