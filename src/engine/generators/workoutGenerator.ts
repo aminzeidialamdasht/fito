@@ -242,6 +242,9 @@ export function generateWorkoutProgram(
     console.log('✅ Program valid (score: ' + validation.score + '/100)');
   }
 
+  // ۸. ذخیره امتیاز اعتبارسنجی در metadata
+  program.metadata.validationScore = validation.score;
+
   return program;
 }
 

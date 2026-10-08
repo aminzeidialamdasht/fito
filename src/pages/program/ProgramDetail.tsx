@@ -10,7 +10,9 @@ import {
 } from 'lucide-react';
 import SubstituteModal from '../../components/SubstituteModal';
 import VolumeSummary from '../../components/VolumeSummary';
+import VolumeLandmarksSection from '../../components/VolumeLandmarksSection';
 import SafetyReportCard from '../../components/SafetyReportCard';
+import SafetyScoreCard from '../../components/ui/SafetyScoreCard';
 import HealthWarningsCard from '../../components/HealthWarningsCard';
 import ProgramIdentityCard from '../../components/program/ProgramIdentityCard';
 import DeloadBadge from '../../components/program/DeloadBadge';
@@ -233,12 +235,34 @@ export default function ProgramDetail() {
           />
         )}
 
+        {/* Volume Landmarks (MEV/MAV/MRV) */}
+        {program.weeklyVolumeSummary && (
+          <VolumeLandmarksSection
+            weeklyVolume={program.weeklyVolumeSummary as any}
+            experience={(program.metadata?.experience as any) || (program.experience as any) || 'intermediate'}
+            goal={(program.metadata?.goal as any) || (program.goal as any) || 'hypertrophy'}
+            priorityMuscles={program.metadata?.priorityMuscles || []}
+          />
+        )}
+
         {/* Safety Report */}
         {safetyReport && <SafetyReportCard report={safetyReport} />}
 
         {/* Health Warnings */}
         {program.metadata?.healthWarnings && program.metadata.healthWarnings.length > 0 && (
           <HealthWarningsCard warnings={program.metadata.healthWarnings} />
+        )}
+
+        {/* Safety Score */}
+        {program.metadata?.validationScore !== undefined && (
+          <SafetyScoreCard
+            score={program.metadata.validationScore}
+            notes={[
+              ...(program.metadata.injuries?.length
+                ? [`برنامه با ${program.metadata.injuries.length} آسیب سازگار است`]
+                : []),
+            ]}
+          />
         )}
 
         {/* Days List */}
