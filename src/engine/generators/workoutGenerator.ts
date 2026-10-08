@@ -17,6 +17,7 @@ import { selectSplit, getSplitName, type SplitPlan } from '../core/splitSelector
 import { selectExercisesForSession } from '../core/exerciseSelector';
 import { getTargetWeeklyVolume, MAX_VOLUME_PER_SESSION } from '../data/rules/volumeRules';
 import { addEffectiveSetsToVolume } from '../core/stimulusCalculator';
+import { calculateStimulusScore } from '../core/stimulusCalculator';
 import { validateProgram } from '../core/programValidator';
 import {
   distributeMuscleAcrossSessions,
@@ -244,6 +245,23 @@ export function generateWorkoutProgram(
 
   // ۸. ذخیره امتیاز اعتبارسنجی در metadata
   program.metadata.validationScore = validation.score;
+
+  // ۹. محاسبه نمره تحریک عضلانی
+  const targetVolumes: Partial<Record<MuscleGroup, number>> = {};
+  for (const muscle of allMuscles) {
+    const isPriority = analysis.priorityMuscles.includes(muscle);
+    const target = getTargetWeeklyVolume(
+      muscle,
+      analysis.experience,
+      analysis.goal,
+      isPriority,
+    );
+    targetVolumes[muscle] = target.target;
+  }
+  program.metadata.stimulusScore = calculateStimulusScore(
+    weeklyVolumeSummary as Partial<Record<MuscleGroup, number>>,
+    targetVolumes,
+  );
 
   return program;
 }

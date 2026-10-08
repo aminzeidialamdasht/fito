@@ -130,6 +130,7 @@ export interface GeneratedProgram {
     priorityMuscles?: string[];
     injuries?: string[];
     healthWarnings?: HealthWarning[];
+    stimulusScore?: number;
     goal?: string;
     experience?: string;
     validationScore?: number;

@@ -13,6 +13,7 @@ import VolumeSummary from '../../components/VolumeSummary';
 import VolumeLandmarksSection from '../../components/VolumeLandmarksSection';
 import SafetyReportCard from '../../components/SafetyReportCard';
 import SafetyScoreCard from '../../components/ui/SafetyScoreCard';
+import StimulusMeter from '../../components/ui/StimulusMeter';
 import HealthWarningsCard from '../../components/HealthWarningsCard';
 import ProgramIdentityCard from '../../components/program/ProgramIdentityCard';
 import DeloadBadge from '../../components/program/DeloadBadge';
@@ -263,6 +264,26 @@ export default function ProgramDetail() {
                 : []),
             ]}
           />
+        )}
+
+        {/* Stimulus Meter */}
+        {program.metadata?.stimulusScore !== undefined && (
+          <Card variant="elevated">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <h3 className="font-bold text-sm mb-1" style={{ color: tokens.textMain }}>
+                  محرک عضلانی (Stimulus)
+                </h3>
+                <p className="text-[10px]" style={{ color: tokens.textSub }}>
+                  میزان تحریک عضلانی برنامه بر اساس Effective Sets
+                </p>
+              </div>
+              <StimulusMeter
+                score={program.metadata.stimulusScore}
+                size={88}
+              />
+            </div>
+          </Card>
         )}
 
         {/* Days List */}

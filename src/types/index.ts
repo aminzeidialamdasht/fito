@@ -128,6 +128,7 @@ export interface WorkoutProgram {
     notes?: string;
     priorityMuscles?: string[];
     healthWarnings?: HealthWarning[];
+    stimulusScore?: number;
     goal?: string;
     experience?: string;
     validationScore?: number;
