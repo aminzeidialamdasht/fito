@@ -38,7 +38,7 @@ export const IS_PERSONAL = APP_FLAVOR === 'personal';
  */
 const RSA_KEYS = {
   myket: 'MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCwJCAs/SeSZg8PlkvDq5sd+BGr2lTn9yqpmK1cvb47BkN8jZhc0Z2rZBjYWQCy+N0041sZxWiKh2KcPIV5H5hbFEbiDPUeR0C3+qk1N/hPECldfrNmx3/R47OpXsp6A5jsBVohFRFSqr8gTlvKBb34FkdvUvOHJ1D2ZzIpeLyQIDAQAB',
-  bazaar: '', // ← بعداً از پنل بازار پر می‌کنیم
+  bazaar: 'MIHNMA0GCSqGSIb3DQEBAQUAA4G7ADCBtwKBrwCCscSY0ASgGJCkkdZuqijb48Y96kiAR5KDjq0rhqSNwrAnAowmtKjuhtuAKHEAGQC0x1OzyXu2zdTFKRiu1x+Kx0/1bzPWXnU0/toIyQb01p7991EaUY8QQvjBLvx3H7014KQ1FkKRbQR5LrqIFc4FJZBRt11NPRXi+H7iwd5fiv0ce/Ip2t8kzsOaHGGuX902zVvo2HdQ1YQ4G/jG1p4VWuUT47JBqxbe5Q7jJRkCwEAaQ==', // از پنل کافه‌بازار
 } as const;
 
 /**
