@@ -11,6 +11,7 @@ interface PrimaryButtonProps {
   disabled?: boolean;
   className?: string;
   ariaLabel?: string;
+  type?: 'button' | 'submit' | 'reset';
 }
 
 export default function PrimaryButton({
@@ -22,39 +23,66 @@ export default function PrimaryButton({
   disabled = false,
   className = '',
   ariaLabel,
+  type = 'button',
 }: PrimaryButtonProps) {
   const { theme } = useTheme();
   const tokens = getTokens(theme === 'dark');
 
-  const variantStyles: Record<string, { bg: string; fg: string; extra?: string }> = {
-    accent:  { bg: tokens.accent,  fg: '#ffffff' },
-    gold:    { bg: tokens.gold,    fg: '#0f172a' },
-    danger:  { bg: tokens.danger,  fg: '#ffffff' },
-    success: { bg: tokens.success, fg: '#0f172a' },
-    outline: { bg: 'transparent',  fg: tokens.accent, extra: 'border-2' },
-    ghost:   { bg: 'transparent',  fg: tokens.textMain, extra: 'hover:bg-white/5' },
+  const variantStyles: Record<
+    string,
+    { bg: string; fg: string; extra?: string; border?: string }
+  > = {
+    accent: {
+      bg: tokens.accentStrong || tokens.accent,
+      fg: '#ffffff',
+    },
+    gold: {
+      bg: tokens.gold,
+      fg: theme === 'dark' ? '#0B0F1A' : '#0F172A',
+    },
+    danger: {
+      bg: tokens.danger,
+      fg: '#ffffff',
+    },
+    success: {
+      bg: tokens.success,
+      fg: theme === 'dark' ? '#0B0F1A' : '#ffffff',
+    },
+    outline: {
+      bg: 'transparent',
+      fg: tokens.accent,
+      extra: 'border-2',
+      border: tokens.accent,
+    },
+    ghost: {
+      bg: 'transparent',
+      fg: tokens.textMain,
+      extra: 'hover:bg-white/5',
+    },
   };
+
   const vs = variantStyles[variant] || variantStyles.accent;
-  const bg = vs.bg;
-  const fg = vs.fg;
-  const extraClass = vs.extra || '';
 
   const sizeClass = {
-    sm: 'py-2 px-3 text-xs',
-    md: 'py-2.5 px-4 text-sm',
-    lg: 'py-3.5 px-6 text-base',
+    sm: 'py-2 px-3 text-xs rounded-xl',
+    md: 'py-2.5 px-4 text-sm rounded-xl',
+    lg: 'py-3.5 px-6 text-base rounded-2xl',
   }[size];
 
   return (
     <button
-      type="button"
+      type={type}
       onClick={onClick}
       disabled={disabled}
       aria-label={ariaLabel}
-      className={`rounded-xl font-bold min-h-[44px] flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 disabled:active:scale-100 ${sizeClass} ${extraClass} ${
-        fullWidth ? 'w-full' : ''
-      } ${className}`}
-      style={{ backgroundColor: bg, color: fg, ...(variant === 'outline' ? { borderColor: tokens.accent } : {}) }}
+      className={`font-bold min-h-[44px] flex items-center justify-center gap-2 active:scale-[0.97] transition-all disabled:opacity-50 disabled:active:scale-100 ${sizeClass} ${
+        vs.extra || ''
+      } ${fullWidth ? 'w-full' : ''} ${className}`}
+      style={{
+        backgroundColor: vs.bg,
+        color: vs.fg,
+        ...(vs.border ? { borderColor: vs.border } : {}),
+      }}
     >
       {children}
     </button>
