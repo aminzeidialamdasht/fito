@@ -54,7 +54,6 @@ const SYSTEMS_TEST_PROFILE: AthleteProfile = {
   sessionDuration: 60,
   equipmentType: 'full_gym',
   equipment: [],
-  customEquipment: [],
   injuries: [],
   limitations: [],
   avoidedExercises: [],

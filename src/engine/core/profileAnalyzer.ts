@@ -37,7 +37,7 @@ export interface ProfileAnalysis {
   programDurationWeeks: number;
   deloadLevel: DeloadLevel;
   equipmentType: string;
-  customEquipment: string[];
+  equipment: string[];
   location: 'gym' | 'home' | 'both' | 'park';
 }
 
@@ -201,7 +201,7 @@ export function analyzeProfile(profile: AthleteProfile): ProfileAnalysis {
     programDurationWeeks,
     deloadLevel: 'none',
     equipmentType: profile.equipmentType || 'full_gym',
-    customEquipment: profile.customEquipment || [],
+    equipment: profile.equipment || [],
     location: (profile.location as any) || 'gym',
   };
 }

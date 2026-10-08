@@ -7,6 +7,7 @@ import type { Exercise, MuscleGroup, EquipmentType } from '../types/exercise';
 import type { ExperienceLevel, Goal } from '../types/program';
 import { ALL_EXERCISES } from '../data/exercises';
 import type { ProfileAnalysis } from './profileAnalyzer';
+import { profileToEquipment } from './profileToEquipment';
 
 export interface ExerciseSelectionOptions {
   muscle: MuscleGroup;
@@ -21,30 +22,6 @@ export interface ExerciseSelectionOptions {
 /**
  * نگاشت تجهیزات پروفایل به تجهیزات دیتابیس
  */
-function mapProfileEquipment(equipmentType: string, customEquipment: string[]): EquipmentType[] {
-  const map: Record<string, EquipmentType[]> = {
-    full_gym: ['barbell', 'dumbbell', 'machine', 'cable', 'ez_bar', 'bench', 'pull_up_bar', 'dip_station', 'smith_machine', 'bodyweight'],
-    home: ['dumbbell', 'bodyweight', 'bands', 'bench'],
-    park: ['bodyweight', 'pull_up_bar', 'dip_station'],
-    custom: ['bodyweight'],
-  };
-
-  const base = map[equipmentType] || map.full_gym;
-
-  // اضافه کردن تجهیزات سفارشی
-  if (customEquipment && customEquipment.length > 0) {
-    for (const ce of customEquipment) {
-      const lower = ce.toLowerCase();
-      if (lower.includes('هالتر') || lower.includes('barbell')) base.push('barbell');
-      if (lower.includes('دمبل') || lower.includes('dumbbell')) base.push('dumbbell');
-      if (lower.includes('سیم') || lower.includes('cable')) base.push('cable');
-      if (lower.includes('دستگاه') || lower.includes('machine')) base.push('machine');
-      if (lower.includes('بارفیکس') || lower.includes('pull')) base.push('pull_up_bar');
-    }
-  }
-
-  return Array.from(new Set(base));
-}
 
 /**
  * بررسی امکان اجرای حرکت با تجهیزات موجود
@@ -165,10 +142,7 @@ export function selectExercisesForMuscle(
 ): Exercise[] {
   const { muscle, analysis, alreadySelected, preferCompound = true, count = 2, onlyPrimary = false } = options;
 
-  const availableEquipment = mapProfileEquipment(
-    analysis.equipmentType,
-    analysis.customEquipment || []
-  );
+  const availableEquipment = profileToEquipment(analysis);
 
   let candidates = ALL_EXERCISES.filter((ex) => {
     if (ex.primaryMuscle !== muscle && !ex.secondaryMuscles.includes(muscle)) return false;

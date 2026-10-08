@@ -37,7 +37,7 @@ export interface AthleteProfile {
   sessionDuration: number;
   location: 'gym' | 'home' | 'both' | 'park';
   equipmentType: 'full_gym' | 'home' | 'park' | 'custom';
-  customEquipment: string[];
+  // customEquipment حذف شد — از equipment استفاده کن
   equipment: string[];
   injuries: string[];
   limitations: string[];

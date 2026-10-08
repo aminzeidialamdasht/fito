@@ -8,7 +8,7 @@ import type { EquipmentType, InjuryRisk } from '../types/exercise';
 /**
  * تبدیل equipmentType + location + custom equipment به EquipmentType[]
  */
-export function profileToEquipment(profile: AthleteProfile | null): EquipmentType[] {
+export function profileToEquipment(profile: any): EquipmentType[] {
   if (!profile) {
     // اگر پروفایل نیست، همه تجهیزات را فرض کن
     return [
@@ -63,6 +63,18 @@ export function profileToEquipment(profile: AthleteProfile | null): EquipmentTyp
       if (isValidEquipmentType(eq)) {
         set.add(eq as EquipmentType);
       }
+    }
+  }
+
+  // fallback: اگه equipment نبود ولی customEquipment بود، ازش استفاده کن
+  if (!Array.isArray(profile.equipment) && Array.isArray(profile.customEquipment)) {
+    for (const ce of profile.customEquipment) {
+      const lower = String(ce).toLowerCase();
+      if (lower.includes('هالتر') || lower.includes('barbell')) set.add('barbell');
+      if (lower.includes('دمبل') || lower.includes('dumbbell')) set.add('dumbbell');
+      if (lower.includes('سیم') || lower.includes('cable')) set.add('cable');
+      if (lower.includes('دستگاه') || lower.includes('machine')) set.add('machine');
+      if (lower.includes('بارفیکس') || lower.includes('pull')) set.add('pull_up_bar');
     }
   }
 

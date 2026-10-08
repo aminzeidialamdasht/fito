@@ -327,7 +327,6 @@ export const SAMPLE_PROFILE: AthleteProfile = {
   sessionDuration: 60,
   location: 'gym',
   equipmentType: 'full_gym',
-  customEquipment: [],
   equipment: [],
   injuries: [],
   limitations: [],
