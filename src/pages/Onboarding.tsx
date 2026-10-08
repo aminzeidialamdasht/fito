@@ -88,7 +88,7 @@ export default function Onboarding() {
     primaryGoal: 'hypertrophy',
     targetMuscles: [],
     programType: 'ai_suggested',
-    timeline: '۳ ماه',
+    timeline: '3 months',
     trainingHistory: '',
     bodyMeasurements: {},
     healthConditions: [],
@@ -193,7 +193,7 @@ export default function Onboarding() {
       secondaryGoal: form.secondaryGoal,
       targetMuscles: form.targetMuscles || [],
       programType: form.programType || 'ai_suggested',
-      timeline: form.timeline || '۳ ماه',
+      timeline: form.timeline || '3 months',
       trainingHistory: form.trainingHistory || '',
       bodyMeasurements: form.bodyMeasurements || {},
       healthConditions: form.healthConditions || [],
@@ -569,7 +569,17 @@ export default function Onboarding() {
             </FormField>
 
             <FormField label="مدت برنامه (Timeline)" hint="دوره برنامه تمرینی">
-              <Input value={form.timeline} onChange={(v) => updateForm('timeline', v)} placeholder="مثلاً: ۳ ماه" isDark={isDark} />
+              <Select
+                value={form.timeline || '3 months'}
+                onChange={(v) => updateForm('timeline', v)}
+                options={[
+                  { value: '1 month', label: '۱ ماه' },
+                  { value: '3 months', label: '۳ ماه' },
+                  { value: '6 months', label: '۶ ماه' },
+                  { value: '1 year', label: '۱ سال' },
+                ]}
+                isDark={isDark}
+              />
             </FormField>
 
             {/* ═══ بخش ریکاوری ═══ */}

@@ -335,7 +335,7 @@ export const SAMPLE_PROFILE: AthleteProfile = {
   secondaryGoal: '',
   targetMuscles: ['سینه', 'پشت', 'چهارسر'],
   programType: 'full_body',
-  timeline: '۱ ماه',
+  timeline: '1 month',
   trainingHistory: 'مبتدی',
   bodyMeasurements: {},
   nutrition: {

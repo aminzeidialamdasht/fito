@@ -110,12 +110,20 @@ function determineSecondaryGoal(profile: AthleteProfile): Goal | undefined {
  */
 function parseDurationToWeeks(timeline: string): number {
   if (!timeline) return 8;
-  const num = parseInt(timeline.replace(/[^\d]/g, ''), 10);
+
+  // تبدیل اعداد فارسی به لاتین
+  const persianDigits = '۰۱۲۳۴۵۶۷۸۹';
+  const normalized = timeline.replace(/[۰-۹]/g, (d) =>
+    String(persianDigits.indexOf(d))
+  );
+
+  const num = parseInt(normalized.replace(/[^\d]/g, ''), 10);
   if (isNaN(num) || num <= 0) return 8;
 
-  if (timeline.includes('هفته')) return num;
-  if (timeline.includes('ماه')) return num * 4;
-  if (timeline.includes('سال')) return num * 52;
+  const lower = timeline.toLowerCase();
+  if (lower.includes('هفته') || lower.includes('week')) return num;
+  if (lower.includes('ماه') || lower.includes('month')) return num * 4;
+  if (lower.includes('سال') || lower.includes('year')) return num * 52;
   return num;
 }
 
