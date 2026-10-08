@@ -19,6 +19,7 @@ import {
   Save,
 } from 'lucide-react';
 import TrainingDaysSelector from '../components/TrainingDaysSelector';
+import { InjurySelector } from '../components/forms/InjurySelector';
 import {
   FormField,
   Input,
@@ -405,11 +406,10 @@ export default function Onboarding() {
               </FormField>
             </div>
 
-            <FormField label="سابقه آسیب‌ها" hint="برای انتخاب حرکات ایمن — با Enter یا کاما اضافه کنید">
-              <ArrayInput
-                value={form.injuries || []}
+            <FormField label="سابقه آسیب‌ها" hint="برای انتخاب حرکات ایمن">
+              <InjurySelector
+                selectedValues={form.injuries || []}
                 onChange={(v) => updateForm('injuries', v)}
-                placeholder="مثلاً: دیسک کمر، زانوی چپ"
                 isDark={isDark}
               />
             </FormField>
