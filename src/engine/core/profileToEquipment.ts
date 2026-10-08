@@ -4,6 +4,7 @@
 
 import type { AthleteProfile } from '../../types';
 import type { EquipmentType, InjuryRisk } from '../types/exercise';
+import { mapEquipmentArrayFaToEn } from './equipmentMapping';
 
 /**
  * تبدیل equipmentType + location + custom equipment به EquipmentType[]
@@ -57,12 +58,11 @@ export function profileToEquipment(profile: any): EquipmentType[] {
       break;
   }
 
-  // equipment سفارشی کاربر را اضافه کن (اگر معتبر بود)
-  if (Array.isArray(profile.equipment)) {
-    for (const eq of profile.equipment) {
-      if (isValidEquipmentType(eq)) {
-        set.add(eq as EquipmentType);
-      }
+  // equipment کاربر را از فارسی به انگلیسی map کن
+  if (Array.isArray(profile.equipment) && profile.equipment.length > 0) {
+    const mapped = mapEquipmentArrayFaToEn(profile.equipment);
+    for (const eq of mapped) {
+      set.add(eq);
     }
   }
 
