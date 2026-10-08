@@ -11,6 +11,7 @@ import {
 import SubstituteModal from '../../components/SubstituteModal';
 import VolumeSummary from '../../components/VolumeSummary';
 import SafetyReportCard from '../../components/SafetyReportCard';
+import HealthWarningsCard from '../../components/HealthWarningsCard';
 import ProgramIdentityCard from '../../components/program/ProgramIdentityCard';
 import DeloadBadge from '../../components/program/DeloadBadge';
 import PeriodizationCard from '../../components/program/PeriodizationCard';
@@ -234,6 +235,11 @@ export default function ProgramDetail() {
 
         {/* Safety Report */}
         {safetyReport && <SafetyReportCard report={safetyReport} />}
+
+        {/* Health Warnings */}
+        {program.metadata?.healthWarnings && program.metadata.healthWarnings.length > 0 && (
+          <HealthWarningsCard warnings={program.metadata.healthWarnings} />
+        )}
 
         {/* Days List */}
         <h2 className={`font-black text-sm px-1 ${textMain}`}>جلسات تمرینی</h2>

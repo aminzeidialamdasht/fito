@@ -19,6 +19,7 @@ import type {
   SafetyLevel,
   SafetyReport,
   SafetyWarning,
+  HealthWarning,
   Substitution,
 } from '../types/injury';
 import { INJURY_FA, RISK_LEVEL_NUM } from '../types/injury';
@@ -247,36 +248,63 @@ export function isExerciseSafeFor(
 export function analyzeHealthConditions(profile: {
   healthConditions?: string[];
   hormoneMedNotes?: string;
-}): SafetyWarning[] {
-  const warnings: SafetyWarning[] = [];
+}): HealthWarning[] {
+  const warnings: HealthWarning[] = [];
 
   const healthConditions = profile.healthConditions || [];
   const hormoneNotes = (profile.hormoneMedNotes || '').toLowerCase();
 
   // شرایط پزشکی که روی تمرین تأثیر دارن
   const highRiskConditions = [
-    { keywords: ['فشار خون', 'فشارخون'], message: 'با فشار خون بالا، از حبس نفس در حرکات سنگین اجتناب کن.' },
-    { keywords: ['دیابت', 'قند'], message: 'با دیابت، قبل از تمرین قند خون رو چک کن.' },
-    { keywords: ['قلب', 'قلبی'], message: 'با مشکل قلبی، شدت تمرین باید تحت نظر پزشک باشه.' },
-    { keywords: ['آسم', 'تنفس'], message: 'با آسم، تمرینات هوازی طولانی باید با احتیاط انجام بشه.' },
-    { keywords: ['کمردرد', 'دیسک'], message: 'با مشکل کمر، از حرکات فشاری روی ستون فقرات اجتناب کن.' },
+    {
+      keywords: ['فشار خون', 'فشارخون'],
+      messageFa: 'با فشار خون بالا، از حبس نفس در حرکات سنگین اجتناب کن.',
+      messageEn: 'With high blood pressure, avoid holding breath during heavy lifts.',
+    },
+    {
+      keywords: ['دیابت', 'قند'],
+      messageFa: 'با دیابت، قبل از تمرین قند خون رو چک کن.',
+      messageEn: 'With diabetes, check blood sugar before training.',
+    },
+    {
+      keywords: ['قلب', 'قلبی'],
+      messageFa: 'با مشکل قلبی، شدت تمرین باید تحت نظر پزشک باشه.',
+      messageEn: 'With heart conditions, training intensity must be supervised by a doctor.',
+    },
+    {
+      keywords: ['آسم', 'تنفس'],
+      messageFa: 'با آسم، تمرینات هوازی طولانی باید با احتیاط انجام بشه.',
+      messageEn: 'With asthma, prolonged cardio should be done cautiously.',
+    },
+    {
+      keywords: ['کمردرد', 'دیسک'],
+      messageFa: 'با مشکل کمر، از حرکات فشاری روی ستون فقرات اجتناب کن.',
+      messageEn: 'With back issues, avoid compression on the spine.',
+    },
   ];
 
+  let counter = 0;
   for (const condition of highRiskConditions) {
     if (healthConditions.some((hc: string) => condition.keywords.some((kw) => hc.includes(kw)))) {
       warnings.push({
-        type: 'caution',
-        message: condition.message,
-      } as any);
+        id: `health_${++counter}`,
+        severity: 'caution',
+        messageFa: condition.messageFa,
+        messageEn: condition.messageEn,
+        category: 'condition',
+      });
     }
   }
 
   // یادداشت دارو/هورمون
   if (hormoneNotes.includes('استروئید') || hormoneNotes.includes('تستوسترون') || hormoneNotes.includes('هورمون')) {
     warnings.push({
-      type: 'info',
-      message: 'مصرف هورمون، ریکاوری رو تسریع می‌کنه — برنامه می‌تونه شدیدتر باشه.',
-    } as any);
+      id: `hormone_${++counter}`,
+      severity: 'info',
+      messageFa: 'مصرف هورمون، ریکاوری رو تسریع می‌کنه — برنامه می‌تونه شدیدتر باشه.',
+      messageEn: 'Hormone use accelerates recovery — program can be more intense.',
+      category: 'hormone',
+    });
   }
 
   return warnings;

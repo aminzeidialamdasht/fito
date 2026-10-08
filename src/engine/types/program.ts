@@ -3,6 +3,7 @@
  */
 
 import type { MuscleGroup } from './exercise';
+import type { HealthWarning } from './injury';
 
 export type Goal =
   | 'hypertrophy'
@@ -128,6 +129,7 @@ export interface GeneratedProgram {
     notes?: string;
     priorityMuscles?: string[];
     injuries?: string[];
+    healthWarnings?: HealthWarning[];
     goal?: string;
     experience?: string;
     validationScore?: number;

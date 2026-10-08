@@ -31,6 +31,7 @@ import { applyTechniquesToExercises } from '../core/techniqueApplier';
 import type { ProgramSystemRule } from '../data/rules/trainingSystems';
 import { suggestWeightForSet } from '../core/progressionEngine';
 import { ENGINE_VERSION } from '../version';
+import { analyzeHealthConditions } from '../core/injurySafetyEngine';
 
 
 const PERSIAN_WEEKDAYS = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
@@ -220,6 +221,10 @@ export function generateWorkoutProgram(
       goal: analysis.goal,
       experience: analysis.experience,
       injuries: analysis.safeInjuries,
+      healthWarnings: analyzeHealthConditions({
+        healthConditions: profile.healthConditions,
+        hormoneMedNotes: profile.hormoneMedNotes,
+      }),
       systemName: analysis.deloadLevel === 'heavy' ? 'deload' : programSystem.id,
       systemNameFa: analysis.deloadLevel === 'heavy' ? 'بازیابی (دیلود)' : programSystem.nameFa,
       periodizationPhase: analysis.deloadLevel === 'heavy' ? 'دیلود' : programSystem.weeklyScheme[safeWeek - 1]?.label,

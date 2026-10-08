@@ -37,6 +37,18 @@ export interface SafetyWarning {
   exerciseIds: string[];
 }
 
+/**
+ * هشدار سلامت (شرایط پزشکی، دارو، هورمون)
+ * جدا از SafetyWarning چون به injury یا exercise خاصی ربط نداره
+ */
+export interface HealthWarning {
+  id: string;
+  severity: 'info' | 'caution' | 'danger';
+  messageFa: string;
+  messageEn: string;
+  category: 'condition' | 'hormone' | 'medication';
+}
+
 /** پیشنهاد جایگزین */
 export interface Substitution {
   originalId: string;

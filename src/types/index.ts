@@ -1,3 +1,4 @@
+import type { HealthWarning } from '../engine/types/injury';
 export type DeloadLevel = 'none' | 'light' | 'medium' | 'heavy';
 
 // ═══════════════════════════════════════════════════════════
@@ -126,6 +127,7 @@ export interface WorkoutProgram {
     generatedFrom?: string;
     notes?: string;
     priorityMuscles?: string[];
+    healthWarnings?: HealthWarning[];
     goal?: string;
     experience?: string;
     validationScore?: number;
