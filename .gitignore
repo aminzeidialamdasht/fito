@@ -42,3 +42,9 @@ keystore/
 # Backup files
 *.backup-*
 .backup-ui-*/
+
+# Ignore temp password files
+FitoBazaar*
+*.password
+*.keystore
+*.jks
