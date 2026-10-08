@@ -102,7 +102,13 @@ jobs:
 
       - name: Decode signing keystore
         run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/release-key.jks"
+          if [ "${{ env.FLAVOR }}" = "bazaar" ]; then
+            echo "🔐 Using BAZAAR keystore"
+            echo "${{ secrets.BAZAAR_KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/release-key.jks"
+          else
+            echo "🔐 Using default (myket/personal) keystore"
+            echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/release-key.jks"
+          fi
 
       - name: Patch Android Signing Config
         run: |
@@ -135,9 +141,9 @@ jobs:
       - name: Build Release APK
         env:
           KEYSTORE_PATH: ${{ runner.temp }}/release-key.jks
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          KEYSTORE_PASSWORD: ${{ env.FLAVOR == 'bazaar' && secrets.BAZAAR_KEYSTORE_PASSWORD || secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ env.FLAVOR == 'bazaar' && secrets.BAZAAR_KEY_ALIAS || secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ env.FLAVOR == 'bazaar' && secrets.BAZAAR_KEY_PASSWORD || secrets.KEY_PASSWORD }}
         run: |
           cd android
           chmod +x gradlew
